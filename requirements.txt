@@ -1,0 +1,2 @@
+# Execute na raiz do repositório. Inclui o pacote local, API e dashboard.
+-e .

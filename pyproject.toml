@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "azul-crm"
+version = "0.1.0"
+description = "Esqueleto privado do MVP de inteligência de CRM"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.30,<1", "pydantic>=2.9,<3",
+  "httpx>=0.27,<1", "streamlit>=1.50,<2", "pandas>=2.2,<3"
+]
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.8,<1"]
+ml = ["scikit-learn>=1.5,<2", "shap>=0.46,<1", "pyarrow>=17,<30"]
+[project.scripts]
+azul-pipeline = "azul_crm.pipeline.cli:main"
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+[tool.ruff]
+line-length = 100
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
