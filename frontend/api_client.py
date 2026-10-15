@@ -13,6 +13,9 @@ class CrmApiClient:
             response.raise_for_status()
             return response.json()
 
+    def metadata(self):
+        return self._request("GET", "/api/v1/metadata")
+
     def priorities(self):
         return self._request("GET", "/api/v1/retention/priorities", params={"limit": 500})
 

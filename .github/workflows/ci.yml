@@ -12,3 +12,5 @@ jobs:
       - run: ruff check .
       - run: pytest -q
       - run: python -m azul_crm.pipeline.cli demo
+      - run: python -m azul_crm.pipeline.cli validate
+      - run: python scripts/export_contracts.py

@@ -8,3 +8,9 @@ frequency_reference = 24
 recency_reference = 180
 high_value_threshold = 70.0
 high_risk_threshold = 0.6
+
+[windows]
+observation_start = 2025-10-01
+observation_end = 2026-09-30
+outcome_start = 2026-10-01
+outcome_end = 2027-03-31

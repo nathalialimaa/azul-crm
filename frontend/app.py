@@ -14,6 +14,20 @@ st.warning(
 )
 api = CrmApiClient(os.getenv("CRM_API_URL", "http://127.0.0.1:8000"))
 try:
+    metadata = api.metadata()
+    with st.expander("Como interpretar esta demonstração"):
+        st.write("Objetivo: priorizar clientes estratégicos e apoiar uma ação de relacionamento.")
+        st.write(f"Observação: {metadata['observation_start']} a {metadata['observation_end']}.")
+        policy = metadata["scoring_policy"]
+        st.write(
+            f"Alto valor: score ≥ {policy['high_value_threshold']}; "
+            f"risco alto: índice ≥ {policy['high_risk_threshold']}."
+        )
+        st.caption(
+            "Churn futuro: zero viagens nos seis meses seguintes, na configuração padrão. "
+            "Contrato planejado; rótulos e modelo ainda não gerados. "
+            "A recomendação atual usa documentos fictícios e template."
+        )
     rows = api.priorities()
     if not rows:
         st.info("Nenhum cliente disponível.")

@@ -1,3 +1,5 @@
+> Atualização Sprint 1: veja SCHEMA_GOLD.md e PREMISSAS.md; exemplos completos gerados em api/examples.json.
+
 # Contratos v1 e dicionário de dados
 
 ## Modelo de dados canônico
@@ -20,7 +22,7 @@ Chaves são strings e não contêm identificadores pessoais. Datas usam ISO `YYY
 | features.customer_id | string | Uma linha por cliente |
 | features.spend | float | Soma de tarifas dentro da observação |
 | features.frequency | int | Quantidade de viagens dentro da observação |
-| features.recency_days | int | Dias entre última viagem observada e corte; sem viagem, tamanho da janela + 1 |
+| features.recency_days | int | Dias entre última viagem observada e corte; sem viagem, duração inclusiva da janela |
 | features.incident_rate | float | Fração das viagens com atraso >= 60 min; zero se não há viagem |
 | features.observation_end | date | Corte usado nas features |
 | manifest.schema_version | string | `1.0` |

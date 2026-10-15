@@ -1,6 +1,8 @@
+> Divisão original. Nathália informou assumir pendências de Davi, Ingrid e Luan; situação atual em STATUS_SPRINT1.md.
+
 # Responsabilidades, fases e pontos de extensão
 
-Fonte: `Sugestao_De_Sprints_Azul_Linhas_Aereas.md`, período **13 a 26/10/2026**. Este documento reproduz a divisão de trabalho das fontes, não confirma o estado atual das tasks no Linear. A estrutura técnica é ponto de partida; responsáveis revisam os contratos juntos na fase 1.
+período **13 a 26/10/2026**. Este documento reproduz a divisão de trabalho, não confirma o estado atual das tasks no Linear. A estrutura técnica é ponto de partida; responsáveis revisam os contratos juntos na fase 1.
 
 | Pessoa | Escopo e tasks | Onde começar neste repositório |
 |---|---|---|

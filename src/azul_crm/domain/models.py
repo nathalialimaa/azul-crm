@@ -16,7 +16,11 @@ class Customer:
     def __post_init__(self):
         if not self.customer_id or self.preferred_channel not in {"email", "app"}:
             raise ValueError("Cliente sem ID ou canal inválido")
-        if len(self.home_airport) != 3 or not self.home_airport.isupper():
+        if (
+            len(self.home_airport) != 3
+            or not self.home_airport.isupper()
+            or not self.home_airport.isalpha()
+        ):
             raise ValueError("Aeroporto deve usar código IATA com três letras maiúsculas")
 
 
@@ -35,6 +39,13 @@ class Trip:
             raise ValueError("Viagem sem identificador")
         if not isfinite(self.fare_amount) or self.fare_amount < 0 or self.delay_minutes < 0:
             raise ValueError("Tarifa e atraso devem ser números não negativos")
+        if any(
+            len(code) != 3 or not code.isalpha() or not code.isupper()
+            for code in (self.origin, self.destination)
+        ):
+            raise ValueError("Origem e destino devem ser códigos IATA")
+        if type(self.delay_minutes) is not int:
+            raise ValueError("Atraso deve ser inteiro")
         if self.origin == self.destination:
             raise ValueError("Origem e destino devem ser diferentes")
 

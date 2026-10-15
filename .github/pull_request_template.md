@@ -1,10 +1,11 @@
-## Problema e resultado
-Descreva a mudança e vincule a task HAC-XX.
+## Problema e tarefa HAC
 
-## Validação
-Informe como o fluxo foi verificado e eventuais limitações.
+## O que mudou
 
-## Contratos e dados
-Indique alterações em schema, premissas, modelos ou fontes.
+## Verificações executadas e resultado
 
-Revisão por pelo menos uma pessoa antes do merge. Repositório privado.
+## Limitações e mudanças de contrato
+
+## Revisão
+- [ ] Revisão independente concluída (indicar pessoa)
+- [ ] Autorrevisão excepcional; revisão independente pendente (explicar motivo)

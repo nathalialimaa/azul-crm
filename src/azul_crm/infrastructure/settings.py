@@ -22,3 +22,23 @@ class Settings:
     def scoring_policy(self) -> ScoringPolicy:
         with (self.root / "config" / "settings.toml").open("rb") as file:
             return ScoringPolicy(**tomllib.load(file)["scoring"])
+
+    def windows(self) -> dict:
+        from datetime import date, timedelta
+
+        with (self.root / "config" / "settings.toml").open("rb") as file:
+            windows = tomllib.load(file)["windows"]
+        if set(windows) != {"observation_start", "observation_end", "outcome_start", "outcome_end"}:
+            raise ValueError("Configuração de janelas incompleta")
+        if not all(type(value) is date for value in windows.values()):
+            raise ValueError("Janelas devem usar datas TOML sem aspas")
+        if not (
+            windows["observation_start"]
+            <= windows["observation_end"]
+            < windows["outcome_start"]
+            <= windows["outcome_end"]
+        ):
+            raise ValueError("Janelas invertidas ou sobrepostas")
+        if windows["outcome_start"] != windows["observation_end"] + timedelta(days=1):
+            raise ValueError("Desfecho deve começar no dia seguinte ao corte")
+        return windows
