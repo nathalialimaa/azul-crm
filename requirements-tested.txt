@@ -1,0 +1,14 @@
+# Versões principais efetivamente usadas no ambiente de validação (não é lock transitivo).
+fastapi==0.158.1
+uvicorn==0.54.0
+pydantic==2.14.0
+httpx==0.28.1
+streamlit==1.66.1
+pandas==2.2.3
+scikit-learn==1.8.0
+numpy==2.3.5
+plotly==6.9.0
+python-dotenv==1.2.4
+pypdf==6.10.0
+pytest==9.1.1
+ruff==0.17.1

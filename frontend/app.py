@@ -1,0 +1,375 @@
+import json
+import sys
+from html import escape
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+from gateway import Gateway
+
+st.set_page_config(page_title="Azul | CRM Intelligence", page_icon="✈", layout="wide")
+st.markdown(
+    """<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+html,body,[class*="css"],.stApp {font-family:Inter,Arial,sans-serif;color:#0a244b}
+.stApp {background:#f3f8fd} header[data-testid="stHeader"]{background:transparent}
+.block-container{padding-top:2rem;padding-bottom:2rem;max-width:1680px}
+[data-testid="stSidebar"]{background:linear-gradient(165deg,#03254c,#031d3d);color:white;min-width:235px;max-width:235px}
+[data-testid="stSidebar"] *{color:#e1efff} [data-testid="stSidebar"] label{font-size:15px}
+[data-testid="stSidebar"] .stRadio>div{gap:18px}
+h1{font-size:2rem!important;letter-spacing:-.8px;color:#08234c} h2,h3{color:#08234c}
+.hero-sub{color:#527098;margin-top:-12px;font-size:16px;margin-bottom:22px}
+.badge{font-size:12px;background:#e7f0fa;padding:9px 14px;border-radius:20px;color:#456183;display:inline-block}
+.brand{font-size:48px;font-weight:800;letter-spacing:-2px;color:white;padding-top:8px}
+.brand-sub{color:#9fbbd6;font-size:14px;margin-bottom:45px}
+.kpi{background:white;border:1px solid #e0edf9;border-radius:13px;padding:23px 20px;min-height:142px;box-shadow:0 3px 14px #123e6505;margin-bottom:20px}
+.kpi .label{font-size:13px;font-weight:600}.kpi .value{font-size:30px;font-weight:800;margin:8px 0 3px}.kpi .sub{font-size:12px;color:#6982a3}
+.kpi .icon{float:left;width:45px;height:45px;background:#e7f5ff;color:#008ff2;border-radius:50%;text-align:center;line-height:45px;margin-right:14px;font-size:22px}
+[data-testid="stVerticalBlockBorderWrapper"]>div{border-color:#e0edf9!important;background:white;border-radius:12px}
+.stButton>button[kind="primary"]{background:#087bfa;border:0} .stButton>button{border-radius:7px}
+.action{background:#eaf5ff;border-radius:10px;padding:16px;margin-bottom:14px;color:#0068df}
+.small{font-size:12px;color:#6380a4}.factors{background:#fff2f3;color:#bf3844;padding:12px;border-radius:9px;font-size:13px;margin:8px 0}
+[data-testid="stMetric"]{background:#f6faff;border:1px solid #e6eff8;border-radius:10px;padding:12px}
+</style>""",
+    unsafe_allow_html=True,
+)
+
+with st.sidebar:
+    st.markdown(
+        '<div class="brand">✈ azul</div><div class="brand-sub">CRM Intelligence</div>',
+        unsafe_allow_html=True,
+    )
+    page = st.radio(
+        "Navegação",
+        [
+            "Visão geral",
+            "Clientes",
+            "Segmentos",
+            "Ações de CRM",
+            "Assistente IA",
+            "Dados e modelos",
+        ],
+        label_visibility="collapsed",
+    )
+    st.markdown(
+        '<br><br><br><div class="small">HACKATHON · MVP PRIVADO<br>Inteligência que aproxima.</div>',
+        unsafe_allow_html=True,
+    )
+    if st.button("Atualizar dados"):
+        st.cache_resource.clear()
+        st.rerun()
+
+
+@st.cache_resource
+def gateway():
+    return Gateway()
+
+
+def money(x):
+    return "R$ " + f"{x:,.0f}".replace(",", ".")
+
+
+def evidence_ui(evidence):
+    for e in evidence:
+        with st.expander(e["title"] + (" · demonstrativo" if e["is_demo"] else " · fonte pública")):
+            st.write(e["text"])
+            st.caption(e["source"] + " | " + e["version"])
+
+
+def ask_ui(api, cid):
+    with st.form("chat"):
+        question = st.text_input(
+            "Pergunte sobre a carteira ou metodologia",
+            placeholder="Por que este cliente está em risco?",
+        )
+        submit = st.form_submit_button("Consultar fontes", type="primary")
+    if submit and question:
+        with st.spinner("Consultando indicadores e evidências…"):
+            result = api.ask(question, cid)
+        st.write(result["answer"])
+        st.caption("Modo: " + result["mode"])
+        evidence_ui(result["evidence"])
+
+
+try:
+    with st.spinner("Carregando a carteira…"):
+        api = gateway()
+        meta = api.metadata()
+        full = api.dashboard()
+    h1, h2 = st.columns([4, 1])
+    with h1:
+        st.title("Inteligência para cuidar de quem mais importa")
+        st.markdown(
+            '<div class="hero-sub">Priorize clientes, entenda os sinais e transforme dados em relacionamento.</div>',
+            unsafe_allow_html=True,
+        )
+    with h2:
+        st.markdown(
+            '<span class="badge">Demonstração · Dados sintéticos</span>', unsafe_allow_html=True
+        )
+    if not full["rows"]:
+        st.info("Nenhum cliente com viagens na janela. Execute o gerador e atualize os dados.")
+        st.stop()
+    f1, f2, f3 = st.columns([1, 1, 1.2])
+    months = f1.selectbox(
+        "Período de viagens", [12, 6, 3], format_func=lambda n: f"Últimos {n} meses"
+    )
+    segment = f2.selectbox("Segmento", ["Todos"] + sorted({r["segment"] for r in full["rows"]}))
+    route = f3.selectbox("Rota", ["Todas"] + sorted({r["route"] for r in full["rows"]}))
+    seg = None if segment == "Todos" else segment
+    rt = None if route == "Todas" else route
+    data = api.dashboard(months, seg, rt)
+    df = pd.DataFrame(data["rows"])
+    if df.empty:
+        st.info(
+            "Nenhum cliente corresponde a esses filtros. Amplie o período ou remova os filtros."
+        )
+        st.stop()
+    cid = st.sidebar.selectbox("Cliente em foco", df.customer_id.tolist())
+    focus = next(r for r in data["rows"] if r["customer_id"] == cid)
+    k = data["kpis"]
+    labels = [
+        ("♟", "Clientes de alto valor", str(k["high_value"]), "na carteira filtrada"),
+        ("△", "Alto valor em risco", str(k["high_value_at_risk"]), "prioridade de retenção"),
+        ("▥", "CLV proxy · 12 meses", money(k["clv_12m_proxy"]), "hipótese de receita futura"),
+        (
+            "◉",
+            "Valor ponderado em risco",
+            money(k["weighted_value_at_risk"]),
+            "proxy × índice de risco",
+        ),
+    ]
+    for col, (icon, label, val, sub) in zip(st.columns(4), labels):
+        col.markdown(
+            f'<div class="kpi"><span class="icon">{icon}</span><div class="label">{label}</div><div class="value">{val}</div><div class="sub">{sub}</div></div>',
+            unsafe_allow_html=True,
+        )
+    if page == "Visão geral":
+        left, right = st.columns([1.38, 1])
+        with left, st.container(border=True):
+            st.subheader("Onde concentrar os esforços?")
+            st.caption("Valor do cliente × risco de evasão")
+            threshold = meta["scoring_policy"]["high_risk_threshold"]
+            value_threshold = meta["scoring_policy"]["high_value_threshold"]
+            fig = px.scatter(
+                df,
+                x="churn_risk",
+                y="value_score",
+                color="segment",
+                hover_name="customer_id",
+                hover_data=["clv_12m_proxy", "route"],
+                color_discrete_sequence=["#ff6670", "#00bc9c", "#13b9d4", "#078afa"],
+            )
+            for x0, x1, y0, y1, color in [
+                (0, threshold, value_threshold, 100, "#eaf5ff"),
+                (threshold, 1, value_threshold, 100, "#fff0f2"),
+                (0, threshold, 0, value_threshold, "#eafaf5"),
+                (threshold, 1, 0, value_threshold, "#fff7df"),
+            ]:
+                fig.add_shape(
+                    type="rect",
+                    x0=x0,
+                    x1=x1,
+                    y0=y0,
+                    y1=y1,
+                    fillcolor=color,
+                    line_width=0,
+                    layer="below",
+                )
+            fig.add_scatter(
+                x=[focus["churn_risk"]],
+                y=[focus["value_score"]],
+                mode="markers",
+                showlegend=False,
+                marker={
+                    "size": 19,
+                    "color": "rgba(0,0,0,0)",
+                    "line": {"width": 2, "color": "#08234c"},
+                },
+                hoverinfo="skip",
+            )
+            for x, y, t, color in [
+                (0.04, 96, "Encantar", "#0079f3"),
+                (0.96, 96, "Reter agora", "#ef465d"),
+                (0.04, 5, "Nutrir", "#00a88a"),
+                (0.96, 5, "Reativar", "#ce9205"),
+            ]:
+                fig.add_annotation(
+                    x=x,
+                    y=y,
+                    text=t,
+                    showarrow=False,
+                    font={"size": 14, "color": color},
+                    xanchor="left" if x < 0.5 else "right",
+                )
+            fig.update_layout(
+                height=390,
+                margin=dict(l=10, r=10, t=10, b=5),
+                paper_bgcolor="white",
+                plot_bgcolor="white",
+                showlegend=False,
+                font={"color": "#496384"},
+                xaxis_title="Risco de evasão →",
+                yaxis_title="Score de valor →",
+            )
+            fig.update_xaxes(range=[0, 1], tickformat=".0%", gridcolor="#edf2f7")
+            fig.update_yaxes(range=[0, 105], gridcolor="#edf2f7")
+            st.plotly_chart(fig, width="stretch")
+        with right, st.container(border=True):
+            st.subheader("Próxima melhor ação")
+            st.markdown("**" + cid + " · " + focus["segment"] + "**")
+            st.caption("Cliente sintético · " + focus["route"])
+            a, b = st.columns(2)
+            a.metric("Valor", f"{focus['value_score']:.0f}/100")
+            b.metric("Risco", f"{focus['churn_risk']:.0%}")
+            st.markdown("**Principais fatores**")
+            for driver in focus["drivers"][:3]:
+                st.markdown(
+                    '<div class="factors">' + escape(driver) + "</div>", unsafe_allow_html=True
+                )
+            rec = api.recommend(cid)
+            st.markdown(
+                '<div class="action"><b>'
+                + escape(rec["action"]["title"])
+                + '</b><br><span class="small">'
+                + escape(rec["action"]["reason"])
+                + "</span></div>",
+                unsafe_allow_html=True,
+            )
+            with st.expander("Ver evidências e regras"):
+                evidence_ui(rec["evidence"])
+            if st.button("Gerar mensagem para revisão", type="primary", width="stretch"):
+                st.info(rec["draft"])
+        left, right = st.columns([1.6, 1])
+        with left, st.container(border=True):
+            st.subheader("Quem precisa de atenção agora?")
+            st.caption("Ordenado por prioridade · seleção no menu lateral")
+            table = df[
+                ["customer_id", "segment", "clv_12m_proxy", "churn_risk", "priority_score"]
+            ].head(8)
+            st.dataframe(
+                table,
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "customer_id": "Cliente",
+                    "segment": "Segmento",
+                    "clv_12m_proxy": st.column_config.NumberColumn("CLV proxy", format="R$ %.0f"),
+                    "churn_risk": st.column_config.ProgressColumn(
+                        "Risco", min_value=0, max_value=1, format="%.2f"
+                    ),
+                    "priority_score": "Prioridade",
+                },
+            )
+        with right, st.container(border=True):
+            st.subheader("✧ Copiloto de CRM")
+            ask_ui(api, cid)
+    elif page == "Clientes":
+        st.subheader("Visão 360 · " + cid)
+        detail = api.customer(cid)
+        st.write("**Fatores:**")
+        st.write(detail["scores"]["drivers"])
+        trips = pd.DataFrame(detail["trips"])
+        st.dataframe(trips, hide_index=True, width="stretch")
+        st.subheader("Fidelidade simulada")
+        loyalty = api.loyalty(cid)
+        if loyalty:
+            a, b, c = st.columns(3)
+            a.metric("Pontos acumulados", loyalty["earned"])
+            b.metric("Pontos resgatados", loyalty["redeemed"])
+            c.metric("Saldo", loyalty["balance"])
+            st.caption("Tier: " + loyalty["tier"] + " · sem elegibilidade oficial inferida")
+            st.dataframe(pd.DataFrame(loyalty["transactions"]), hide_index=True, width="stretch")
+    elif page == "Segmentos":
+        st.subheader("Perfis e oportunidades")
+        agg = df.groupby("segment", as_index=False).agg(
+            clientes=("customer_id", "count"),
+            valor=("clv_12m_proxy", "sum"),
+            risco=("churn_risk", "mean"),
+        )
+        st.plotly_chart(
+            px.bar(
+                agg,
+                x="segment",
+                y="clientes",
+                color="segment",
+                color_discrete_sequence=["#087bfa", "#00beac", "#ff7080", "#f4b849"],
+            ),
+            width="stretch",
+        )
+        st.dataframe(agg, hide_index=True, width="stretch")
+        st.caption(
+            "Segmentação por regras explícitas de valor e risco; não são clusters treinados."
+        )
+    elif page == "Ações de CRM":
+        st.subheader("Revisar antes de agir · " + cid)
+        rec = api.recommend(cid)
+        st.info(rec["draft"])
+        evidence_ui(rec["evidence"])
+        note = st.text_area("Observação da revisão")
+        a, b = st.columns(2)
+        if a.button("Aprovar rascunho", type="primary"):
+            api.decide(cid, "APPROVED", note)
+            st.success("Aprovação registrada. Nenhuma mensagem enviada.")
+        if b.button("Rejeitar rascunho"):
+            api.decide(cid, "REJECTED", note)
+            st.success("Rejeição registrada.")
+        st.subheader("Simular um cenário")
+        cost = st.number_input("Custo por cliente (R$)", min_value=0.0, value=10.0)
+        retention = st.slider("Fração hipotética do valor em risco protegida", 0.0, 1.0, 0.10)
+        result = api.simulate(cost, retention, months, seg, rt)
+        a, b, c = st.columns(3)
+        a.metric("Custo do cenário", money(result["cost"]))
+        b.metric("Valor protegido hipotético", money(result["hypothetical_protected_value"]))
+        c.metric("Saldo hipotético", money(result["net_scenario"]))
+        st.caption(result["note"])
+        st.json(result)
+    elif page == "Assistente IA":
+        st.subheader("Respostas com evidências")
+        st.caption(
+            "Indicadores são calculados por código. O corpus disponível contém metodologia e catálogo interno, sem regulamento oficial validado."
+        )
+        ask_ui(api, cid)
+    else:
+        st.subheader("Dados e modelos")
+        st.json(meta)
+        st.json(api.models())
+        st.caption(
+            "Persistência: "
+            + meta.get("storage", "legacy")
+            + " · atualização exige recarregar o snapshot."
+        )
+    st.divider()
+    st.caption(data["notes"])
+    st.caption(
+        "Risco: "
+        + meta.get("risk_method", "heuristic_not_calibrated")
+        + " · dados sintéticos · recomendações sujeitas a revisão."
+    )
+    st.download_button(
+        "↓ Exportar relatório do recorte",
+        df.to_csv(index=False).encode("utf-8-sig"),
+        "carteira-demonstrativa.csv",
+        "text/csv",
+    )
+    st.download_button(
+        "↓ Exportar premissas e indicadores",
+        json.dumps(
+            {"metadata": meta, "kpis": k, "notes": data["notes"]},
+            ensure_ascii=False,
+            indent=2,
+            default=str,
+        ),
+        "premissas.json",
+        "application/json",
+    )
+except Exception as exc:
+    st.error(
+        "Não foi possível concluir a operação. Confira a configuração e a disponibilidade dos dados."
+    )
+    st.code(str(exc))
+    st.info(
+        "Primeira execução: python -m azul_crm.cli demo; depois reinicie ou use Atualizar dados."
+    )

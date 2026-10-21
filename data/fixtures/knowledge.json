@@ -1,0 +1,10 @@
+[
+  {
+    "document_id": "demo-contact-v1",
+    "title": "Catálogo fictício de contato de relacionamento",
+    "text": "No protótipo, contato de relacionamento sem benefício comercial pode gerar somente um rascunho para revisão humana. Nenhum bônus, upgrade, desconto ou concessão é autorizado por este documento fictício.",
+    "source": "fixture interna de demonstração; não é política da Azul",
+    "version": "1.0",
+    "is_demo": true
+  }
+]

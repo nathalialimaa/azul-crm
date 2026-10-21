@@ -1,0 +1,9 @@
+{
+  "url": "https://davidmegginson.github.io/ourairports-data/airports.csv",
+  "retrieved_at": "2026-10-21T19:05:59.974259+00:00",
+  "sha256": "0499dbd88de2fc735ac5c09f59796ccc3af544e17ffda807f793c0c6fe6c3d75",
+  "bytes": 12748669,
+  "subset": true,
+  "license": "Public Domain",
+  "rows": 10
+}
