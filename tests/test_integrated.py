@@ -181,7 +181,8 @@ def test_document_import_and_index_refresh(integrated):
     root, _ = integrated
     file = root / "rule.txt"
     file.write_text(
-        "Documento fictício: abacaxizeiro é uma palavra exclusiva para testar recuperação documental com procedência e hash."
+        "Documento fictício: abacaxizeiro é uma palavra exclusiva para testar recuperação documental com procedência e hash.",
+        encoding="utf-8",
     )
     result = import_document(file, root, "test-doc", "Teste de ingestão", "internal://test", True)
     assert result["characters"] > 50
