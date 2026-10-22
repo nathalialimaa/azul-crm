@@ -18,6 +18,7 @@ def main():
             "demo",
             "train",
             "personas",
+            "bias-audit",
             "index",
             "check",
             "validate",
@@ -65,6 +66,13 @@ def main():
         from azul_crm.pipeline.personas import train_personas
 
         result = train_personas(settings.root, store, args.seed, args.k)
+    elif args.command == "bias-audit":
+        from azul_crm.bootstrap import build_container
+        from azul_crm.pipeline.bias_audit import write_report
+
+        report = write_report(settings.root, build_container(settings), store)
+        result = {k: report[k] for k in ("method", "settings", "summary", "segmenter")}
+        result["verdicts"] = {k: v["verdict"] for k, v in report["attributes"].items()}
     elif args.command == "index":
         from azul_crm.infrastructure.rag import DocumentIndex
 

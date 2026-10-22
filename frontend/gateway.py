@@ -85,6 +85,13 @@ class Gateway:
         artifact = json.loads(p.read_text(encoding="utf-8"))
         return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
 
+    def bias(self):
+        if self.http:
+            return self.request("GET", "/bias")
+        from azul_crm.pipeline.bias_audit import load_report
+
+        return load_report(self.settings.root, Store(self.settings.root))
+
     def loyalty(self, cid):
         if self.http:
             return self.request("GET", "/customers/" + cid + "/loyalty")

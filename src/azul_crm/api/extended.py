@@ -109,6 +109,14 @@ def personas():
     return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
 
 
+@router.get("/bias")
+def bias():
+    from azul_crm.pipeline.bias_audit import load_report
+
+    root = Settings.load().root
+    return load_report(root, Store(root))
+
+
 @router.get("/models")
 def models():
     path = Settings.load().root / "artifacts/metrics.json"

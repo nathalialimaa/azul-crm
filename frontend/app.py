@@ -49,6 +49,7 @@ with st.sidebar:
             "Segmentos",
             "Ações de CRM",
             "Assistente IA",
+            "Auditoria de viés",
             "Dados e modelos",
         ],
         label_visibility="collapsed",
@@ -325,7 +326,9 @@ try:
             st.caption(
                 f"KMeans com k={info['k']} · silhouette {q['silhouette']:.2f} · "
                 f"estabilidade (ARI em reamostragem) {q['bootstrap_ari_mean']:.2f} · "
-                "fora do agrupamento: " + ", ".join(info["excluded_attributes"]) + ". "
+                "fora do agrupamento: "
+                + ", ".join(info["excluded_attributes"])
+                + ". "
                 + info["limitation"]
             )
         else:
@@ -362,6 +365,77 @@ try:
             "Indicadores são calculados por código. O corpus disponível contém metodologia e catálogo interno, sem regulamento oficial validado."
         )
         ask_ui(api, cid)
+    elif page == "Auditoria de viés":
+        st.subheader("IA responsável · auditoria de viés")
+        report = api.bias()
+        if not report.get("available"):
+            st.info(
+                "Auditoria ainda não executada. Rode `azul-crm bias-audit` e atualize os dados."
+            )
+        else:
+            if report.get("stale"):
+                st.warning("Relatório desatualizado: a base mudou depois da auditoria.")
+            s = report["settings"]
+            st.caption(
+                f"Resultado favorável: {s['favorable_outcome']} ({s['selected_customers']} de "
+                f"{s['customers']} clientes). Alarme pela regra dos 4/5."
+            )
+            icon = {"ok": "🟢 OK", "atencao": "🟡 Atenção", "alerta": "🔴 Alerta"}
+            icon["confundido"] = "🟠 Confundido"
+            icon["amostra_insuficiente"] = "⚪ Amostra pequena"
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Atributo": a["label"],
+                            "Resultado": icon[a["verdict"]],
+                            "Razão bruta": a["selection_ratio"],
+                            "Recall (iguais oportunidades)": a["recall_ratio"],
+                            "Associação com persona (V)": (a["persona_association"] or {}).get(
+                                "cramers_v"
+                            ),
+                        }
+                        for a in report["attributes"].values()
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            for key, a in report["attributes"].items():
+                with st.expander(a["label"] + " · " + icon[a["verdict"]]):
+                    st.write(a["verdict_text"])
+                    st.dataframe(
+                        pd.DataFrame(a["groups"]).drop(columns=["persona_mix"]),
+                        hide_index=True,
+                        width="stretch",
+                    )
+                    if a["within_persona"]:
+                        st.markdown("**Mesma persona, grupos diferentes (razão menor/maior):**")
+                        st.dataframe(
+                            pd.DataFrame(
+                                [
+                                    {
+                                        "Persona": w["persona"],
+                                        "Razão": w["selection_ratio"],
+                                        "Alerta": "sim" if w["flag"] else "não",
+                                    }
+                                    for w in a["within_persona"]
+                                ]
+                            ),
+                            hide_index=True,
+                            width="stretch",
+                        )
+                    if a["skipped_small_groups"]:
+                        st.caption(
+                            "Grupos pequenos, não comparados: "
+                            + ", ".join(
+                                f"{g['group']} ({g['customers']})"
+                                for g in a["skipped_small_groups"]
+                            )
+                        )
+            st.markdown("**Limitações**")
+            for text in report["limitations"]:
+                st.caption("• " + text)
     else:
         st.subheader("Dados e modelos")
         st.json(meta)
