@@ -114,8 +114,15 @@ def build_stored_container(settings, store, manifest):
         windows["observation_end"],
     )
     index = DocumentIndex(settings.root)
+    playbook, generator = None, SafeMessageGenerator()
+    playbook_path = settings.root / "config/playbook.toml"
+    if playbook_path.exists():
+        from azul_crm.infrastructure.playbook import PlaybookMessageGenerator, load_playbook
+
+        playbook = load_playbook(playbook_path)
+        generator = PlaybookMessageGenerator(playbook)
     recommendations = RecommendationService(
-        crm, index, EligibilityPolicy(policy.high_risk_threshold), SafeMessageGenerator()
+        crm, index, EligibilityPolicy(policy.high_risk_threshold), generator, playbook
     )
     manifest = {
         **manifest,
@@ -125,6 +132,7 @@ def build_stored_container(settings, store, manifest):
         else "heuristic_not_calibrated",
         "agent_mode": index.mode,
         "segmenter": segmenter_method,
+        "playbook": playbook.version if playbook else "none",
         "storage": store.backend,
     }
     return Container(crm, recommendations, manifest)

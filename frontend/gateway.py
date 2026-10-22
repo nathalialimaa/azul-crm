@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import httpx
 
-from azul_crm.application.dashboard import overview, simulation
+from azul_crm.application.dashboard import overview, simulation, strategy
 from azul_crm.bootstrap import build_container
 from azul_crm.infrastructure.rag import DocumentIndex
 from azul_crm.infrastructure.settings import Settings
@@ -84,6 +84,11 @@ class Gateway:
         hidden = {"centroids", "scaler_mean", "scaler_scale", "clip_low", "clip_high"}
         artifact = json.loads(p.read_text(encoding="utf-8"))
         return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
+
+    def playbook(self, months=12):
+        if self.http:
+            return self.request("GET", "/playbook", params={"months": months})
+        return strategy(self.c, months)
 
     def bias(self):
         if self.http:

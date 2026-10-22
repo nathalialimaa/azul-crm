@@ -78,6 +78,8 @@ Após mudar a Gold/modelo, reinicie a API e clique **Atualizar dados** no Stream
 
 O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. Não há previsão de CLV treinada: o card representa um proxy explícito de receita.
 
+O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
+
 ## ANAC e aeroportos
 
 Importe a referência pequena já verificada, ou baixe a dimensão completa:

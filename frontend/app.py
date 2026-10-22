@@ -337,9 +337,46 @@ try:
                 "execute `azul-crm personas` para treinar as personas."
             )
     elif page == "Ações de CRM":
+        st.subheader("Estratégia por persona")
+        plan = api.playbook(months)
+        if plan.get("available"):
+            st.caption(plan["note"])
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Persona": r["persona"],
+                            "Clientes": r["customers"],
+                            "Ação principal": r["action"],
+                            "Oferta sugerida (hipótese)": r["offer"] or "—",
+                            "Custo assumido": money(r["cost"]),
+                            "Valor protegido (hipótese)": money(r["protected_value"]),
+                            "Saldo hipotético": money(r["net"]),
+                        }
+                        for r in plan["rows"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.caption(plan["disclaimer"])
+        st.divider()
         st.subheader("Revisar antes de agir · " + cid)
         rec = api.recommend(cid)
+        channels = {"app": "notificação no app", "email": "e-mail"}
+        st.markdown(
+            f"**Persona:** {rec.get('persona') or '—'} · "
+            f"**Canal sugerido:** {channels.get(rec.get('channel'), rec.get('channel') or '—')}"
+        )
+        st.markdown("**Ação principal:** " + rec["action"]["title"])
+        st.caption(rec["action"]["reason"])
         st.info(rec["draft"])
+        if rec.get("offer"):
+            with st.container(border=True):
+                st.markdown("**Oferta sugerida · hipótese a validar (não entra na mensagem)**")
+                st.write(rec["offer"]["title"])
+                st.caption(rec["offer"]["description"])
+                st.caption("Requer: " + rec["offer"]["requires"])
         evidence_ui(rec["evidence"])
         note = st.text_area("Observação da revisão")
         a, b = st.columns(2)

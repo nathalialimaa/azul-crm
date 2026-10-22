@@ -102,6 +102,17 @@ class Action:
 
 
 @dataclass(frozen=True)
+class Offer:
+    """Ideia comercial sugerida. Hipótese a validar; nunca entra no texto da mensagem."""
+
+    code: str
+    title: str
+    description: str
+    status: str
+    requires: str
+
+
+@dataclass(frozen=True)
 class Recommendation:
     customer_id: str
     action: Action
@@ -109,3 +120,6 @@ class Recommendation:
     evidence: tuple[Evidence, ...]
     status: str = "DRAFT_REQUIRES_REVIEW"
     mode: str = "demo_template"
+    offer: Offer | None = None
+    channel: str | None = None
+    persona: str | None = None

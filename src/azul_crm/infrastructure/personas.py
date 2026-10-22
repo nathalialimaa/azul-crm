@@ -3,6 +3,7 @@
 import numpy as np
 
 from azul_crm.domain.personas import FEATURE_NAMES, persona_vector
+from azul_crm.domain.playbook import Traits
 
 REQUIRED = (
     "method",
@@ -46,6 +47,13 @@ class ClusterSegmenter:
         if features is None:
             raise ValueError("ClusterSegmenter exige as features do cliente")
         return self.personas[self._assign(features)[0]]["name"]
+
+    def traits(self, segment: str) -> Traits | None:
+        for persona in self.personas:
+            if persona["name"] == segment:
+                t = persona.get("traits")
+                return Traits(**t) if t else None
+        return None
 
     def explain(self, features) -> tuple[str, ...]:
         cluster, distance = self._assign(features)

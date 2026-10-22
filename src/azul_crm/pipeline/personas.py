@@ -43,6 +43,7 @@ def _name_cluster(value_z: float, recency_days: float, incident_rate: float):
     high = value_z > 0
     cooling = recency_days >= COOLING_DAYS
     delays = incident_rate >= DELAY_RATE
+    traits = {"high_value": bool(high), "cooling": bool(cooling), "delays": bool(delays)}
     if high:
         name = "Alto Valor Esfriando" if cooling else "Fiéis de Alto Valor"
     else:
@@ -62,7 +63,7 @@ def _name_cluster(value_z: float, recency_days: float, incident_rate: float):
             else "."
         )
     )
-    return name, text
+    return name, text, traits
 
 
 def _bootstrap_stability(matrix, labels, k, seed, rounds=10):
@@ -114,7 +115,7 @@ def train_personas(root, store, seed=42, k=4):
         frequency = float(np.mean([m["frequency"] for m in members]))
         recency = float(np.mean([m["recency_days"] for m in members]))
         incident = float(np.mean([m["incident_rate"] for m in members]))
-        name, text = _name_cluster(
+        name, text, traits = _name_cluster(
             (centroids[cluster][0] + centroids[cluster][1]) / 2, recency, incident
         )
         if name in used:  # nomes precisam ser únicos para filtros e relatórios
@@ -128,6 +129,7 @@ def train_personas(root, store, seed=42, k=4):
                     f"{text} Em média: {_brl(spend)} gastos, "
                     f"{frequency:.0f} viagens, {recency:.0f} dias desde a última viagem."
                 ),
+                "traits": traits,
                 "size": len(members),
                 "share": round(len(members) / len(feats), 4),
                 "profile": {

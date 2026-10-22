@@ -1,6 +1,6 @@
 """Consultas estruturadas e simulação: o LLM não calcula indicadores."""
 
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import asdict
 from datetime import timedelta
 
@@ -69,4 +69,59 @@ def simulation(rows, cost_per_customer, assumed_retention):
         "break_even_retention": cost / value if value else None,
         "causal_claim": False,
         "note": "Cenário hipotético; não estima uplift real.",
+    }
+
+
+def strategy(c, months=12):
+    """Playbook por persona com cenário hipotético: premissas vêm do catálogo, não de medições."""
+    playbook = getattr(c.recommendations, "playbook", None)
+    traits_of = getattr(c.crm.segments, "traits", None)
+    if playbook is None or traits_of is None:
+        return {"available": False}
+    groups = defaultdict(list)
+    for row in overview(c, months)["rows"]:
+        groups[row["segment"]].append(row)
+    rows = []
+    for name, members in sorted(groups.items()):
+        traits = traits_of(name)
+        if traits is None:
+            continue
+        action, offer = playbook.decide(traits)
+        value = round(sum(m["weighted_value_at_risk"] for m in members), 2)
+        cost = round(action.assumed_cost * len(members), 2)
+        protected = round(value * action.assumed_retention, 2)
+        rows.append(
+            {
+                "persona": name,
+                "customers": len(members),
+                "value_at_risk": value,
+                "action_code": action.code,
+                "action": action.title,
+                "offer": offer.title if offer else None,
+                "offer_status": offer.status if offer else None,
+                "assumed_cost_per_customer": action.assumed_cost,
+                "assumed_retention": action.assumed_retention,
+                "cost": cost,
+                "protected_value": protected,
+                "net": round(protected - cost, 2),
+                "break_even_retention": round(cost / value, 4) if value else None,
+            }
+        )
+    return {
+        "available": True,
+        "version": playbook.version,
+        "note": playbook.note,
+        "months": months,
+        "rows": rows,
+        "totals": {
+            "customers": sum(r["customers"] for r in rows),
+            "cost": round(sum(r["cost"] for r in rows), 2),
+            "protected_value": round(sum(r["protected_value"] for r in rows), 2),
+            "net": round(sum(r["net"] for r in rows), 2),
+        },
+        "causal_claim": False,
+        "disclaimer": (
+            "Cenário hipotético com premissas do playbook. Não estima uplift real: o valor em "
+            "risco é um proxy de receita e a retenção assumida precisa de teste A/B."
+        ),
     }

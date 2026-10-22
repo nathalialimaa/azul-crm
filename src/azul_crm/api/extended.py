@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from azul_crm.api.routes import get_container
-from azul_crm.application.dashboard import overview, simulation
+from azul_crm.application.dashboard import overview, simulation, strategy
 from azul_crm.infrastructure.rag import DocumentIndex
 from azul_crm.infrastructure.settings import Settings
 from azul_crm.infrastructure.store import Store
@@ -107,6 +107,11 @@ def personas():
     artifact = json.loads(path.read_text(encoding="utf-8"))
     hidden = {"centroids", "scaler_mean", "scaler_scale", "clip_low", "clip_high"}
     return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
+
+
+@router.get("/playbook")
+def playbook(months: int = Query(12, ge=1, le=12), c=Depends(get_container)):
+    return strategy(c, months)
 
 
 @router.get("/bias")
