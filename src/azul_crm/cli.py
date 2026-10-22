@@ -19,6 +19,7 @@ def main():
             "train",
             "personas",
             "bias-audit",
+            "prepare",
             "index",
             "check",
             "validate",
@@ -66,6 +67,10 @@ def main():
         from azul_crm.pipeline.personas import train_personas
 
         result = train_personas(settings.root, store, args.seed, args.k)
+    elif args.command == "prepare":
+        from azul_crm.pipeline.demo import prepare_demo
+
+        result = prepare_demo(settings, args.customers, args.seed)
     elif args.command == "bias-audit":
         from azul_crm.bootstrap import build_container
         from azul_crm.pipeline.bias_audit import write_report

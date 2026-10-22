@@ -80,6 +80,8 @@ O baseline de valor e os segmentos continuam sendo regras. A explicação da log
 
 O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
 
+Para publicar o protótipo (Docker, senha e Streamlit Cloud), veja `docs/DEPLOY.md`.
+
 ## ANAC e aeroportos
 
 Importe a referência pequena já verificada, ou baixe a dimensão completa:
