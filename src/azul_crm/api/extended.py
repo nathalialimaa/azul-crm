@@ -99,6 +99,16 @@ def loyalty(customer_id: str, c=Depends(get_container)):
     )
 
 
+@router.get("/personas")
+def personas():
+    path = Settings.load().root / "artifacts/personas.json"
+    if not path.exists():
+        return {"trained": False, "method": "rules"}
+    artifact = json.loads(path.read_text(encoding="utf-8"))
+    hidden = {"centroids", "scaler_mean", "scaler_scale", "clip_low", "clip_high"}
+    return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
+
+
 @router.get("/models")
 def models():
     path = Settings.load().root / "artifacts/metrics.json"

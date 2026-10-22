@@ -75,6 +75,16 @@ class Gateway:
             json.loads(p.read_text()) if p.exists() else {"selected": "heuristic", "trained": False}
         )
 
+    def personas(self):
+        if self.http:
+            return self.request("GET", "/personas")
+        p = self.settings.root / "artifacts/personas.json"
+        if not p.exists():
+            return {"trained": False, "method": "rules"}
+        hidden = {"centroids", "scaler_mean", "scaler_scale", "clip_low", "clip_high"}
+        artifact = json.loads(p.read_text(encoding="utf-8"))
+        return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
+
     def loyalty(self, cid):
         if self.http:
             return self.request("GET", "/customers/" + cid + "/loyalty")

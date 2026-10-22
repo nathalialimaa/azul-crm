@@ -65,7 +65,7 @@ class RuleSegmenter:
     def __init__(self, policy: ScoringPolicy):
         self.policy = policy
 
-    def classify(self, value: float, risk: float) -> str:
+    def classify(self, value: float, risk: float, features: Features | None = None) -> str:
         if value >= self.policy.high_value_threshold:
             return (
                 "Alto Valor em Risco" if risk >= self.policy.high_risk_threshold else "Premium Leal"

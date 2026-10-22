@@ -115,6 +115,6 @@ def generate(settings, count=400, seed=42, public=False):
     }
     store.publish(tables)
     # Retira modelo de um snapshot anterior; novo treino deve ser explícito.
-    for name in ["churn.json", "metrics.json"]:
+    for name in ["churn.json", "metrics.json", "personas.json"]:
         (root / "artifacts" / name).unlink(missing_ok=True)
     return manifest

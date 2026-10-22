@@ -64,6 +64,7 @@ A API não implementa autenticação de produção. Mantenha-a vinculada a `127.
 .\.venv\Scripts\python.exe -m azul_crm.cli demo --customers 400 --seed 42
 .\.venv\Scripts\python.exe -m azul_crm.cli validate
 .\.venv\Scripts\python.exe -m azul_crm.cli train
+.\.venv\Scripts\python.exe -m azul_crm.cli personas
 .\.venv\Scripts\python.exe -m azul_crm.cli index
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 .\.venv\Scripts\python.exe -m pytest -q

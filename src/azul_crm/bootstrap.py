@@ -91,12 +91,24 @@ def build_stored_container(settings, store, manifest):
             raise ValueError("Modelo incompatível com a Gold. Treine novamente.")
         if artifact["report"]["selected"] == "logistic":
             churn = LogisticPredictor(artifact)
+    segmenter, segmenter_method = RuleSegmenter(policy), "rules"
+    personas_path = settings.root / "artifacts/personas.json"
+    if personas_path.exists():
+        from azul_crm.infrastructure.personas import ClusterSegmenter
+        from azul_crm.pipeline.personas import fingerprint
+
+        persona_artifact = json.loads(personas_path.read_text(encoding="utf-8"))
+        current = fingerprint(sorted(store.read("features"), key=lambda r: r["customer_id"]))
+        if persona_artifact.get("gold_fingerprint") != current:
+            raise ValueError("Personas incompatíveis com a Gold. Execute: azul-crm personas")
+        segmenter = ClusterSegmenter(persona_artifact)
+        segmenter_method = segmenter.method
     crm = CrmService(
         StoredCustomerRepository(store),
         FeatureBuilder(),
         ValueScorer(policy),
         churn,
-        RuleSegmenter(policy),
+        segmenter,
         PriorityScorer(),
         windows["observation_start"],
         windows["observation_end"],
@@ -112,6 +124,7 @@ def build_stored_container(settings, store, manifest):
         if isinstance(churn, LogisticPredictor)
         else "heuristic_not_calibrated",
         "agent_mode": index.mode,
+        "segmenter": segmenter_method,
         "storage": store.backend,
     }
     return Container(crm, recommendations, manifest)

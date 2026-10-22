@@ -24,7 +24,7 @@ class ChurnPredictor(Protocol):
 
 
 class Segmenter(Protocol):
-    def classify(self, value: float, risk: float) -> str: ...
+    def classify(self, value: float, risk: float, features: Features | None = None) -> str: ...
 
 
 class KnowledgeRetriever(Protocol):

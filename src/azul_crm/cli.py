@@ -17,6 +17,7 @@ def main():
         choices=[
             "demo",
             "train",
+            "personas",
             "index",
             "check",
             "validate",
@@ -29,6 +30,7 @@ def main():
     )
     parser.add_argument("--customers", type=int, default=400)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--k", type=int, default=4, help="Número de personas (comando personas)")
     parser.add_argument(
         "--public", action="store_true", help="Calibrar tarifas com Silver pública já importada"
     )
@@ -59,6 +61,10 @@ def main():
         from azul_crm.pipeline.modeling import train
 
         result = train(settings.root, store, args.seed)
+    elif args.command == "personas":
+        from azul_crm.pipeline.personas import train_personas
+
+        result = train_personas(settings.root, store, args.seed, args.k)
     elif args.command == "index":
         from azul_crm.infrastructure.rag import DocumentIndex
 

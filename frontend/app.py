@@ -300,9 +300,39 @@ try:
             width="stretch",
         )
         st.dataframe(agg, hide_index=True, width="stretch")
-        st.caption(
-            "Segmentação por regras explícitas de valor e risco; não são clusters treinados."
-        )
+        info = api.personas()
+        if info.get("trained"):
+            st.markdown("**Perfil de cada persona (média do grupo)**")
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Persona": p["name"],
+                            "Clientes": p["size"],
+                            "% da base": f"{p['share']:.0%}",
+                            "Gasto médio": money(p["profile"]["spend"]),
+                            "Viagens": round(p["profile"]["frequency"]),
+                            "Dias sem voar": round(p["profile"]["recency_days"]),
+                            "Viagens com atraso ≥ 60 min": f"{p['profile']['incident_rate']:.0%}",
+                        }
+                        for p in info["personas"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            q = info["quality"]
+            st.caption(
+                f"KMeans com k={info['k']} · silhouette {q['silhouette']:.2f} · "
+                f"estabilidade (ARI em reamostragem) {q['bootstrap_ari_mean']:.2f} · "
+                "fora do agrupamento: " + ", ".join(info["excluded_attributes"]) + ". "
+                + info["limitation"]
+            )
+        else:
+            st.caption(
+                "Segmentação por regras explícitas de valor e risco; "
+                "execute `azul-crm personas` para treinar as personas."
+            )
     elif page == "Ações de CRM":
         st.subheader("Revisar antes de agir · " + cid)
         rec = api.recommend(cid)
