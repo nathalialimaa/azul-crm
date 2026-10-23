@@ -2,7 +2,7 @@
 
 ## Validado localmente
 
-- `python -m pytest -q`: **24 testes passaram**, incluindo os 15 testes preservados da base original. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
+- `python -m pytest -q`: **163 testes passaram**, incluindo os testes preservados da base original. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
 - `python -m ruff check src frontend tests`: passou.
 - `python -m azul_crm.cli demo --customers 400 --seed 42`: 400 clientes, 6.046 viagens.
 - `python -m azul_crm.cli validate`: Gold SQL válida; clientes/viagens/features/desfechos/fidelidade consistentes.
@@ -12,6 +12,7 @@
 - API: contratos, paginação, ausências, filtros, simulação e revisão testados via TestClient. Inicialização real Uvicorn e HTTP local também verificadas.
 - Streamlit AppTest: seis páginas executadas sem erros/exceções; geração de rascunho e consulta de fatores executadas. Não é equivalente a captura visual em navegador.
 - Importação de documento TXT, recuperação e rejeição de identificador inválido verificadas. PDF usa pypdf, mas não há teste de OCR (não implementado).
+- Contrato do adaptador Ollama testado com resposta HTTP simulada: uma resposta vazia é rejeitada mesmo com citação permitida; isso não é inferência Ollama real.
 - Ingestão ANAC/VRA testada com amostras construídas: idempotência, período inválido, NaN, preservação de ausências e aeroportos desconhecidos.
 - Integridade do cache HTTP testada com transporte simulado; não é prova de acesso aos endpoints ANAC.
 

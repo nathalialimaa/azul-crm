@@ -56,6 +56,8 @@ Há dois caminhos:
 
 A busca pode falhar mesmo quando um texto relevante existe; o limiar não prova groundedness. Validação de IDs não garante correção de cada frase do LLM. Recomendações comerciais continuam limitadas ao catálogo seguro e exigem revisão.
 
+O adaptador bloqueia respostas Ollama sem texto ou sem uma lista de citações permitidas. Esse contrato é testável offline; não substitui a execução do Ollama nem a avaliação humana do conteúdo.
+
 **Ativação Ollama (bloqueia apenas embeddings/geração reais):**
 
 1. Instale [Ollama](https://ollama.com/) no computador e confirme espaço/memória disponíveis.

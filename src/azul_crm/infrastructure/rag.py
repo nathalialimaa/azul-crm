@@ -130,9 +130,12 @@ class DocumentIndex:
             allowed = {e.document_id for e in evidence}
             citations = result.get("citations", [])
             if (
-                not citations
+                not isinstance(citations, list)
+                or not citations
+                or not all(isinstance(citation, str) for citation in citations)
                 or not set(citations) <= allowed
                 or not isinstance(result.get("answer"), str)
+                or not result["answer"].strip()
             ):
                 raise ValueError("Geração sem referências válidas; resposta bloqueada")
             answer = (
