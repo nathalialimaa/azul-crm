@@ -2,7 +2,7 @@
 
 ## Validado localmente
 
-- `python -m pytest -q`: **24 testes passaram**, incluindo os 15 testes preservados da base original. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
+- `python -m pytest -q`: **163 testes passaram**, incluindo os testes preservados da base original. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
 - `python -m ruff check src frontend tests`: passou.
 - `python -m azul_crm.cli demo --customers 400 --seed 42`: 400 clientes, 6.046 viagens.
 - `python -m azul_crm.cli validate`: Gold SQL válida; clientes/viagens/features/desfechos/fidelidade consistentes.

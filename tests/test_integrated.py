@@ -79,26 +79,38 @@ def test_rag_sources_and_abstention(integrated):
     assert rag.build()["chunks"] == 2
 
 
-def test_ollama_rejects_empty_grounded_answer(integrated, monkeypatch):
+@pytest.mark.parametrize(
+    "invalid_response",
+    ["malformed_json", "unknown_citation", "non_string_citation", "blank_answer"],
+)
+def test_ollama_rejects_invalid_grounded_answer(integrated, monkeypatch, invalid_response):
     root, _ = integrated
     monkeypatch.setenv("RAG_PROVIDER", "ollama")
     rag = DocumentIndex(root)
     rag.matrix = np.array([[1.0]])
     rag.embed = lambda texts: np.ones((len(texts), 1))
 
-    class EmptyAnswer:
+    allowed_citation = rag.chunks[0].document_id
+    responses = {
+        "malformed_json": "not json",
+        "unknown_citation": json.dumps(
+            {"answer": "Resposta", "citations": ["unknown-document#0"]}
+        ),
+        "non_string_citation": json.dumps(
+            {"answer": "Resposta", "citations": [123]}
+        ),
+        "blank_answer": json.dumps({"answer": "   ", "citations": [allowed_citation]}),
+    }
+
+    class InvalidAnswer:
         def raise_for_status(self):
             pass
 
         def json(self):
-            return {
-                "response": json.dumps(
-                    {"answer": "", "citations": [rag.chunks[0].document_id]}
-                )
-            }
+            return {"response": responses[invalid_response]}
 
-    monkeypatch.setattr(httpx, "post", lambda *args, **kwargs: EmptyAnswer())
-    with pytest.raises(ValueError, match="referências válidas"):
+    monkeypatch.setattr(httpx, "post", lambda *args, **kwargs: InvalidAnswer())
+    with pytest.raises(ValueError):
         rag.answer("Como o score é calculado?")
 
 
