@@ -29,3 +29,6 @@ dist/
 *.p8
 data/downloads/
 artifacts/rag-index.json
+
+# Estado local do canvas Maestri (papéis e sessões desta máquina)
+.maestri/
