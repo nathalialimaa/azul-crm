@@ -66,6 +66,7 @@ A API não implementa autenticação de produção. Mantenha-a vinculada a `127.
 .\.venv\Scripts\python.exe -m azul_crm.cli train
 .\.venv\Scripts\python.exe -m azul_crm.cli personas
 .\.venv\Scripts\python.exe -m azul_crm.cli bias-audit
+.\.venv\Scripts\python.exe -m azul_crm.cli export-lake
 .\.venv\Scripts\python.exe -m azul_crm.cli index
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 .\.venv\Scripts\python.exe -m pytest -q
@@ -81,6 +82,8 @@ O baseline de valor e os segmentos continuam sendo regras. A explicação da log
 O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
 
 Para publicar o protótipo (Docker, senha e Streamlit Cloud), veja `docs/DEPLOY.md`.
+
+Data lake em Parquet, dicionário de dados e DDL do Snowflake (`azul-crm export-lake`): `docs/DATA_LAKE.md`.
 
 ## ANAC e aeroportos
 

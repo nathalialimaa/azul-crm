@@ -90,6 +90,13 @@ class Gateway:
             return self.request("GET", "/playbook", params={"months": months})
         return strategy(self.c, months)
 
+    def lake(self):
+        if self.http:
+            return self.request("GET", "/lake")
+        from azul_crm.infrastructure.lake import load_dictionary
+
+        return load_dictionary(self.settings.root)
+
     def bias(self):
         if self.http:
             return self.request("GET", "/bias")

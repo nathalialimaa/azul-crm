@@ -482,6 +482,37 @@ try:
             + meta.get("storage", "legacy")
             + " · atualização exige recarregar o snapshot."
         )
+        lake = api.lake()
+        st.subheader("Data lake e dicionário de dados")
+        if not lake.get("available"):
+            st.info("Lake ainda não exportado. Rode `azul-crm export-lake` e atualize os dados.")
+        else:
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Camada": t["layer"],
+                            "Tabela": t["name"],
+                            "Linhas": t["rows"],
+                            "Situação": "exportada" if t["exported"] else "sem dados",
+                            "Colunas": len(t["columns"]),
+                            "Descrição": t["description"],
+                        }
+                        for t in lake["tables"].values()
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            choice = st.selectbox("Ver colunas de", list(lake["tables"]))
+            st.dataframe(
+                pd.DataFrame(lake["tables"][choice]["columns"])[
+                    ["name", "type", "nullable", "description"]
+                ],
+                hide_index=True,
+                width="stretch",
+            )
+            st.caption("Parquet em data/lake · esquema validado no código · DDL Snowflake gerado.")
     st.divider()
     st.caption(data["notes"])
     st.caption(

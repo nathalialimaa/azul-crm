@@ -20,6 +20,7 @@ def main():
             "personas",
             "bias-audit",
             "prepare",
+            "export-lake",
             "index",
             "check",
             "validate",
@@ -37,6 +38,7 @@ def main():
         "--public", action="store_true", help="Calibrar tarifas com Silver pública já importada"
     )
     parser.add_argument("--file", type=Path)
+    parser.add_argument("--out", type=Path, help="Pasta de saída do export-lake (data/lake)")
     parser.add_argument("--url", help="URL HTTPS oficial do CSV ou ZIP")
     parser.add_argument("--period", help="Mês de venda YYYY-MM")
     parser.add_argument("--max-mb", type=int, default=50)
@@ -67,6 +69,10 @@ def main():
         from azul_crm.pipeline.personas import train_personas
 
         result = train_personas(settings.root, store, args.seed, args.k)
+    elif args.command == "export-lake":
+        from azul_crm.infrastructure.lake import export_lake
+
+        result = export_lake(settings.root, store, args.out)
     elif args.command == "prepare":
         from azul_crm.pipeline.demo import prepare_demo
 

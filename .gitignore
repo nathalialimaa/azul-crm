@@ -13,6 +13,7 @@ credentials/
 data/bronze/*
 data/silver/*
 data/gold/*
+data/lake/
 !data/**/.gitkeep
 artifacts/*
 !artifacts/.gitkeep

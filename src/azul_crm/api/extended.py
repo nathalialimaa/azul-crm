@@ -114,6 +114,13 @@ def playbook(months: int = Query(12, ge=1, le=12), c=Depends(get_container)):
     return strategy(c, months)
 
 
+@router.get("/lake")
+def lake():
+    from azul_crm.infrastructure.lake import load_dictionary
+
+    return load_dictionary(Settings.load().root)
+
+
 @router.get("/bias")
 def bias():
     from azul_crm.pipeline.bias_audit import load_report
