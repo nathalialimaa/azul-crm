@@ -1,7 +1,9 @@
+import json
 import shutil
 from pathlib import Path
 
 import httpx
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
@@ -75,6 +77,29 @@ def test_rag_sources_and_abstention(integrated):
     assert not result["evidence"]
     assert "evidência suficiente" in result["answer"]
     assert rag.build()["chunks"] == 2
+
+
+def test_ollama_rejects_empty_grounded_answer(integrated, monkeypatch):
+    root, _ = integrated
+    monkeypatch.setenv("RAG_PROVIDER", "ollama")
+    rag = DocumentIndex(root)
+    rag.matrix = np.array([[1.0]])
+    rag.embed = lambda texts: np.ones((len(texts), 1))
+
+    class EmptyAnswer:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {
+                "response": json.dumps(
+                    {"answer": "", "citations": [rag.chunks[0].document_id]}
+                )
+            }
+
+    monkeypatch.setattr(httpx, "post", lambda *args, **kwargs: EmptyAnswer())
+    with pytest.raises(ValueError, match="referências válidas"):
+        rag.answer("Como o score é calculado?")
 
 
 def test_airport_missing_ambiguous():
