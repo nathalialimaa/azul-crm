@@ -11,6 +11,7 @@ from azul_crm.domain.models import (
     Scores,
     Trip,
 )
+from azul_crm.domain.playbook import Traits
 
 
 class CustomerRepository(Protocol):
@@ -24,7 +25,9 @@ class ChurnPredictor(Protocol):
 
 
 class Segmenter(Protocol):
-    def classify(self, value: float, risk: float) -> str: ...
+    def classify(self, value: float, risk: float, features: Features | None = None) -> str: ...
+
+    def traits(self, segment: str) -> Traits | None: ...
 
 
 class KnowledgeRetriever(Protocol):

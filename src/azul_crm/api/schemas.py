@@ -59,13 +59,24 @@ class ActionResponse(ApiModel):
     reason: str
 
 
+class OfferResponse(ApiModel):
+    code: str
+    title: str
+    description: str
+    status: Literal["hypothesis_unverified", "verified"]
+    requires: str
+
+
 class RecommendationResponse(ApiModel):
     customer_id: str
     action: ActionResponse
     draft: str
     evidence: list[EvidenceResponse]
     status: Literal["DRAFT_REQUIRES_REVIEW"]
-    mode: Literal["demo_template"]
+    mode: Literal["demo_template", "playbook_template"]
+    offer: OfferResponse | None = None
+    channel: str | None = None
+    persona: str | None = None
 
 
 class RecommendationRequest(ApiModel):

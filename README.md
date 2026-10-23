@@ -25,7 +25,7 @@ Se o comando `py -3.12` falhar, confirme a instalação com `py --list`. Se a po
 
 ## O que demonstrar em cinco minutos
 
-1. **Visão geral:** clientes de alto valor, risco, proxy de receita futura e fila de prioridade.
+1. **Visão geral:** clientes de alto valor (top 20% por CLV), risco, CLV de 12 meses e fila de prioridade.
 2. Escolha um cliente no menu lateral. A matriz destaca o cliente selecionado.
 3. Confira fatores e clique em **Gerar mensagem para revisão**. Abra as evidências.
 4. Em **Clientes**, veja viagens e fidelidade sintética, inclusive resgates e pagamentos restritos simulados.
@@ -64,6 +64,10 @@ A API não implementa autenticação de produção. Mantenha-a vinculada a `127.
 .\.venv\Scripts\python.exe -m azul_crm.cli demo --customers 400 --seed 42
 .\.venv\Scripts\python.exe -m azul_crm.cli validate
 .\.venv\Scripts\python.exe -m azul_crm.cli train
+.\.venv\Scripts\python.exe -m azul_crm.cli personas
+.\.venv\Scripts\python.exe -m azul_crm.cli bias-audit
+.\.venv\Scripts\python.exe -m azul_crm.cli clv-report
+.\.venv\Scripts\python.exe -m azul_crm.cli export-lake
 .\.venv\Scripts\python.exe -m azul_crm.cli index
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 .\.venv\Scripts\python.exe -m pytest -q
@@ -72,9 +76,17 @@ A API não implementa autenticação de produção. Mantenha-a vinculada a `127.
 
 Após mudar a Gold/modelo, reinicie a API e clique **Atualizar dados** no Streamlit. O snapshot evita consultas repetidas ao warehouse; não há atualização automática em tempo real.
 
-`train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A promoção exige ROC-AUC maior e Brier menor que o baseline na validação. No snapshot entregue, a logística **não foi promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
+`train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A escolha entre a logística e a regra usa **validação cruzada** (5×3, em treino + validação, sem o teste): a logística só entra se o ganho de AUC for distinguível de ruído (teste t pareado com correção de Nadeau e Bengio, t > 1,65) e o Brier for menor; veja `docs/MODELO_CHURN.md`. Na base de demonstração, a logística **não é promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
 
-O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. Não há previsão de CLV treinada: o card representa um proxy explícito de receita.
+O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. O CLV de 12 meses é calculado com premissas explícitas e configuráveis (margem e desconto, que são hipóteses), não treinado com dados reais; veja `docs/CLV.md`.
+
+O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
+
+Para publicar o protótipo (Docker, senha e Streamlit Cloud), veja `docs/DEPLOY.md`.
+
+Data lake em Parquet, dicionário de dados e DDL do Snowflake (`azul-crm export-lake`): `docs/DATA_LAKE.md`.
+
+CLV de 12 meses e definição de alto valor (`azul-crm clv-report`): `docs/CLV.md`.
 
 ## ANAC e aeroportos
 
@@ -110,17 +122,18 @@ VRA, com as colunas publicadas pela ANAC:
 # Também aceita --url HTTPS de domínio ANAC.
 ```
 
-O parser VRA registra horários com fuso de Brasília, atraso calculável e cancelamento; horário ausente permanece `null`. O formato deve ter as colunas descritas em `docs/ARQUITETURA.md`. Schemas divergentes falham explicitamente. A carga VRA foi testada com amostra construída; não foi validada contra download real.
+O parser VRA lê o arquivo oficial mensal (CSV do portal de dados abertos da ANAC, "Voo Regular Ativo"): pula a linha de aviso do topo, trata `null` e `N/A` como ausência, lê horários em **UTC** e calcula atraso e cancelamento. Linhas sem data ou fora do período são **rejeitadas e contadas** (`rejected_reasons`); se mais de 5% forem rejeitadas, a carga é recusada. Schemas divergentes falham explicitamente. Foi validado com o arquivo real de agosto de 2026 (88 mil linhas). Veja `docs/CALIBRACAO_PUBLICA.md`.
 
 Para gerar uma carteira com médias tarifárias da Silver pública:
 
 ```powershell
+# Ingerir antes: airports, fares (tarifas) e vra (atrasos)
 .\.venv\Scripts\python.exe -m azul_crm.cli demo --public --customers 400 --seed 42
 .\.venv\Scripts\python.exe -m azul_crm.cli train
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 ```
 
-Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota. Não calibra frequência individual, demanda, resgate, fidelidade ou atraso. O VRA é persistido na Silver, mas ainda não condiciona o gerador. Essas limitações são expostas no manifesto.
+Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota, e distribui os clientes pelas rotas na proporção dos assentos comercializados (sorteio com semente fixa). Se o VRA tiver sido ingerido, os **atrasos** também são sorteados da distribuição real da Azul (doméstico, por aeroporto de origem quando há voos suficientes); sem ele, vale o padrão antigo. Não calibra frequência individual de viagens, resgate nem fidelidade. O que foi calibrado fica registrado no manifesto (`calibration_scope` e `delay_calibration`).
 
 Os CSVs de tarifas não identificam clientes nem comprovam fidelidade. `period` representa mês de venda. Tarifas restritas e milhas são simulações separadas, sem alegação de cobertura pública.
 

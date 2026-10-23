@@ -50,16 +50,19 @@ class CrmService:
         features = self.features.build(customer_id, self.trips(customer_id), self.start, self.end)
         value = self.value.score(features)
         risk = self.churn.predict(features)
+        explain = getattr(self.segments, "explain", None)
+        method = getattr(self.segments, "method", None)
         return Scores(
             customer_id,
             value,
             risk.probability,
             self.priority.score(value, risk.probability),
             round(features.spend * risk.probability, 2),
-            self.segments.classify(value, risk.probability),
+            self.segments.classify(value, risk.probability, features),
             (f"Gasto observado: R$ {features.spend:.2f}", f"Frequência: {features.frequency}")
-            + risk.drivers,
-            "value_baseline_v1+" + risk.method,
+            + risk.drivers
+            + (explain(features) if explain else ()),
+            "value_baseline_v1+" + risk.method + ("+" + method if method else ""),
             self.end,
         )
 

@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import httpx
 
-from azul_crm.application.dashboard import overview, simulation
+from azul_crm.application.dashboard import overview, simulation, strategy
 from azul_crm.bootstrap import build_container
 from azul_crm.infrastructure.rag import DocumentIndex
 from azul_crm.infrastructure.settings import Settings
@@ -74,6 +74,42 @@ class Gateway:
         return (
             json.loads(p.read_text()) if p.exists() else {"selected": "heuristic", "trained": False}
         )
+
+    def personas(self):
+        if self.http:
+            return self.request("GET", "/personas")
+        p = self.settings.root / "artifacts/personas.json"
+        if not p.exists():
+            return {"trained": False, "method": "rules"}
+        hidden = {"centroids", "scaler_mean", "scaler_scale", "clip_low", "clip_high"}
+        artifact = json.loads(p.read_text(encoding="utf-8"))
+        return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
+
+    def playbook(self, months=12):
+        if self.http:
+            return self.request("GET", "/playbook", params={"months": months})
+        return strategy(self.c, months)
+
+    def lake(self):
+        if self.http:
+            return self.request("GET", "/lake")
+        from azul_crm.infrastructure.lake import load_dictionary
+
+        return load_dictionary(self.settings.root)
+
+    def clv(self):
+        if self.http:
+            return self.request("GET", "/clv")
+        from azul_crm.pipeline.clv_report import load_clv_report
+
+        return load_clv_report(self.settings.root, Store(self.settings.root))
+
+    def bias(self):
+        if self.http:
+            return self.request("GET", "/bias")
+        from azul_crm.pipeline.bias_audit import load_report
+
+        return load_report(self.settings.root, Store(self.settings.root))
 
     def loyalty(self, cid):
         if self.http:

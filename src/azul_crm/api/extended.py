@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from azul_crm.api.routes import get_container
-from azul_crm.application.dashboard import overview, simulation
+from azul_crm.application.dashboard import overview, simulation, strategy
 from azul_crm.infrastructure.rag import DocumentIndex
 from azul_crm.infrastructure.settings import Settings
 from azul_crm.infrastructure.store import Store
@@ -97,6 +97,44 @@ def loyalty(customer_id: str, c=Depends(get_container)):
         (r for r in Store(Settings.load().root).read("loyalty") if r["customer_id"] == customer_id),
         {},
     )
+
+
+@router.get("/personas")
+def personas():
+    path = Settings.load().root / "artifacts/personas.json"
+    if not path.exists():
+        return {"trained": False, "method": "rules"}
+    artifact = json.loads(path.read_text(encoding="utf-8"))
+    hidden = {"centroids", "scaler_mean", "scaler_scale", "clip_low", "clip_high"}
+    return {"trained": True, **{k: v for k, v in artifact.items() if k not in hidden}}
+
+
+@router.get("/playbook")
+def playbook(months: int = Query(12, ge=1, le=12), c=Depends(get_container)):
+    return strategy(c, months)
+
+
+@router.get("/lake")
+def lake():
+    from azul_crm.infrastructure.lake import load_dictionary
+
+    return load_dictionary(Settings.load().root)
+
+
+@router.get("/clv")
+def clv():
+    from azul_crm.pipeline.clv_report import load_clv_report
+
+    root = Settings.load().root
+    return load_clv_report(root, Store(root))
+
+
+@router.get("/bias")
+def bias():
+    from azul_crm.pipeline.bias_audit import load_report
+
+    root = Settings.load().root
+    return load_report(root, Store(root))
 
 
 @router.get("/models")

@@ -49,6 +49,7 @@ with st.sidebar:
             "Segmentos",
             "Ações de CRM",
             "Assistente IA",
+            "Auditoria de viés",
             "Dados e modelos",
         ],
         label_visibility="collapsed",
@@ -130,16 +131,17 @@ try:
     cid = st.sidebar.selectbox("Cliente em foco", df.customer_id.tolist())
     focus = next(r for r in data["rows"] if r["customer_id"] == cid)
     k = data["kpis"]
+    share = meta.get("clv_policy", {}).get("top_share", 0.2)
     labels = [
-        ("♟", "Clientes de alto valor", str(k["high_value"]), "na carteira filtrada"),
-        ("△", "Alto valor em risco", str(k["high_value_at_risk"]), "prioridade de retenção"),
-        ("▥", "CLV proxy · 12 meses", money(k["clv_12m_proxy"]), "hipótese de receita futura"),
         (
-            "◉",
-            "Valor ponderado em risco",
-            money(k["weighted_value_at_risk"]),
-            "proxy × índice de risco",
+            "♟",
+            "Clientes de alto valor",
+            str(k["high_value"]),
+            f"top {share:.0%} por valor potencial",
         ),
+        ("△", "Alto valor em risco", str(k["high_value_at_risk"]), "prioridade de retenção"),
+        ("▥", "CLV 12 meses (margem)", money(k["clv_12m"]), "margem esperada, com desconto"),
+        ("◉", "CLV em risco", money(k["clv_at_risk"]), "margem que se perde se saírem"),
     ]
     for col, (icon, label, val, sub) in zip(st.columns(4), labels):
         col.markdown(
@@ -150,21 +152,24 @@ try:
         left, right = st.columns([1.38, 1])
         with left, st.container(border=True):
             st.subheader("Onde concentrar os esforços?")
-            st.caption("Valor do cliente × risco de evasão")
+            st.caption(
+                "Valor potencial (margem em 12 meses) × risco de evasão · divisória = corte do alto valor"
+            )
             threshold = meta["scoring_policy"]["high_risk_threshold"]
-            value_threshold = meta["scoring_policy"]["high_value_threshold"]
+            value_threshold = k["high_value_cutoff"]
+            ymax = max(float(df["potential_value_12m"].max()), value_threshold) * 1.08
             fig = px.scatter(
                 df,
                 x="churn_risk",
-                y="value_score",
+                y="potential_value_12m",
                 color="segment",
                 hover_name="customer_id",
-                hover_data=["clv_12m_proxy", "route"],
+                hover_data=["clv_12m", "route"],
                 color_discrete_sequence=["#ff6670", "#00bc9c", "#13b9d4", "#078afa"],
             )
             for x0, x1, y0, y1, color in [
-                (0, threshold, value_threshold, 100, "#eaf5ff"),
-                (threshold, 1, value_threshold, 100, "#fff0f2"),
+                (0, threshold, value_threshold, ymax, "#eaf5ff"),
+                (threshold, 1, value_threshold, ymax, "#fff0f2"),
                 (0, threshold, 0, value_threshold, "#eafaf5"),
                 (threshold, 1, 0, value_threshold, "#fff7df"),
             ]:
@@ -180,7 +185,7 @@ try:
                 )
             fig.add_scatter(
                 x=[focus["churn_risk"]],
-                y=[focus["value_score"]],
+                y=[focus["potential_value_12m"]],
                 mode="markers",
                 showlegend=False,
                 marker={
@@ -191,10 +196,10 @@ try:
                 hoverinfo="skip",
             )
             for x, y, t, color in [
-                (0.04, 96, "Encantar", "#0079f3"),
-                (0.96, 96, "Reter agora", "#ef465d"),
-                (0.04, 5, "Nutrir", "#00a88a"),
-                (0.96, 5, "Reativar", "#ce9205"),
+                (0.04, 0.96 * ymax, "Encantar", "#0079f3"),
+                (0.96, 0.96 * ymax, "Reter agora", "#ef465d"),
+                (0.04, 0.05 * ymax, "Nutrir", "#00a88a"),
+                (0.96, 0.05 * ymax, "Reativar", "#ce9205"),
             ]:
                 fig.add_annotation(
                     x=x,
@@ -212,10 +217,10 @@ try:
                 showlegend=False,
                 font={"color": "#496384"},
                 xaxis_title="Risco de evasão →",
-                yaxis_title="Score de valor →",
+                yaxis_title="Valor potencial 12 meses (margem, R$) →",
             )
             fig.update_xaxes(range=[0, 1], tickformat=".0%", gridcolor="#edf2f7")
-            fig.update_yaxes(range=[0, 105], gridcolor="#edf2f7")
+            fig.update_yaxes(range=[0, ymax], gridcolor="#edf2f7")
             st.plotly_chart(fig, width="stretch")
         with right, st.container(border=True):
             st.subheader("Próxima melhor ação")
@@ -224,6 +229,10 @@ try:
             a, b = st.columns(2)
             a.metric("Valor", f"{focus['value_score']:.0f}/100")
             b.metric("Risco", f"{focus['churn_risk']:.0%}")
+            st.caption(
+                f"CLV 12m: {money(focus['clv_12m'])} · "
+                + ("alto valor" if focus["is_high_value"] else "fora do grupo de alto valor")
+            )
             st.markdown("**Principais fatores**")
             for driver in focus["drivers"][:3]:
                 st.markdown(
@@ -246,9 +255,9 @@ try:
         with left, st.container(border=True):
             st.subheader("Quem precisa de atenção agora?")
             st.caption("Ordenado por prioridade · seleção no menu lateral")
-            table = df[
-                ["customer_id", "segment", "clv_12m_proxy", "churn_risk", "priority_score"]
-            ].head(8)
+            table = df[["customer_id", "segment", "clv_12m", "churn_risk", "priority_score"]].head(
+                8
+            )
             st.dataframe(
                 table,
                 hide_index=True,
@@ -256,7 +265,7 @@ try:
                 column_config={
                     "customer_id": "Cliente",
                     "segment": "Segmento",
-                    "clv_12m_proxy": st.column_config.NumberColumn("CLV proxy", format="R$ %.0f"),
+                    "clv_12m": st.column_config.NumberColumn("CLV 12m (margem)", format="R$ %.0f"),
                     "churn_risk": st.column_config.ProgressColumn(
                         "Risco", min_value=0, max_value=1, format="%.2f"
                     ),
@@ -286,7 +295,7 @@ try:
         st.subheader("Perfis e oportunidades")
         agg = df.groupby("segment", as_index=False).agg(
             clientes=("customer_id", "count"),
-            valor=("clv_12m_proxy", "sum"),
+            valor=("clv_12m", "sum"),
             risco=("churn_risk", "mean"),
         )
         st.plotly_chart(
@@ -300,13 +309,145 @@ try:
             width="stretch",
         )
         st.dataframe(agg, hide_index=True, width="stretch")
-        st.caption(
-            "Segmentação por regras explícitas de valor e risco; não são clusters treinados."
-        )
+        info = api.personas()
+        if info.get("trained"):
+            st.markdown("**Perfil de cada persona (média do grupo)**")
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Persona": p["name"],
+                            "Clientes": p["size"],
+                            "% da base": f"{p['share']:.0%}",
+                            "Gasto médio": money(p["profile"]["spend"]),
+                            "Viagens": round(p["profile"]["frequency"]),
+                            "Dias sem voar": round(p["profile"]["recency_days"]),
+                            "Viagens com atraso ≥ 60 min": f"{p['profile']['incident_rate']:.0%}",
+                        }
+                        for p in info["personas"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            q = info["quality"]
+            st.caption(
+                f"KMeans com k={info['k']} · silhouette {q['silhouette']:.2f} · "
+                f"estabilidade (ARI em reamostragem) {q['bootstrap_ari_mean']:.2f} · "
+                "fora do agrupamento: "
+                + ", ".join(info["excluded_attributes"])
+                + ". "
+                + info["limitation"]
+            )
+        else:
+            st.caption(
+                "Segmentação por regras explícitas de valor e risco; "
+                "execute `azul-crm personas` para treinar as personas."
+            )
+        st.divider()
+        st.subheader("Definição de alto valor (CLV)")
+        clv = api.clv()
+        if not clv.get("available"):
+            st.info("Relatório de CLV ainda não gerado. Rode `azul-crm clv-report` e atualize.")
+        else:
+            if clv.get("stale"):
+                st.warning("Relatório desatualizado: a base mudou depois do cálculo.")
+            assumptions, summary = clv["assumptions"], clv["summary"]
+            st.markdown(
+                f"**Alto valor = os {assumptions['top_share']:.0%} clientes de maior valor "
+                f"potencial.** Valor potencial = gasto em dinheiro dos últimos 12 meses × margem "
+                f"({assumptions['margin']:.0%}) × desconto ({assumptions['discount_rate']:.0%} ao "
+                "ano). CLV = valor potencial × (1 − risco de evasão)."
+            )
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Clientes de alto valor", summary["high_value_customers"])
+            m2.metric("Corte (valor potencial/ano)", money(summary["cutoff_potential_12m"]))
+            m3.metric("Parcela do valor total", f"{summary['top_value_share']:.0%}")
+            m4.metric("Alto valor em risco", summary["high_value_at_risk_customers"])
+            st.markdown("**Concentração de valor (Pareto)**")
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Top": f"{x['top_share']:.0%}",
+                            "Clientes": x["customers"],
+                            "Parcela do valor potencial": f"{x['value_share']:.0%}",
+                        }
+                        for x in clv["concentration"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.markdown("**Por persona**")
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Persona": p["persona"],
+                            "Clientes": p["customers"],
+                            "De alto valor": p["high_value_customers"],
+                            "Risco médio": f"{p['mean_churn_risk']:.0%}",
+                            "CLV 12m": money(p["clv_12m"]),
+                            "CLV em risco": money(p["clv_at_risk"]),
+                        }
+                        for p in clv["by_persona"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.markdown("**Sensibilidade às premissas (CLV total de 12 meses)**")
+            table = pd.DataFrame(clv["sensitivity"]).pivot(
+                index="margin", columns="discount_rate", values="total_clv_12m"
+            )
+            table.index = [f"margem {m:.0%}" for m in table.index]
+            table.columns = [f"desconto {d:.0%}" for d in table.columns]
+            st.dataframe(table.map(money), width="stretch")
+            st.caption(clv["ranking_note"])
+            for text in clv["limitations"]:
+                st.caption("• " + text)
     elif page == "Ações de CRM":
+        st.subheader("Estratégia por persona")
+        plan = api.playbook(months)
+        if plan.get("available"):
+            st.caption(plan["note"])
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Persona": r["persona"],
+                            "Clientes": r["customers"],
+                            "Ação principal": r["action"],
+                            "Oferta sugerida (hipótese)": r["offer"] or "—",
+                            "Custo assumido": money(r["cost"]),
+                            "Valor protegido (hipótese)": money(r["protected_value"]),
+                            "Saldo hipotético": money(r["net"]),
+                        }
+                        for r in plan["rows"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.caption(plan["disclaimer"])
+        st.divider()
         st.subheader("Revisar antes de agir · " + cid)
         rec = api.recommend(cid)
+        channels = {"app": "notificação no app", "email": "e-mail"}
+        st.markdown(
+            f"**Persona:** {rec.get('persona') or '—'} · "
+            f"**Canal sugerido:** {channels.get(rec.get('channel'), rec.get('channel') or '—')}"
+        )
+        st.markdown("**Ação principal:** " + rec["action"]["title"])
+        st.caption(rec["action"]["reason"])
         st.info(rec["draft"])
+        if rec.get("offer"):
+            with st.container(border=True):
+                st.markdown("**Oferta sugerida · hipótese a validar (não entra na mensagem)**")
+                st.write(rec["offer"]["title"])
+                st.caption(rec["offer"]["description"])
+                st.caption("Requer: " + rec["offer"]["requires"])
         evidence_ui(rec["evidence"])
         note = st.text_area("Observação da revisão")
         a, b = st.columns(2)
@@ -332,6 +473,83 @@ try:
             "Indicadores são calculados por código. O corpus disponível contém metodologia e catálogo interno, sem regulamento oficial validado."
         )
         ask_ui(api, cid)
+    elif page == "Auditoria de viés":
+        st.subheader("IA responsável · auditoria de viés")
+        report = api.bias()
+        if not report.get("available"):
+            st.info(
+                "Auditoria ainda não executada. Rode `azul-crm bias-audit` e atualize os dados."
+            )
+        else:
+            if report.get("stale"):
+                st.warning("Relatório desatualizado: a base mudou depois da auditoria.")
+            s = report["settings"]
+            st.caption(
+                f"Resultado favorável: {s['favorable_outcome']} ({s['selected_customers']} de "
+                f"{s['customers']} clientes). Alarme pela regra dos 4/5."
+            )
+            icon = {"ok": "🟢 OK", "atencao": "🟡 Atenção", "alerta": "🔴 Alerta"}
+            icon["confundido"] = "🟠 Confundido"
+            icon["amostra_insuficiente"] = "⚪ Amostra pequena"
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Atributo": a["label"],
+                            "Resultado": icon[a["verdict"]],
+                            "Razão bruta": a["selection_ratio"],
+                            "Recall (iguais oportunidades)": a["recall_ratio"],
+                            "Associação com persona (V)": (a["persona_association"] or {}).get(
+                                "cramers_v"
+                            ),
+                        }
+                        for a in report["attributes"].values()
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            for key, a in report["attributes"].items():
+                with st.expander(a["label"] + " · " + icon[a["verdict"]]):
+                    st.write(a["verdict_text"])
+                    st.dataframe(
+                        pd.DataFrame(a["groups"]).drop(columns=["persona_mix"]),
+                        hide_index=True,
+                        width="stretch",
+                    )
+                    if a["within_persona"]:
+                        st.markdown("**Mesma persona, grupos diferentes (razão menor/maior):**")
+                        st.dataframe(
+                            pd.DataFrame(
+                                [
+                                    {
+                                        "Persona": w["persona"],
+                                        "Selecionados": w["selected"],
+                                        "Razão": w["selection_ratio"],
+                                        "p-valor": w["p_value"],
+                                        "Alerta": "sim"
+                                        if w["flag"]
+                                        else "inconclusivo"
+                                        if w["inconclusive"]
+                                        else "não",
+                                    }
+                                    for w in a["within_persona"]
+                                ]
+                            ),
+                            hide_index=True,
+                            width="stretch",
+                        )
+                    if a["skipped_small_groups"]:
+                        st.caption(
+                            "Grupos pequenos, não comparados: "
+                            + ", ".join(
+                                f"{g['group']} ({g['customers']})"
+                                for g in a["skipped_small_groups"]
+                            )
+                        )
+            st.markdown("**Limitações**")
+            for text in report["limitations"]:
+                st.caption("• " + text)
     else:
         st.subheader("Dados e modelos")
         st.json(meta)
@@ -341,6 +559,37 @@ try:
             + meta.get("storage", "legacy")
             + " · atualização exige recarregar o snapshot."
         )
+        lake = api.lake()
+        st.subheader("Data lake e dicionário de dados")
+        if not lake.get("available"):
+            st.info("Lake ainda não exportado. Rode `azul-crm export-lake` e atualize os dados.")
+        else:
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Camada": t["layer"],
+                            "Tabela": t["name"],
+                            "Linhas": t["rows"],
+                            "Situação": "exportada" if t["exported"] else "sem dados",
+                            "Colunas": len(t["columns"]),
+                            "Descrição": t["description"],
+                        }
+                        for t in lake["tables"].values()
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            choice = st.selectbox("Ver colunas de", list(lake["tables"]))
+            st.dataframe(
+                pd.DataFrame(lake["tables"][choice]["columns"])[
+                    ["name", "type", "nullable", "description"]
+                ],
+                hide_index=True,
+                width="stretch",
+            )
+            st.caption("Parquet em data/lake · esquema validado no código · DDL Snowflake gerado.")
     st.divider()
     st.caption(data["notes"])
     st.caption(

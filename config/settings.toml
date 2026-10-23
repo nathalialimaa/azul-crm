@@ -9,6 +9,13 @@ recency_reference = 180
 high_value_threshold = 70.0
 high_risk_threshold = 0.6
 
+[clv]
+# Premissas do CLV de 12 meses. São HIPÓTESES de demonstração, não dados da Azul.
+# Margem e desconto mudam o tamanho do valor, não quem é de alto valor (veja docs/CLV.md).
+margin = 0.15
+discount_rate = 0.10
+top_share = 0.20
+
 [windows]
 observation_start = 2025-10-01
 observation_end = 2026-09-30

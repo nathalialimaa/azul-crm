@@ -8,6 +8,8 @@ from datetime import timedelta
 
 from azul_crm.application.features import FeatureBuilder
 from azul_crm.infrastructure.store import Store
+from azul_crm.pipeline.delays import EmpiricalDelays
+from azul_crm.pipeline.demand import PublicDemandGenerator
 from azul_crm.pipeline.public_data import calibrated_routes
 from azul_crm.pipeline.stages import DemoSyntheticGenerator, GoldPublisher, RouteCleaner
 
@@ -28,7 +30,9 @@ def generate(settings, count=400, seed=42, public=False):
     start, end = w["observation_start"], w["observation_end"]
     if not 4 <= count <= 10000:
         raise ValueError("Clientes devem estar entre 4 e 10000")
-    customers, trips = DemoSyntheticGenerator().generate(routes, count, seed, start, end)
+    delays = EmpiricalDelays.from_store(store) if public else None
+    generator = PublicDemandGenerator(delays) if public else DemoSyntheticGenerator()
+    customers, trips = generator.generate(routes, count, seed, start, end)
     rng = random.Random(seed + 11)
     loyalty, outcomes, transactions, updated = [], [], [], []
     for t in trips:
@@ -97,11 +101,22 @@ def generate(settings, count=400, seed=42, public=False):
     manifest.update(
         mode="synthetic_public_fares" if public else "demo_fixture",
         calibrated_with_public_data=public,
-        calibration_scope="route_mean_fares_only" if public else "none",
+        calibration_scope=(
+            "route_mean_fares_and_route_demand" + ("_and_delays" if delays else "")
+            if public
+            else "none"
+        ),
+        delay_calibration=delays.summary if delays else None,
         churn_label_status="synthetic_generated",
         storage=store.backend,
         schema_version="2.0",
-        notes="Clientes, fidelidade, resgates, atrasos e desfechos simulados. Sem clientes reais.",
+        notes=(
+            "Clientes, fidelidade, resgates e desfechos simulados; atrasos sorteados da "
+            "distribuição real do VRA (ANAC). Sem clientes reais."
+            if delays
+            else "Clientes, fidelidade, resgates, atrasos e desfechos simulados. "
+            "Sem clientes reais."
+        ),
     )
     tables = {
         "customers": [(c.customer_id, asdict(c)) for c in customers],
@@ -115,6 +130,12 @@ def generate(settings, count=400, seed=42, public=False):
     }
     store.publish(tables)
     # Retira modelo de um snapshot anterior; novo treino deve ser explícito.
-    for name in ["churn.json", "metrics.json"]:
+    for name in [
+        "churn.json",
+        "metrics.json",
+        "personas.json",
+        "bias_report.json",
+        "clv_report.json",
+    ]:
         (root / "artifacts" / name).unlink(missing_ok=True)
     return manifest

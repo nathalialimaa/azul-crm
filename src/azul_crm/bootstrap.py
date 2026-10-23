@@ -91,19 +91,38 @@ def build_stored_container(settings, store, manifest):
             raise ValueError("Modelo incompatível com a Gold. Treine novamente.")
         if artifact["report"]["selected"] == "logistic":
             churn = LogisticPredictor(artifact)
+    segmenter, segmenter_method = RuleSegmenter(policy), "rules"
+    personas_path = settings.root / "artifacts/personas.json"
+    if personas_path.exists():
+        from azul_crm.infrastructure.personas import ClusterSegmenter
+        from azul_crm.pipeline.personas import fingerprint
+
+        persona_artifact = json.loads(personas_path.read_text(encoding="utf-8"))
+        current = fingerprint(sorted(store.read("features"), key=lambda r: r["customer_id"]))
+        if persona_artifact.get("gold_fingerprint") != current:
+            raise ValueError("Personas incompatíveis com a Gold. Execute: azul-crm personas")
+        segmenter = ClusterSegmenter(persona_artifact)
+        segmenter_method = segmenter.method
     crm = CrmService(
         StoredCustomerRepository(store),
         FeatureBuilder(),
         ValueScorer(policy),
         churn,
-        RuleSegmenter(policy),
+        segmenter,
         PriorityScorer(),
         windows["observation_start"],
         windows["observation_end"],
     )
     index = DocumentIndex(settings.root)
+    playbook, generator = None, SafeMessageGenerator()
+    playbook_path = settings.root / "config/playbook.toml"
+    if playbook_path.exists():
+        from azul_crm.infrastructure.playbook import PlaybookMessageGenerator, load_playbook
+
+        playbook = load_playbook(playbook_path)
+        generator = PlaybookMessageGenerator(playbook)
     recommendations = RecommendationService(
-        crm, index, EligibilityPolicy(policy.high_risk_threshold), SafeMessageGenerator()
+        crm, index, EligibilityPolicy(policy.high_risk_threshold), generator, playbook
     )
     manifest = {
         **manifest,
@@ -112,6 +131,9 @@ def build_stored_container(settings, store, manifest):
         if isinstance(churn, LogisticPredictor)
         else "heuristic_not_calibrated",
         "agent_mode": index.mode,
+        "segmenter": segmenter_method,
+        "clv_policy": asdict(settings.clv_policy()),
+        "playbook": playbook.version if playbook else "none",
         "storage": store.backend,
     }
     return Container(crm, recommendations, manifest)

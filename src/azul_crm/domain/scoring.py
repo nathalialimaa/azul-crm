@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from math import isfinite
 
 from azul_crm.domain.models import Features, RiskEstimate
+from azul_crm.domain.playbook import Traits
 
 
 @dataclass(frozen=True)
@@ -65,7 +66,7 @@ class RuleSegmenter:
     def __init__(self, policy: ScoringPolicy):
         self.policy = policy
 
-    def classify(self, value: float, risk: float) -> str:
+    def classify(self, value: float, risk: float, features: Features | None = None) -> str:
         if value >= self.policy.high_value_threshold:
             return (
                 "Alto Valor em Risco" if risk >= self.policy.high_risk_threshold else "Premium Leal"
@@ -75,6 +76,17 @@ class RuleSegmenter:
             if risk >= self.policy.high_risk_threshold
             else "Lazer com Potencial"
         )
+
+    def traits(self, segment: str) -> Traits | None:
+        return _RULE_TRAITS.get(segment)
+
+
+_RULE_TRAITS = {
+    "Alto Valor em Risco": Traits(high_value=True, cooling=True, delays=False),
+    "Premium Leal": Traits(high_value=True, cooling=False, delays=False),
+    "Reativação de Baixo Custo": Traits(high_value=False, cooling=True, delays=False),
+    "Lazer com Potencial": Traits(high_value=False, cooling=False, delays=False),
+}
 
 
 class PriorityScorer:

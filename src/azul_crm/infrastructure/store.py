@@ -91,6 +91,20 @@ class Store:
             finally:
                 cur.close()
 
+    def iter_batches(self, name, batch_size=20000):
+        """Lê a tabela em lotes, na mesma ordem de ``read``, sem carregar tudo na memória."""
+        with self.connection() as con:
+            cur = con.cursor()
+            try:
+                cur.execute(f"SELECT payload FROM {self.table(name)} ORDER BY id")
+                while True:
+                    chunk = cur.fetchmany(batch_size)
+                    if not chunk:
+                        break
+                    yield [json.loads(r[0]) if isinstance(r[0], str) else r[0] for r in chunk]
+            finally:
+                cur.close()
+
     def publish(self, tables, replace=True):
         """Uma transação para o snapshot inteiro; use apenas um escritor por vez."""
         for name, rows in tables.items():
