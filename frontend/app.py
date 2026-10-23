@@ -131,16 +131,17 @@ try:
     cid = st.sidebar.selectbox("Cliente em foco", df.customer_id.tolist())
     focus = next(r for r in data["rows"] if r["customer_id"] == cid)
     k = data["kpis"]
+    share = meta.get("clv_policy", {}).get("top_share", 0.2)
     labels = [
-        ("♟", "Clientes de alto valor", str(k["high_value"]), "na carteira filtrada"),
-        ("△", "Alto valor em risco", str(k["high_value_at_risk"]), "prioridade de retenção"),
-        ("▥", "CLV proxy · 12 meses", money(k["clv_12m_proxy"]), "hipótese de receita futura"),
         (
-            "◉",
-            "Valor ponderado em risco",
-            money(k["weighted_value_at_risk"]),
-            "proxy × índice de risco",
+            "♟",
+            "Clientes de alto valor",
+            str(k["high_value"]),
+            f"top {share:.0%} por valor potencial",
         ),
+        ("△", "Alto valor em risco", str(k["high_value_at_risk"]), "prioridade de retenção"),
+        ("▥", "CLV 12 meses (margem)", money(k["clv_12m"]), "margem esperada, com desconto"),
+        ("◉", "CLV em risco", money(k["clv_at_risk"]), "margem que se perde se saírem"),
     ]
     for col, (icon, label, val, sub) in zip(st.columns(4), labels):
         col.markdown(
@@ -151,21 +152,24 @@ try:
         left, right = st.columns([1.38, 1])
         with left, st.container(border=True):
             st.subheader("Onde concentrar os esforços?")
-            st.caption("Valor do cliente × risco de evasão")
+            st.caption(
+                "Valor potencial (margem em 12 meses) × risco de evasão · divisória = corte do alto valor"
+            )
             threshold = meta["scoring_policy"]["high_risk_threshold"]
-            value_threshold = meta["scoring_policy"]["high_value_threshold"]
+            value_threshold = k["high_value_cutoff"]
+            ymax = max(float(df["potential_value_12m"].max()), value_threshold) * 1.08
             fig = px.scatter(
                 df,
                 x="churn_risk",
-                y="value_score",
+                y="potential_value_12m",
                 color="segment",
                 hover_name="customer_id",
-                hover_data=["clv_12m_proxy", "route"],
+                hover_data=["clv_12m", "route"],
                 color_discrete_sequence=["#ff6670", "#00bc9c", "#13b9d4", "#078afa"],
             )
             for x0, x1, y0, y1, color in [
-                (0, threshold, value_threshold, 100, "#eaf5ff"),
-                (threshold, 1, value_threshold, 100, "#fff0f2"),
+                (0, threshold, value_threshold, ymax, "#eaf5ff"),
+                (threshold, 1, value_threshold, ymax, "#fff0f2"),
                 (0, threshold, 0, value_threshold, "#eafaf5"),
                 (threshold, 1, 0, value_threshold, "#fff7df"),
             ]:
@@ -181,7 +185,7 @@ try:
                 )
             fig.add_scatter(
                 x=[focus["churn_risk"]],
-                y=[focus["value_score"]],
+                y=[focus["potential_value_12m"]],
                 mode="markers",
                 showlegend=False,
                 marker={
@@ -192,10 +196,10 @@ try:
                 hoverinfo="skip",
             )
             for x, y, t, color in [
-                (0.04, 96, "Encantar", "#0079f3"),
-                (0.96, 96, "Reter agora", "#ef465d"),
-                (0.04, 5, "Nutrir", "#00a88a"),
-                (0.96, 5, "Reativar", "#ce9205"),
+                (0.04, 0.96 * ymax, "Encantar", "#0079f3"),
+                (0.96, 0.96 * ymax, "Reter agora", "#ef465d"),
+                (0.04, 0.05 * ymax, "Nutrir", "#00a88a"),
+                (0.96, 0.05 * ymax, "Reativar", "#ce9205"),
             ]:
                 fig.add_annotation(
                     x=x,
@@ -213,10 +217,10 @@ try:
                 showlegend=False,
                 font={"color": "#496384"},
                 xaxis_title="Risco de evasão →",
-                yaxis_title="Score de valor →",
+                yaxis_title="Valor potencial 12 meses (margem, R$) →",
             )
             fig.update_xaxes(range=[0, 1], tickformat=".0%", gridcolor="#edf2f7")
-            fig.update_yaxes(range=[0, 105], gridcolor="#edf2f7")
+            fig.update_yaxes(range=[0, ymax], gridcolor="#edf2f7")
             st.plotly_chart(fig, width="stretch")
         with right, st.container(border=True):
             st.subheader("Próxima melhor ação")
@@ -225,6 +229,10 @@ try:
             a, b = st.columns(2)
             a.metric("Valor", f"{focus['value_score']:.0f}/100")
             b.metric("Risco", f"{focus['churn_risk']:.0%}")
+            st.caption(
+                f"CLV 12m: {money(focus['clv_12m'])} · "
+                + ("alto valor" if focus["is_high_value"] else "fora do grupo de alto valor")
+            )
             st.markdown("**Principais fatores**")
             for driver in focus["drivers"][:3]:
                 st.markdown(
@@ -247,9 +255,9 @@ try:
         with left, st.container(border=True):
             st.subheader("Quem precisa de atenção agora?")
             st.caption("Ordenado por prioridade · seleção no menu lateral")
-            table = df[
-                ["customer_id", "segment", "clv_12m_proxy", "churn_risk", "priority_score"]
-            ].head(8)
+            table = df[["customer_id", "segment", "clv_12m", "churn_risk", "priority_score"]].head(
+                8
+            )
             st.dataframe(
                 table,
                 hide_index=True,
@@ -257,7 +265,7 @@ try:
                 column_config={
                     "customer_id": "Cliente",
                     "segment": "Segmento",
-                    "clv_12m_proxy": st.column_config.NumberColumn("CLV proxy", format="R$ %.0f"),
+                    "clv_12m": st.column_config.NumberColumn("CLV 12m (margem)", format="R$ %.0f"),
                     "churn_risk": st.column_config.ProgressColumn(
                         "Risco", min_value=0, max_value=1, format="%.2f"
                     ),
@@ -287,7 +295,7 @@ try:
         st.subheader("Perfis e oportunidades")
         agg = df.groupby("segment", as_index=False).agg(
             clientes=("customer_id", "count"),
-            valor=("clv_12m_proxy", "sum"),
+            valor=("clv_12m", "sum"),
             risco=("churn_risk", "mean"),
         )
         st.plotly_chart(
@@ -336,6 +344,69 @@ try:
                 "Segmentação por regras explícitas de valor e risco; "
                 "execute `azul-crm personas` para treinar as personas."
             )
+        st.divider()
+        st.subheader("Definição de alto valor (CLV)")
+        clv = api.clv()
+        if not clv.get("available"):
+            st.info("Relatório de CLV ainda não gerado. Rode `azul-crm clv-report` e atualize.")
+        else:
+            if clv.get("stale"):
+                st.warning("Relatório desatualizado: a base mudou depois do cálculo.")
+            assumptions, summary = clv["assumptions"], clv["summary"]
+            st.markdown(
+                f"**Alto valor = os {assumptions['top_share']:.0%} clientes de maior valor "
+                f"potencial.** Valor potencial = gasto em dinheiro dos últimos 12 meses × margem "
+                f"({assumptions['margin']:.0%}) × desconto ({assumptions['discount_rate']:.0%} ao "
+                "ano). CLV = valor potencial × (1 − risco de evasão)."
+            )
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Clientes de alto valor", summary["high_value_customers"])
+            m2.metric("Corte (valor potencial/ano)", money(summary["cutoff_potential_12m"]))
+            m3.metric("Parcela do valor total", f"{summary['top_value_share']:.0%}")
+            m4.metric("Alto valor em risco", summary["high_value_at_risk_customers"])
+            st.markdown("**Concentração de valor (Pareto)**")
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Top": f"{x['top_share']:.0%}",
+                            "Clientes": x["customers"],
+                            "Parcela do valor potencial": f"{x['value_share']:.0%}",
+                        }
+                        for x in clv["concentration"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.markdown("**Por persona**")
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "Persona": p["persona"],
+                            "Clientes": p["customers"],
+                            "De alto valor": p["high_value_customers"],
+                            "Risco médio": f"{p['mean_churn_risk']:.0%}",
+                            "CLV 12m": money(p["clv_12m"]),
+                            "CLV em risco": money(p["clv_at_risk"]),
+                        }
+                        for p in clv["by_persona"]
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.markdown("**Sensibilidade às premissas (CLV total de 12 meses)**")
+            table = pd.DataFrame(clv["sensitivity"]).pivot(
+                index="margin", columns="discount_rate", values="total_clv_12m"
+            )
+            table.index = [f"margem {m:.0%}" for m in table.index]
+            table.columns = [f"desconto {d:.0%}" for d in table.columns]
+            st.dataframe(table.map(money), width="stretch")
+            st.caption(clv["ranking_note"])
+            for text in clv["limitations"]:
+                st.caption("• " + text)
     elif page == "Ações de CRM":
         st.subheader("Estratégia por persona")
         plan = api.playbook(months)

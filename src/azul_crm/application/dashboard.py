@@ -5,9 +5,15 @@ from dataclasses import asdict
 from datetime import timedelta
 
 from azul_crm.application.features import FeatureBuilder
+from azul_crm.application.value import customer_values
 
 
 def overview(c, months=12, segment=None, route=None):
+    # CLV e alto valor usam a janela completa de 12 meses; os filtros só recortam a carteira.
+    values = {v["customer_id"]: v for v in customer_values(c)}
+    cutoff = min(
+        (v["potential_value_12m"] for v in values.values() if v["is_high_value"]), default=0
+    )
     rows = []
     start = max(c.crm.start, c.crm.end - timedelta(days=round(months * 365.25 / 12) - 1))
     for customer in c.crm.customers():
@@ -33,6 +39,10 @@ def overview(c, months=12, segment=None, route=None):
                 "route": preferred,
                 "clv_12m_proxy": clv,
                 "weighted_value_at_risk": round(clv * score.churn_risk, 2),
+                "potential_value_12m": values[customer.customer_id]["potential_value_12m"],
+                "clv_12m": values[customer.customer_id]["clv_12m"],
+                "clv_at_risk": values[customer.customer_id]["clv_at_risk"],
+                "is_high_value": values[customer.customer_id]["is_high_value"],
                 "observed_spend": f.spend,
                 "frequency": f.frequency,
                 "recency_days": f.recency_days,
@@ -41,24 +51,31 @@ def overview(c, months=12, segment=None, route=None):
         )
     rows.sort(key=lambda r: (-r["priority_score"], r["customer_id"]))
     p = c.metadata["scoring_policy"]
-    high = [r for r in rows if r["value_score"] >= p["high_value_threshold"]]
+    high = [r for r in rows if r["is_high_value"]]
     return {
         "rows": rows,
         "kpis": {
             "customers": len(rows),
             "high_value": len(high),
             "high_value_at_risk": sum(r["churn_risk"] >= p["high_risk_threshold"] for r in high),
+            "high_value_cutoff": cutoff,
+            "clv_12m": round(sum(r["clv_12m"] for r in rows), 2),
+            "clv_at_risk": round(sum(r["clv_at_risk"] for r in rows), 2),
             "clv_12m_proxy": round(sum(r["clv_12m_proxy"] for r in rows), 2),
             "weighted_value_at_risk": round(sum(r["weighted_value_at_risk"] for r in rows), 2),
         },
         "filters": {"months": months, "segment": segment, "route": route},
-        "notes": "Scores usam janela de treinamento completa. Filtros de período/rota recortam viagens e público. CLV é proxy de receita, não margem nem previsão validada.",
+        "notes": (
+            "Scores e CLV usam a janela completa de 12 meses; filtros de período e rota recortam "
+            "viagens e público. CLV = margem esperada em 12 meses, com desconto e risco de evasão; "
+            "margem e desconto são hipóteses. Alto valor = top 20% por valor potencial."
+        ),
     }
 
 
 def simulation(rows, cost_per_customer, assumed_retention):
     cost = len(rows) * cost_per_customer
-    value = sum(r["weighted_value_at_risk"] for r in rows)
+    value = sum(r["clv_at_risk"] for r in rows)
     return {
         "customers": len(rows),
         "cost": round(cost, 2),
@@ -87,7 +104,7 @@ def strategy(c, months=12):
         if traits is None:
             continue
         action, offer = playbook.decide(traits)
-        value = round(sum(m["weighted_value_at_risk"] for m in members), 2)
+        value = round(sum(m["clv_at_risk"] for m in members), 2)
         cost = round(action.assumed_cost * len(members), 2)
         protected = round(value * action.assumed_retention, 2)
         rows.append(
@@ -122,6 +139,7 @@ def strategy(c, months=12):
         "causal_claim": False,
         "disclaimer": (
             "Cenário hipotético com premissas do playbook. Não estima uplift real: o valor em "
-            "risco é um proxy de receita e a retenção assumida precisa de teste A/B."
+            "risco é o CLV em risco (margem, com premissas) e a retenção assumida precisa de "
+            "teste A/B."
         ),
     }

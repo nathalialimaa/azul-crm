@@ -3,6 +3,7 @@ import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
+from azul_crm.domain.clv import ClvPolicy
 from azul_crm.domain.scoring import ScoringPolicy
 
 
@@ -26,6 +27,10 @@ class Settings:
     def scoring_policy(self) -> ScoringPolicy:
         with (self.root / "config" / "settings.toml").open("rb") as file:
             return ScoringPolicy(**tomllib.load(file)["scoring"])
+
+    def clv_policy(self) -> ClvPolicy:
+        with (self.root / "config" / "settings.toml").open("rb") as file:
+            return ClvPolicy(**tomllib.load(file).get("clv", {}))
 
     def windows(self) -> dict:
         from datetime import date, timedelta

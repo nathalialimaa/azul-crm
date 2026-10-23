@@ -132,6 +132,7 @@ def build_stored_container(settings, store, manifest):
         else "heuristic_not_calibrated",
         "agent_mode": index.mode,
         "segmenter": segmenter_method,
+        "clv_policy": asdict(settings.clv_policy()),
         "playbook": playbook.version if playbook else "none",
         "storage": store.backend,
     }

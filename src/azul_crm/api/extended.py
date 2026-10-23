@@ -121,6 +121,14 @@ def lake():
     return load_dictionary(Settings.load().root)
 
 
+@router.get("/clv")
+def clv():
+    from azul_crm.pipeline.clv_report import load_clv_report
+
+    root = Settings.load().root
+    return load_clv_report(root, Store(root))
+
+
 @router.get("/bias")
 def bias():
     from azul_crm.pipeline.bias_audit import load_report

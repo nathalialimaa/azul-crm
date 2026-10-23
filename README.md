@@ -25,7 +25,7 @@ Se o comando `py -3.12` falhar, confirme a instalação com `py --list`. Se a po
 
 ## O que demonstrar em cinco minutos
 
-1. **Visão geral:** clientes de alto valor, risco, proxy de receita futura e fila de prioridade.
+1. **Visão geral:** clientes de alto valor (top 20% por CLV), risco, CLV de 12 meses e fila de prioridade.
 2. Escolha um cliente no menu lateral. A matriz destaca o cliente selecionado.
 3. Confira fatores e clique em **Gerar mensagem para revisão**. Abra as evidências.
 4. Em **Clientes**, veja viagens e fidelidade sintética, inclusive resgates e pagamentos restritos simulados.
@@ -66,6 +66,7 @@ A API não implementa autenticação de produção. Mantenha-a vinculada a `127.
 .\.venv\Scripts\python.exe -m azul_crm.cli train
 .\.venv\Scripts\python.exe -m azul_crm.cli personas
 .\.venv\Scripts\python.exe -m azul_crm.cli bias-audit
+.\.venv\Scripts\python.exe -m azul_crm.cli clv-report
 .\.venv\Scripts\python.exe -m azul_crm.cli export-lake
 .\.venv\Scripts\python.exe -m azul_crm.cli index
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
@@ -77,13 +78,15 @@ Após mudar a Gold/modelo, reinicie a API e clique **Atualizar dados** no Stream
 
 `train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A promoção exige ROC-AUC maior e Brier menor que o baseline na validação. No snapshot entregue, a logística **não foi promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
 
-O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. Não há previsão de CLV treinada: o card representa um proxy explícito de receita.
+O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. O CLV de 12 meses é calculado com premissas explícitas e configuráveis (margem e desconto, que são hipóteses), não treinado com dados reais; veja `docs/CLV.md`.
 
 O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
 
 Para publicar o protótipo (Docker, senha e Streamlit Cloud), veja `docs/DEPLOY.md`.
 
 Data lake em Parquet, dicionário de dados e DDL do Snowflake (`azul-crm export-lake`): `docs/DATA_LAKE.md`.
+
+CLV de 12 meses e definição de alto valor (`azul-crm clv-report`): `docs/CLV.md`.
 
 ## ANAC e aeroportos
 

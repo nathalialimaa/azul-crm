@@ -360,6 +360,74 @@ TABLES = (
     ),
     _t(
         "gold",
+        "customer_value",
+        "CLV de 12 meses e marca de alto valor por cliente (margem, com premissas explícitas).",
+        "artifacts/clv_report.json (azul-crm clv-report)",
+        [
+            Col("customer_id", "string", "Cliente (chave estrangeira de customers)."),
+            Col("segment", "string", "Persona do cliente (ou segmento por regras)."),
+            Col("annual_spend", "float64", "Gasto em dinheiro dos últimos 12 meses (BRL)."),
+            Col("churn_risk", "float64", "Risco de evasão de 0 a 1."),
+            Col(
+                "value_score",
+                "float64",
+                "Score operacional de valor (0 a 100), usado na prioridade.",
+            ),
+            Col(
+                "potential_value_12m",
+                "float64",
+                "Gasto x margem x desconto: margem em 12 meses se ficar.",
+            ),
+            Col(
+                "clv_12m", "float64", "Valor potencial x (1 - risco): margem esperada em 12 meses."
+            ),
+            Col(
+                "clv_at_risk",
+                "float64",
+                "Valor potencial x risco: o que se perde se o cliente sair.",
+            ),
+            Col(
+                "is_high_value",
+                "bool",
+                "Verdadeiro se está entre os top_share de maior valor potencial.",
+            ),
+        ],
+        primary_key=("customer_id",),
+    ),
+    _t(
+        "gold",
+        "clv_assumptions",
+        "Premissas e resultado agregado do CLV. Margem e desconto são hipóteses, não dados reais.",
+        "artifacts/clv_report.json (azul-crm clv-report)",
+        [
+            Col("method", "string", "Método do CLV."),
+            Col(
+                "margin", "float64", "Margem de contribuição assumida sobre a receita em dinheiro."
+            ),
+            Col("discount_rate", "float64", "Taxa de desconto anual assumida."),
+            Col("top_share", "float64", "Fatia da carteira definida como alto valor."),
+            Col("horizon_months", "int64", "Horizonte do CLV em meses."),
+            Col("customers", "int64", "Clientes na carteira."),
+            Col("high_value_customers", "int64", "Clientes de alto valor."),
+            Col(
+                "cutoff_potential_12m",
+                "float64",
+                "Menor valor potencial entre os de alto valor (BRL).",
+            ),
+            Col("total_potential_12m", "float64", "Valor potencial somado da carteira (BRL)."),
+            Col("total_clv_12m", "float64", "CLV somado da carteira (BRL)."),
+            Col("total_clv_at_risk", "float64", "CLV em risco somado da carteira (BRL)."),
+            Col(
+                "top_value_share",
+                "float64",
+                "Fração do valor potencial que está no grupo de alto valor.",
+            ),
+            Col("risk_method", "string", "Método do risco usado no CLV.", nullable=True),
+            Col("segmenter", "string", "Segmentador usado.", nullable=True),
+        ],
+    ),
+    _t(
+        "gold",
         "manifest",
         "Linhagem da execução: de onde vieram os dados, com que janela e semente.",
         "pipeline.extended.generate",
@@ -514,6 +582,42 @@ def _personas_records(root: Path):
     return records
 
 
+def _clv_report(root: Path):
+    path = root / "artifacts" / "clv_report.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+def _clv_customers(root: Path):
+    report = _clv_report(root)
+    return [] if report is None else report["customers"]
+
+
+def _clv_assumptions(root: Path):
+    report = _clv_report(root)
+    if report is None:
+        return []
+    return [
+        {
+            "method": report["method"],
+            **{
+                k: report["assumptions"][k]
+                for k in ("margin", "discount_rate", "top_share", "horizon_months")
+            },
+            **{
+                "customers": report["summary"]["customers"],
+                "high_value_customers": report["summary"]["high_value_customers"],
+                "cutoff_potential_12m": report["summary"]["cutoff_potential_12m"],
+                "total_potential_12m": report["summary"]["total_potential_12m"],
+                "total_clv_12m": report["summary"]["total_clv_12m"],
+                "total_clv_at_risk": report["summary"]["total_clv_at_risk"],
+            },
+            "top_value_share": report["summary"]["top_value_share"],
+            "risk_method": report.get("risk_method"),
+            "segmenter": report.get("segmenter"),
+        }
+    ]
+
+
 def _bias_records(root: Path):
     path = root / "artifacts" / "bias_report.json"
     if not path.exists():
@@ -550,6 +654,12 @@ def _batches(qualified: str, root: Path, store, size: int):
                 yield rows
     elif qualified == "gold.personas":
         rows = _personas_records(root)
+        if rows:
+            yield rows
+    elif qualified in {"gold.customer_value", "gold.clv_assumptions"}:
+        rows = (
+            _clv_customers(root) if qualified == "gold.customer_value" else _clv_assumptions(root)
+        )
         if rows:
             yield rows
     elif qualified == "gold.bias_audit_groups":

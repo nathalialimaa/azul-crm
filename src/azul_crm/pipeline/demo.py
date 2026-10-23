@@ -13,6 +13,7 @@ from azul_crm.infrastructure.store import Store
 def prepare_demo(settings, customers=400, seed=42, force=False, _retry=True) -> dict:
     from azul_crm.bootstrap import build_container
     from azul_crm.pipeline.bias_audit import write_report
+    from azul_crm.pipeline.clv_report import write_clv_report
     from azul_crm.pipeline.extended import generate
     from azul_crm.pipeline.modeling import train
     from azul_crm.pipeline.personas import train_personas
@@ -39,9 +40,10 @@ def prepare_demo(settings, customers=400, seed=42, force=False, _retry=True) -> 
         if not _retry:
             raise
         return prepare_demo(settings, customers, seed, force=True, _retry=False)
-    if steps or not (artifacts / "bias_report.json").exists():
+    if steps or not all((artifacts / n).exists() for n in ("bias_report.json", "clv_report.json")):
         store.publish({"scores": [(r.customer_id, asdict(r)) for r in container.crm.priorities()]})
         write_report(root, container, store)
+        write_clv_report(root, container, store)
         steps.append("scores+bias")
     return {
         "steps": steps,

@@ -30,7 +30,13 @@ def test_prepare_builds_everything_once_and_is_idempotent(root):
     result = prepare_demo(Settings(root), customers=120)
     assert result["steps"] == ["generate", "train", "personas", "scores+bias"]
     assert result["segmenter"] == "kmeans_personas_v1" and result["playbook"] == "playbook_v1"
-    for name in ["churn.json", "metrics.json", "personas.json", "bias_report.json"]:
+    for name in [
+        "churn.json",
+        "metrics.json",
+        "personas.json",
+        "bias_report.json",
+        "clv_report.json",
+    ]:
         assert (root / "artifacts" / name).exists()
     assert len(Store(root).read("scores")) == 120
     assert prepare_demo(Settings(root), customers=120)["steps"] == []

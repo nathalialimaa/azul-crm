@@ -19,6 +19,7 @@ def main():
             "train",
             "personas",
             "bias-audit",
+            "clv-report",
             "prepare",
             "export-lake",
             "index",
@@ -73,6 +74,12 @@ def main():
         from azul_crm.infrastructure.lake import export_lake
 
         result = export_lake(settings.root, store, args.out)
+    elif args.command == "clv-report":
+        from azul_crm.bootstrap import build_container
+        from azul_crm.pipeline.clv_report import write_clv_report
+
+        report = write_clv_report(settings.root, build_container(settings), store)
+        result = {k: report[k] for k in ("method", "assumptions", "summary", "concentration")}
     elif args.command == "prepare":
         from azul_crm.pipeline.demo import prepare_demo
 

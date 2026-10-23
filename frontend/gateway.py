@@ -97,6 +97,13 @@ class Gateway:
 
         return load_dictionary(self.settings.root)
 
+    def clv(self):
+        if self.http:
+            return self.request("GET", "/clv")
+        from azul_crm.pipeline.clv_report import load_clv_report
+
+        return load_clv_report(self.settings.root, Store(self.settings.root))
+
     def bias(self):
         if self.http:
             return self.request("GET", "/bias")

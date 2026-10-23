@@ -43,7 +43,7 @@ Define a **próxima melhor ação** de cada persona. Substitui as duas ações g
 ## Premissas (todas hipóteses)
 
 Custo por contato e retenção assumida de cada ação ficam em `config/playbook.toml`. O cenário da
-tela usa o **valor em risco** (um proxy de receita, não CLV) vezes a retenção assumida, menos o
+tela usa o **CLV em risco** (margem, ver `docs/CLV.md`) vezes a retenção assumida, menos o
 custo. **Não estima ganho real**; precisa de teste A/B antes de qualquer uso.
 
 ## Para evoluir com regras reais

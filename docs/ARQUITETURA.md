@@ -72,6 +72,7 @@ OurAirports: `ident`, `iata_code`, `name`; localização e `icao_code` quando di
 - `estimated_value_at_risk` da API v1 mantém semântica original: gasto observado × risco.
 - `clv_12m_proxy` da v2 = gasto anualizado no recorte × (1 − 0,5 × risco). É hipótese de receita, sem margem, taxa de desconto ou calibração real.
 - `weighted_value_at_risk` = proxy × índice/probabilidade. Com baseline, não é perda esperada probabilística validada.
+- **Atualização:** o CLV exibido no app e usado no cenário é o CLV de 12 meses por margem, com desconto e risco de evasão (`clv_12m`, `clv_at_risk`, `potential_value_12m`), definido em `docs/CLV.md`. Os campos `clv_12m_proxy` e `weighted_value_at_risk` continuam na API só por compatibilidade.
 - Simulador: custo = público × custo unitário; valor hipotético protegido = valor em risco × retenção assumida; saldo = protegido − custo. Ponto de equilíbrio nulo quando não há valor. Nenhuma alegação causal.
 - Os filtros de período/rota mudam a população e as viagens utilizadas nos indicadores. Scores mantêm a janela contratual para não aplicar modelo fora do contrato; essa distinção aparece na UI.
 
