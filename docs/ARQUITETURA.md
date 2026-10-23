@@ -84,7 +84,7 @@ O gerador original cria frequências contrastantes e rotas de fixtures. A extens
 
 A propensão de churn sintético combina recência, incidentes, intercepto e fator oculto normal de desvio 0,9. Um sorteio gera desfecho; clientes evadidos têm zero viagens na janela futura. Somente features da observação entram na regressão. Isso evita usar o rótulo/futuro diretamente, mas não elimina a artificialidade da distribuição gerada.
 
-Scaler ajustado no treino; seleção na validação; teste reservado. Relatório inclui ROC-AUC, average precision (nomeada PR-AUC no JSON), Brier, precisão, recall e matriz de confusão. AUC > 0,95 bloqueia promoção para investigação. Essa regra é triagem, não prova de ausência de vazamento. Não há ajuste automático de hiperparâmetros nem busca de seeds por resultado.
+Scaler ajustado no treino; escolha entre modelo e regra por validação cruzada em treino + validação (ver `docs/MODELO_CHURN.md`); teste reservado. Relatório inclui ROC-AUC, average precision (nomeada PR-AUC no JSON), Brier, precisão, recall e matriz de confusão. AUC > 0,95 bloqueia promoção para investigação. Essa regra é triagem, não prova de ausência de vazamento. Não há ajuste automático de hiperparâmetros nem busca de seeds por resultado.
 
 Coeficientes e scaler são serializados em JSON, sem pickle. Fingerprint da Gold evita usar artefato de outro snapshot. A inferência é leve e usa as portas originais. Modelo de CLV treinado, SHAP e clustering não foram implementados.
 

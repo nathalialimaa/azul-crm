@@ -76,7 +76,7 @@ A API não implementa autenticação de produção. Mantenha-a vinculada a `127.
 
 Após mudar a Gold/modelo, reinicie a API e clique **Atualizar dados** no Streamlit. O snapshot evita consultas repetidas ao warehouse; não há atualização automática em tempo real.
 
-`train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A promoção exige ROC-AUC maior e Brier menor que o baseline na validação. No snapshot entregue, a logística **não foi promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
+`train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A escolha entre a logística e a regra usa **validação cruzada** (5×3, em treino + validação, sem o teste): a logística só entra se o ganho de AUC for distinguível de ruído (teste t pareado com correção de Nadeau e Bengio, t > 1,65) e o Brier for menor; veja `docs/MODELO_CHURN.md`. Na base de demonstração, a logística **não é promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
 
 O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. O CLV de 12 meses é calculado com premissas explícitas e configuráveis (margem e desconto, que são hipóteses), não treinado com dados reais; veja `docs/CLV.md`.
 

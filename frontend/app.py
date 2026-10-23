@@ -524,8 +524,14 @@ try:
                                 [
                                     {
                                         "Persona": w["persona"],
+                                        "Selecionados": w["selected"],
                                         "Razão": w["selection_ratio"],
-                                        "Alerta": "sim" if w["flag"] else "não",
+                                        "p-valor": w["p_value"],
+                                        "Alerta": "sim"
+                                        if w["flag"]
+                                        else "inconclusivo"
+                                        if w["inconclusive"]
+                                        else "não",
                                     }
                                     for w in a["within_persona"]
                                 ]

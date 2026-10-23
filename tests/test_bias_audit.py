@@ -194,3 +194,71 @@ def test_small_samples_per_persona_are_not_called_confounded():
     assert airport["selection_flag"] is True and airport["within_persona"] == []
     assert airport["persona_association"]["relevant"] is False  # a mistura é igual nos dois
     assert airport["verdict"] == "amostra_insuficiente"
+
+
+def _random_attribute_run(seed, penalty=0.0):
+    """Estrutura de personas realista; o canal é sorteado, só a penalidade cria viés."""
+    import random
+
+    rng = random.Random(seed)
+    rows, i = [], 0
+    for persona, n, mean, spread in [
+        ("Baixo Volume", 173, 20, 6),
+        ("Esfriando", 103, 60, 14),
+        ("Atrasos", 26, 18, 6),
+        ("Fiéis", 98, 70, 13),
+    ]:
+        for _ in range(n):
+            channel = rng.choice(["app", "email"])
+            score = rng.gauss(mean, spread) - (penalty if channel == "email" else 0)
+            rows.append(
+                rec(i, persona, score, channel=channel, tier=rng.choice(["T1", "T2", "T3"]))
+            )
+            i += 1
+    return run_audit(rows)["attributes"]
+
+
+def test_random_attributes_rarely_raise_alerts():
+    trials = [_random_attribute_run(seed) for seed in range(150)]
+    for attribute in ("preferred_channel", "tier"):
+        false_alarms = sum(t[attribute]["verdict"] == "alerta" for t in trials)
+        assert false_alarms / len(trials) <= 0.12, (attribute, false_alarms)  # nível nominal: 5%
+
+
+def test_real_bias_is_still_detected():
+    hits = sum(
+        _random_attribute_run(seed, penalty=15)["preferred_channel"]["verdict"] == "alerta"
+        for seed in range(30)
+    )
+    assert hits >= 28
+
+
+def test_low_ratio_that_could_be_chance_is_inconclusive_not_an_alert():
+    # Persona P: 25 app + 25 email; 14 de app e 20 de email entram no top 20% (razão 0,7).
+    # Base de 170 clientes: 20% = 34 selecionados, todos de P.
+    rows = []
+    for i in range(50):
+        channel = "app" if i < 25 else "email"
+        picked = (i < 14) if channel == "app" else (i - 25 < 20)
+        rows.append(rec(i, "P", 90 - i * 0.01 if picked else 10, channel=channel))
+    rows += [
+        rec(i, "Q", 5 - i * 0.001, channel="app" if i % 2 else "email") for i in range(50, 170)
+    ]
+    within = run_audit(rows)["attributes"]["preferred_channel"]["within_persona"]
+    entry = next(w for w in within if w["persona"] == "P")
+    assert entry["selection_ratio"] == pytest.approx(0.7) and entry["selected"] == 34
+    assert entry["p_value"] > 0.01 and entry["flag"] is False and entry["inconclusive"] is True
+
+
+def test_too_few_selected_in_a_persona_are_not_compared():
+    # Base de 400 (80 selecionados): só 6 deles são da persona P, que tem 60 clientes.
+    rows = [
+        rec(i, "P", 99 if i < 6 else 10, channel="app" if i % 2 else "email") for i in range(60)
+    ]
+    rows += [
+        rec(i, "Q", 60 if i < 134 else 5, channel="app" if i % 2 else "email")
+        for i in range(60, 400)
+    ]
+    attribute = run_audit(rows)["attributes"]["preferred_channel"]
+    entry = next(w for w in attribute["within_persona"] if w["persona"] == "P")
+    assert entry["selected"] == 6 and entry["selection_ratio"] is None and entry["p_value"] is None

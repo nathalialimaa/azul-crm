@@ -57,6 +57,32 @@ não dá para comparar com segurança. Com mais clientes por grupo a comparaçã
 
 Nenhum dos dois cenários encontrou tratamento desigual dentro da mesma persona (nenhum alerta).
 
+## Como evitamos falsos alarmes
+
+A regra dos 4/5 sozinha **não serve** para grupos de algumas dezenas de clientes: com um atributo
+sorteado ao acaso (sem nenhum viés), ela acusava alerta em **62% a 96%** das execuções. Por isso o
+alerta exige três coisas, dentro da persona:
+
+1. **Eventos suficientes:** pelo menos 10 clientes selecionados na persona; abaixo disso a razão não é
+   comparada.
+2. **Razão menor que 4/5**, como antes.
+3. **Significância estatística:** teste exato de Fisher (2 grupos) ou qui-quadrado (3 ou mais), com
+   correção de Bonferroni sobre as personas comparáveis do atributo (nível global de 5%).
+
+Uma razão abaixo de 4/5 que pode ser acaso aparece como **inconclusivo** na tela, não como alerta.
+
+Medido por simulação, com a estrutura de personas e as taxas de seleção da base:
+
+| Cenário | Antes | Agora |
+|---|---|---|
+| Atributo aleatório (nenhum viés): alerta falso | 62% a 96% | 4% a 5% por atributo |
+| Viés real de 10 pontos de prioridade para um grupo: detectado | n/d | 93% |
+| Viés real de 15 pontos ou mais: detectado | n/d | 100% |
+
+O que isso não cobre: um viés pequeno (cerca de 5 pontos) é detectado em só 26% das execuções, e
+os testes assumem que os clientes são independentes. Com dados reais, auditar também com base legal
+os atributos que não existem aqui (gênero, idade, raça).
+
 ## Limitações
 
 - Dados sintéticos: o resultado descreve o gerador.

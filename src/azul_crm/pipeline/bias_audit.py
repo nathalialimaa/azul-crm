@@ -23,7 +23,7 @@ import math
 from collections import defaultdict
 
 import numpy as np
-from scipy.stats import chi2_contingency
+from scipy.stats import chi2_contingency, fisher_exact
 
 from azul_crm.pipeline.personas import fingerprint
 
@@ -32,6 +32,8 @@ TOP_SHARE = 0.20  # fatia da carteira que recebe atenção de retenção
 MIN_GROUP = 30  # grupo menor que isso não é comparado (amostra insuficiente)
 MIN_WITHIN = 20  # mínimo por grupo dentro de uma persona
 MIN_CHURNERS = 10  # mínimo de clientes que saíram para medir recall do grupo
+MIN_SELECTED_WITHIN = 10  # mínimo de selecionados na persona para a comparação ter sentido
+FAMILY_ALPHA = 0.05  # nível global por atributo; dividido pelo nº de comparações (Bonferroni)
 FOUR_FIFTHS = 0.8
 CALIBRATION_GAP = 0.10  # 10 pontos percentuais
 ASSOCIATION_P = 0.01
@@ -60,6 +62,16 @@ def region_of(airport: str) -> str:
 
 def _rate(selected: int, total: int):
     return selected / total if total else None
+
+
+def _independence_p(groups: list[dict]) -> float | None:
+    """P-valor de que a seleção independe do grupo (Fisher com 2 grupos, qui-quadrado com mais)."""
+    table = [[g["selected"], g["customers"] - g["selected"]] for g in groups]
+    if len(table) < 2 or sum(row[0] for row in table) in (0, sum(sum(r) for r in table)):
+        return None
+    if len(table) == 2:
+        return float(fisher_exact(table)[1])
+    return float(chi2_contingency(table)[1])
 
 
 def _ratio(rates):
@@ -153,19 +165,33 @@ def _attribute_report(rows, chosen, attribute):
                     {
                         "group": name,
                         "customers": len(members),
+                        "selected": selected,
                         "selection_rate": round(selected / len(members), 4),
                     }
                 )
-        ratio = _ratio([s["selection_rate"] for s in sub])
-        if len(sub) >= 2:
-            within.append(
-                {
-                    "persona": persona,
-                    "groups": sub,
-                    "selection_ratio": None if ratio is None else round(ratio, 4),
-                    "flag": ratio is not None and ratio < FOUR_FIFTHS,
-                }
-            )
+        if len(sub) < 2:
+            continue
+        total_selected = sum(g["selected"] for g in sub)
+        eligible = total_selected >= MIN_SELECTED_WITHIN  # poucos eventos: razão não é confiável
+        ratio = _ratio([g["selection_rate"] for g in sub]) if eligible else None
+        within.append(
+            {
+                "persona": persona,
+                "groups": sub,
+                "selected": total_selected,
+                "selection_ratio": None if ratio is None else round(ratio, 4),
+                "p_value": _independence_p(sub) if ratio is not None else None,
+                "flag": False,  # definido abaixo, com correção para várias comparações
+                "inconclusive": False,
+            }
+        )
+    tests = [w for w in within if w["p_value"] is not None]
+    alpha = FAMILY_ALPHA / max(1, len(tests))  # Bonferroni: o nível vale para o atributo todo
+    for w in tests:
+        low = w["selection_ratio"] < FOUR_FIFTHS
+        w["flag"] = bool(low and w["p_value"] < alpha)
+        w["inconclusive"] = bool(low and not w["flag"])  # abaixo de 4/5, mas pode ser acaso
+        w["p_value"] = round(w["p_value"], 4)
     within_flag = any(w["flag"] for w in within)
     comparable = [w for w in within if w["selection_ratio"] is not None]
     association = _association(rows, attribute, names)
@@ -203,10 +229,12 @@ VERDICT_TEXT = {
     "ok": "Sem disparidade relevante.",
     "atencao": (
         "Há diferença bruta entre grupos, mas ela some quando se compara clientes da mesma "
-        "persona: é explicada pelo comportamento (mix de personas), não por tratamento desigual."
+        "persona, ou não se distingue do acaso: é explicada pelo comportamento (mix de personas) "
+        "ou pelo tamanho pequeno dos grupos, e não indica tratamento desigual."
     ),
     "alerta": (
-        "Clientes da mesma persona recebem tratamento diferente conforme o grupo. "
+        "Clientes da mesma persona recebem tratamento diferente conforme o grupo, com diferença "
+        "estatisticamente significativa (teste exato, com correção para várias comparações). "
         "Investigar antes de qualquer uso."
     ),
     "confundido": (
