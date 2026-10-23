@@ -216,11 +216,12 @@ def ingest_fares(path, root, period=None, source_url=SOURCE_PAGE, max_rows=10000
 
 def calibrated_routes(store, airline="AZU"):
     groups = defaultdict(lambda: [0.0, 0])
-    for r in store.read("fares"):
-        if r["origin"] and r["destination"] and r["airline"] == airline:
-            key = (r["origin"], r["destination"])
-            groups[key][0] += r["fare"] * r["seats"]
-            groups[key][1] += r["seats"]
+    for batch in store.iter_batches("fares"):
+        for r in batch:
+            if r["origin"] and r["destination"] and r["airline"] == airline:
+                key = (r["origin"], r["destination"])
+                groups[key][0] += r["fare"] * r["seats"]
+                groups[key][1] += r["seats"]
     return [
         {"origin": a, "destination": b, "mean_fare": v / n, "weight": n}
         for (a, b), (v, n) in sorted(groups.items())

@@ -271,3 +271,70 @@ def test_cli_and_api_expose_the_lake(root, monkeypatch, capsys):
 def test_generated_lake_stays_out_of_git_and_docker():
     assert "data/lake/" in (REPO / ".gitignore").read_text(encoding="utf-8")
     assert "data/lake" in (REPO / ".dockerignore").read_text(encoding="utf-8").split()
+
+
+def test_batch_size_does_not_change_the_result(root):
+    store = Store(root)
+    export_lake(root, store, root / "a")  # lote padrão: uma leva só
+    export_lake(root, store, root / "b", batch_size=7)  # muitos lotes pequenos
+    dictionaries = [
+        json.loads((root / d / "data_dictionary.json").read_text(encoding="utf-8")) for d in "ab"
+    ]
+    assert dictionaries[0] == dictionaries[1]  # mesmas linhas e mesmo hash de conteúdo
+    assert pq.read_metadata(root / "b/gold/trips.parquet").num_row_groups > 1
+    assert parquet(root / "a", "gold.trips").equals(parquet(root / "b", "gold.trips"))
+
+
+def test_failed_export_keeps_previous_output_and_leaves_no_temp_files(root):
+    store = Store(root)
+    out = root / "lake"
+    export_lake(root, store, out)
+
+    def snapshot():
+        return {
+            p.relative_to(out).as_posix(): p.read_bytes() for p in out.rglob("*") if p.is_file()
+        }
+
+    before = snapshot()
+    trips = store.read("trips")
+    trips[-1]["fare_amount"] = "abc"  # falha numa tabela que vem depois de customers
+    store.publish({"trips": [(t["trip_id"], t) for t in trips]})
+    with pytest.raises(ValueError, match="fare_amount"):
+        export_lake(root, store, out, batch_size=50)
+    assert snapshot() == before
+    assert list(root.glob(".lake-*")) == []
+
+
+def test_store_iter_batches_matches_read(root):
+    store = Store(root)
+    batches = list(store.iter_batches("trips", 500))
+    assert len(batches) > 1 and all(len(b) <= 500 for b in batches)
+    assert [row for batch in batches for row in batch] == store.read("trips")
+    assert list(store.iter_batches("decisions")) == []
+
+
+def test_calibrated_routes_streams_in_batches(root, monkeypatch):
+    from azul_crm.pipeline.public_data import calibrated_routes
+
+    store = Store(root)
+    import_airports(REPO / "data/fixtures/airports_reference.csv", store)
+    path = root / "fares2.csv"
+    header = FARES.splitlines()[0]
+    rows = [
+        "2026;6;AZU;SBRF;SBGR;400,00;2",
+        "2026;6;AZU;SBRF;SBGR;700,00;1",
+        "2026;6;AZU;SBRF;SBBR;300,00;4",
+        "2026;6;GLO;SBRF;SBGR;999,00;9",  # outra empresa: fora da calibração
+    ]
+    path.write_text("\n".join([header, *rows]) + "\n", encoding="utf-8")
+    ingest_fares(path, root, "2026-06")
+    original = Store.iter_batches
+    monkeypatch.setattr(
+        Store, "iter_batches", lambda self, name, batch_size=20000: original(self, name, 1)
+    )
+    routes = calibrated_routes(store)
+    assert [(r["origin"], r["destination"], r["weight"]) for r in routes] == [
+        ("REC", "BSB", 4),
+        ("REC", "GRU", 3),
+    ]
+    assert routes[1]["mean_fare"] == pytest.approx((400 * 2 + 700 * 1) / 3)

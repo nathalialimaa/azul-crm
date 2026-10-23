@@ -56,6 +56,25 @@ tabelas tipadas são as indicadas. Migrar o app para lê-las é trabalho futuro.
 gerados e revisados, mas nunca foram executados. Em especial, a carga de colunas de lista (`ARRAY`)
 deve ser conferida na primeira execução.
 
+## Escala (arquivos grandes da ANAC)
+
+O arquivo mensal de tarifas da ANAC tem cerca de 25 MB (centenas de milhares de linhas). Foi
+medido com um arquivo **simulado** do mesmo formato, de 800 mil linhas, em Linux. Ainda **não**
+foi medido com o arquivo real nem no Windows, então trate os números como ordem de grandeza.
+
+| Etapa | Tempo | Memória no pico |
+|---|---|---|
+| `fares` (ingestão, 800 mil linhas) | ~35 s | ~2 GB |
+| `demo --public` (lê as tarifas em lotes) | ~8 s | ~160 MB |
+| `export-lake` (em lotes de 20 mil linhas) | ~25 s | ~250 MB |
+
+- A ingestão (`fares`) é a etapa mais pesada: mantém as linhas na memória antes de gravar. Feche
+  outros programas e ingira **um mês por vez**.
+- O banco local (`data/crm.sqlite3`) passa de ~900 MB com um mês de dados da ANAC. Ele não vai
+  para o Git nem para a imagem Docker.
+- O `export-lake` grava numa pasta temporária e só troca os arquivos no fim. Se qualquer tabela
+  falhar, a saída anterior fica intacta e nada novo é criado.
+
 ## Limitações
 
 - Dados sintéticos: o lake descreve o gerador, não clientes reais.

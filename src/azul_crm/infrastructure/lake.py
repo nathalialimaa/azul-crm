@@ -14,6 +14,9 @@ Execução: ``python -m azul_crm.cli export-lake`` (saída em ``data/lake``).
 
 import hashlib
 import json
+import os
+import shutil
+import tempfile
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -22,6 +25,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 LAYERS = ("bronze", "silver", "gold")
+BATCH_SIZE = 20000  # linhas por lote: a memória não cresce com o tamanho da tabela
 
 ARROW_TYPES = {
     "string": pa.string(),
@@ -437,11 +441,11 @@ def _convert(dtype, value):
     raise ValueError(f"tipo desconhecido: {dtype}")
 
 
-def convert_rows(table: Table, records: list[dict]) -> list[list]:
+def convert_rows(table: Table, records: list[dict], start: int = 1) -> list[list]:
     """Valida os registros contra o esquema e devolve linhas na ordem das colunas."""
     expected = {c.key for c in table.columns} | set(table.ignore_keys)
     rows = []
-    for number, record in enumerate(records, start=1):
+    for number, record in enumerate(records, start=start):
         extra = set(record) - expected
         if extra and table.strict:
             raise ValueError(
@@ -478,11 +482,6 @@ def arrow_schema(table: Table) -> pa.Schema:
         ],
         metadata={"description": table.description},
     )
-
-
-def content_hash(rows: list[list]) -> str:
-    """Hash do conteúdo, independente da versão do Parquet. Mesmos dados, mesmo hash."""
-    return hashlib.sha256(json.dumps(rows, default=str, ensure_ascii=False).encode()).hexdigest()
 
 
 # ----------------------------------------------------------------------------- origens
@@ -542,13 +541,23 @@ def _bias_records(root: Path):
     ]
 
 
-def collect(root: Path, store) -> dict[str, list[dict]]:
-    """Registros de cada tabela do lake, vindos do store e dos artefatos."""
-    records = {qualified: store.read(name) for qualified, name in STORE_TABLES.items()}
-    records["gold.loyalty_transactions"] = _derived_transactions(records["gold.loyalty"])
-    records["gold.personas"] = _personas_records(root)
-    records["gold.bias_audit_groups"] = _bias_records(root)
-    return records
+def _batches(qualified: str, root: Path, store, size: int):
+    """Lotes de registros de uma tabela do lake, do store ou dos artefatos."""
+    if qualified == "gold.loyalty_transactions":
+        for batch in store.iter_batches("loyalty", size):
+            rows = _derived_transactions(batch)
+            if rows:
+                yield rows
+    elif qualified == "gold.personas":
+        rows = _personas_records(root)
+        if rows:
+            yield rows
+    elif qualified == "gold.bias_audit_groups":
+        rows = _bias_records(root)
+        if rows:
+            yield rows
+    else:
+        yield from store.iter_batches(STORE_TABLES[qualified], size)
 
 
 # ----------------------------------------------------------------------------- saídas
@@ -638,80 +647,107 @@ def dictionary_markdown(dictionary: dict) -> str:
     return "\n".join(out)
 
 
-def export_lake(root: Path, store, out: Path | None = None) -> dict:
+def export_lake(root: Path, store, out: Path | None = None, batch_size: int | None = None) -> dict:
+    """Exporta o lake em lotes. Grava numa pasta temporária e só troca os arquivos no fim:
+    se qualquer tabela falhar, a saída anterior fica intacta e nada novo é criado."""
+    size = batch_size or BATCH_SIZE
     out = Path(out) if out else root / "data" / "lake"
-    records = collect(root, store)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix=".lake-", dir=out.parent))
     manifest = (store.read("manifest") or [{}])[0]
-    tables = {}
-    for table in TABLES:
-        rows = convert_rows(
-            table, records[table.qualified]
-        )  # valida antes de gravar qualquer coisa
-        tables[table.qualified] = (table, rows)
-
-    out.mkdir(parents=True, exist_ok=True)  # só depois de validar tudo
-    entries = {}
-    for qualified, (table, rows) in tables.items():
-        path = out / table.layer / f"{table.name}.parquet"
-        exported = bool(rows)
-        if exported:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            columns = list(zip(*rows)) if rows else []
-            arrays = [
-                pa.array(list(values), type=ARROW_TYPES[c.dtype])
-                for c, values in zip(table.columns, columns)
-            ]
-            pq.write_table(
-                pa.Table.from_arrays(arrays, schema=arrow_schema(table)), path, compression="snappy"
+    entries, customers_synthetic = {}, True
+    try:
+        for table in TABLES:
+            path = work / table.layer / f"{table.name}.parquet"
+            schema, writer = arrow_schema(table), None
+            digest, total, number = hashlib.sha256(), 0, 1
+            flag = (
+                [c.name for c in table.columns].index("is_synthetic")
+                if (table.qualified == "gold.customers")
+                else None
             )
-        elif path.exists():
-            path.unlink()  # sobra de uma execução anterior com dados
-        entries[qualified] = {
-            "layer": table.layer,
-            "name": table.name,
-            "description": table.description,
-            "origin": table.origin,
-            "primary_key": list(table.primary_key),
-            "path": f"{table.layer}/{table.name}.parquet",
-            "exported": exported,
-            "rows": len(rows),
-            "content_sha256": content_hash(rows) if exported else None,
-            "columns": [
-                {
-                    "name": c.name,
-                    "type": c.dtype,
-                    "nullable": c.nullable,
-                    "description": c.description,
-                    "snowflake_type": SNOWFLAKE_TYPES[c.dtype],
-                }
-                for c in table.columns
-            ],
+            try:
+                for records in _batches(table.qualified, root, store, size):
+                    rows = convert_rows(table, records, start=number)
+                    number += len(records)
+                    if not rows:
+                        continue
+                    if writer is None:
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        writer = pq.ParquetWriter(path, schema, compression="snappy")
+                    arrays = [
+                        pa.array(list(values), type=ARROW_TYPES[c.dtype])
+                        for c, values in zip(table.columns, zip(*rows))
+                    ]
+                    writer.write_table(pa.Table.from_arrays(arrays, schema=schema))
+                    for row in rows:  # hash por linha: não depende do tamanho do lote
+                        digest.update(json.dumps(row, default=str, ensure_ascii=False).encode())
+                        digest.update(b"\n")
+                    total += len(rows)
+                    if flag is not None:
+                        customers_synthetic &= all(row[flag] for row in rows)
+            finally:
+                if writer is not None:
+                    writer.close()
+            entries[table.qualified] = {
+                "layer": table.layer,
+                "name": table.name,
+                "description": table.description,
+                "origin": table.origin,
+                "primary_key": list(table.primary_key),
+                "path": f"{table.layer}/{table.name}.parquet",
+                "exported": total > 0,
+                "rows": total,
+                "content_sha256": digest.hexdigest() if total else None,
+                "columns": [
+                    {
+                        "name": c.name,
+                        "type": c.dtype,
+                        "nullable": c.nullable,
+                        "description": c.description,
+                        "snowflake_type": SNOWFLAKE_TYPES[c.dtype],
+                    }
+                    for c in table.columns
+                ],
+            }
+        # Tudo validado e gravado: agora sim troca os arquivos de uma vez.
+        out.mkdir(parents=True, exist_ok=True)
+        for table in TABLES:
+            source = work / table.layer / f"{table.name}.parquet"
+            target = out / table.layer / f"{table.name}.parquet"
+            if source.exists():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(source, target)
+            elif target.exists():
+                target.unlink()  # sobra de uma execução anterior com dados
+        dictionary = {
+            "generated_by": "azul-crm export-lake",
+            "customers_are_synthetic": customers_synthetic,
+            "snapshot": {
+                k: manifest.get(k)
+                for k in (
+                    "seed",
+                    "observation_start",
+                    "observation_end",
+                    "customer_count",
+                    "trip_count",
+                    "mode",
+                    "calibrated_with_public_data",
+                )
+            },
+            "layers": {
+                layer: [e["name"] for e in entries.values() if e["layer"] == layer]
+                for layer in LAYERS
+            },
+            "tables": entries,
         }
-    dictionary = {
-        "generated_by": "azul-crm export-lake",
-        "customers_are_synthetic": all(r["is_synthetic"] for r in records["gold.customers"]),
-        "snapshot": {
-            k: manifest.get(k)
-            for k in (
-                "seed",
-                "observation_start",
-                "observation_end",
-                "customer_count",
-                "trip_count",
-                "mode",
-                "calibrated_with_public_data",
-            )
-        },
-        "layers": {
-            layer: [e["name"] for e in entries.values() if e["layer"] == layer] for layer in LAYERS
-        },
-        "tables": entries,
-    }
-    (out / "data_dictionary.json").write_text(
-        json.dumps(dictionary, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
-    (out / "DATA_DICTIONARY.md").write_text(dictionary_markdown(dictionary), encoding="utf-8")
-    (out / "snowflake_typed.sql").write_text(snowflake_ddl(), encoding="utf-8")
+        (out / "data_dictionary.json").write_text(
+            json.dumps(dictionary, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        (out / "DATA_DICTIONARY.md").write_text(dictionary_markdown(dictionary), encoding="utf-8")
+        (out / "snowflake_typed.sql").write_text(snowflake_ddl(), encoding="utf-8")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
     exported = {k: v["rows"] for k, v in entries.items() if v["exported"]}
     return {
         "out": str(out),
