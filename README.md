@@ -122,17 +122,18 @@ VRA, com as colunas publicadas pela ANAC:
 # Também aceita --url HTTPS de domínio ANAC.
 ```
 
-O parser VRA registra horários com fuso de Brasília, atraso calculável e cancelamento; horário ausente permanece `null`. O formato deve ter as colunas descritas em `docs/ARQUITETURA.md`. Schemas divergentes falham explicitamente. A carga VRA foi testada com amostra construída; não foi validada contra download real.
+O parser VRA lê o arquivo oficial mensal (CSV do portal de dados abertos da ANAC, "Voo Regular Ativo"): pula a linha de aviso do topo, trata `null` e `N/A` como ausência, lê horários em **UTC** e calcula atraso e cancelamento. Linhas sem data ou fora do período são **rejeitadas e contadas** (`rejected_reasons`); se mais de 5% forem rejeitadas, a carga é recusada. Schemas divergentes falham explicitamente. Foi validado com o arquivo real de agosto de 2026 (88 mil linhas). Veja `docs/CALIBRACAO_PUBLICA.md`.
 
 Para gerar uma carteira com médias tarifárias da Silver pública:
 
 ```powershell
+# Ingerir antes: airports, fares (tarifas) e vra (atrasos)
 .\.venv\Scripts\python.exe -m azul_crm.cli demo --public --customers 400 --seed 42
 .\.venv\Scripts\python.exe -m azul_crm.cli train
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 ```
 
-Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota, e distribui os clientes pelas rotas na proporção dos assentos comercializados (sorteio com semente fixa). Não calibra frequência individual de viagens, resgate, fidelidade ou atraso. O VRA é persistido na Silver, mas ainda não condiciona o gerador. Essas limitações são expostas no manifesto.
+Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota, e distribui os clientes pelas rotas na proporção dos assentos comercializados (sorteio com semente fixa). Se o VRA tiver sido ingerido, os **atrasos** também são sorteados da distribuição real da Azul (doméstico, por aeroporto de origem quando há voos suficientes); sem ele, vale o padrão antigo. Não calibra frequência individual de viagens, resgate nem fidelidade. O que foi calibrado fica registrado no manifesto (`calibration_scope` e `delay_calibration`).
 
 Os CSVs de tarifas não identificam clientes nem comprovam fidelidade. `period` representa mês de venda. Tarifas restritas e milhas são simulações separadas, sem alegação de cobertura pública.
 

@@ -6,8 +6,8 @@ Define a **próxima melhor ação** de cada persona. Substitui as duas ações g
 ## Como funciona
 
 1. A persona do cliente tem três características, calculadas no treino: **valor alto**,
-   **esfriando** (média ≥ 90 dias sem voar) e **atrasos frequentes** (≥ 50% das viagens com
-   atraso de 60 min ou mais).
+   **esfriando** (média ≥ 90 dias sem voar) e **atrasos** (≥ 50% das viagens com atraso de 60 min ou mais, ou
+   pelo menos 10% e 3× a taxa média da base).
 2. As regras do playbook casam essas características. **A primeira regra que casa vence**, então
    a ordem é a prioridade. O playbook precisa cobrir as 8 combinações; senão a aplicação não inicia.
 3. Cada regra aponta uma **ação principal** e uma **oferta sugerida**.

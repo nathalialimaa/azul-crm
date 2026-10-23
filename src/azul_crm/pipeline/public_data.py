@@ -1,5 +1,6 @@
 """Download limitado, Bronze imutável e Silver de tarifas ANAC."""
 
+import collections
 import csv
 import hashlib
 import io
@@ -90,8 +91,18 @@ def csv_payload(path, max_mb=100):
             continue
     if text.lstrip().startswith("<"):
         raise ValueError("Fonte retornou HTML, não CSV; obtenha o arquivo oficial manualmente")
-    delimiter = ";" if text.splitlines()[0].count(";") > text.splitlines()[0].count(",") else ","
-    return csv.DictReader(io.StringIO(text), delimiter=delimiter)
+    stream = io.StringIO(text)
+    header = stream.readline()
+    for _ in range(5):  # alguns arquivos da ANAC têm linhas de aviso antes do cabeçalho
+        if header.count(";") >= 2 or header.count(",") >= 2:
+            break
+        header = stream.readline()
+    else:
+        stream.seek(0)
+        header = stream.readline()
+    delimiter = ";" if header.count(";") > header.count(",") else ","
+    stream.seek(stream.tell() - len(header))  # volta ao início do cabeçalho
+    return csv.DictReader(stream, delimiter=delimiter)
 
 
 class AirportDimension:
@@ -267,33 +278,50 @@ def discover_fares_url(period):
     return matches[0]
 
 
+VRA_ALIASES = {
+    "airline": ("sigla icao empresa aerea", "icao empresa aerea"),
+    "flight": ("numero voo",),
+    "origin": ("sigla icao aeroporto origem", "icao aerodromo origem"),
+    "destination": ("sigla icao aeroporto destino", "icao aerodromo destino"),
+    "scheduled": ("partida prevista",),
+    "actual": ("partida real",),
+}
+VRA_OPTIONAL = {
+    "status": ("situacao voo", "situacao do voo"),
+    "line_type": ("codigo tipo linha",),
+}
+MISSING_MARKERS = {"", "null", "n/a", "na", "none"}
+MAX_REJECTED_SHARE = 0.05
+
+
+def _vra_timestamp(value):
+    """Horários do VRA vêm em UTC. Ausência (``null``, ``N/A``) vira ``None``."""
+    from datetime import timezone
+
+    if value is None or value.strip().lower() in MISSING_MARKERS:
+        return None
+    text = value.strip().split(".")[0]  # alguns registros trazem frações de segundo
+    for fmt in ["%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"]:
+        try:
+            return datetime.strptime(text, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    raise ValueError("Data VRA inválida: " + value)
+
+
 def ingest_vra(path, root, period, source_url):
-    """VRA: datas em Brasília; ausência de horário permanece null, não vira atraso zero."""
+    """VRA: horários em UTC; ausência de horário fica nula, nunca vira atraso zero.
+
+    Linhas sem data ou fora do período são rejeitadas e contadas, não derrubam a carga. Se mais
+    de 5% das linhas forem rejeitadas, a carga inteira é recusada (arquivo ou período errado).
+    """
     import shutil
     import unicodedata
-    from zoneinfo import ZoneInfo
 
     def norm(s):
         return "".join(
             c for c in unicodedata.normalize("NFKD", s.lower()) if not unicodedata.combining(c)
         ).strip()
-
-    def timestamp(value):
-        if not value or not value.strip():
-            return None
-        for fmt in [
-            "%d/%m/%Y %H:%M:%S",
-            "%d/%m/%Y %H:%M",
-            "%Y-%m-%d %H:%M:%S",
-            "%Y-%m-%dT%H:%M:%S",
-        ]:
-            try:
-                return datetime.strptime(value.strip(), fmt).replace(
-                    tzinfo=ZoneInfo("America/Sao_Paulo")
-                )
-            except ValueError:
-                continue
-        raise ValueError("Data VRA inválida: " + value)
 
     store = Store(root)
     dimension = AirportDimension(store.read("airports"))
@@ -301,59 +329,72 @@ def ingest_vra(path, root, period, source_url):
     if any(r["sha256"] == digest and r.get("dataset") == "vra" for r in store.read("sources")):
         return {"already_ingested": True, "sha256": digest}
     reader = csv_payload(path)
-    required = {
-        "sigla icao empresa aerea",
-        "numero voo",
-        "sigla icao aeroporto origem",
-        "sigla icao aeroporto destino",
-        "partida prevista",
-        "partida real",
-    }
-    if not required.issubset({norm(k) for k in (reader.fieldnames or [])}):
-        raise ValueError("Schema VRA não suportado")
-    records = []
-    raw = []
+    present = {norm(k): k for k in (reader.fieldnames or []) if k}
+    columns = {}
+    for key, names in {**VRA_ALIASES, **VRA_OPTIONAL}.items():
+        found = next((n for n in names if n in present), None)
+        if found is None and key in VRA_ALIASES:
+            raise ValueError("Schema VRA não suportado: " + str(reader.fieldnames))
+        columns[key] = present.get(found) if found else None
+
+    def field(row, key):
+        name = columns[key]
+        return (row.get(name) or "").strip() if name else ""
+
+    records, raw, rejected = [], [], collections.Counter()
     unmatched = 0
     for i, row in enumerate(reader):
         if i >= 1000000:
             raise ValueError("VRA excede limite de 1 milhão de linhas")
-        r = {norm(k): v for k, v in row.items() if k}
-        scheduled = timestamp(r["partida prevista"])
-        actual = timestamp(r["partida real"])
+        scheduled = _vra_timestamp(field(row, "scheduled"))
+        actual = _vra_timestamp(field(row, "actual"))
         when = scheduled or actual
-        if not when or when.strftime("%Y-%m") != period:
-            raise ValueError("VRA sem data de referência ou fora do período solicitado")
-        orig = r["sigla icao aeroporto origem"].strip().upper()
-        dest = r["sigla icao aeroporto destino"].strip().upper()
+        if not when:
+            rejected["sem_data"] += 1
+            continue
+        if when.strftime("%Y-%m") != period:
+            rejected["fora_do_periodo"] += 1
+            continue
+        orig = field(row, "origin").upper()
+        dest = field(row, "destination").upper()
         oi, os = dimension.lookup(orig)
         di, ds = dimension.lookup(dest)
-        status = norm(r.get("situacao voo") or r.get("situacao do voo") or "nao informado")
+        status = norm(field(row, "status") or "nao informado")
         cancelled = True if status == "cancelado" else False if status == "realizado" else None
         delay = (actual - scheduled).total_seconds() / 60 if scheduled and actual else None
-        rec = {
-            "period": period,
-            "airline": r["sigla icao empresa aerea"].strip().upper(),
-            "flight_number": r["numero voo"],
-            "origin_icao": orig,
-            "destination_icao": dest,
-            "origin": oi,
-            "destination": di,
-            "origin_status": os,
-            "destination_status": ds,
-            "scheduled_departure": scheduled.isoformat() if scheduled else None,
-            "actual_departure": actual.isoformat() if actual else None,
-            "delay_minutes": delay,
-            "cancelled": cancelled,
-            "source_sha256": digest,
-            "mapping_version": dimension.version,
-            "is_synthetic": False,
-        }
-        rid = hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest()
-        records.append((rid, rec))
+        records.append(
+            (
+                hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest(),
+                {
+                    "period": period,
+                    "airline": field(row, "airline").upper(),
+                    "flight_number": field(row, "flight"),
+                    "line_type": field(row, "line_type").upper() or None,
+                    "origin_icao": orig,
+                    "destination_icao": dest,
+                    "origin": oi,
+                    "destination": di,
+                    "origin_status": os,
+                    "destination_status": ds,
+                    "scheduled_departure": scheduled.isoformat() if scheduled else None,
+                    "actual_departure": actual.isoformat() if actual else None,
+                    "delay_minutes": delay,
+                    "cancelled": cancelled,
+                    "source_sha256": digest,
+                    "mapping_version": dimension.version,
+                    "is_synthetic": False,
+                },
+            )
+        )
         raw.append(("vra:" + digest + ":" + str(i), {"row": row, "sha256": digest, "line": i + 2}))
         unmatched += int(os != "matched" or ds != "matched")
-    if not records:
-        raise ValueError("VRA vazio")
+    total_rejected = sum(rejected.values())
+    seen = len(records) + total_rejected
+    if not records or total_rejected / seen > MAX_REJECTED_SHARE:
+        raise ValueError(
+            f"VRA recusado: {total_rejected} de {seen} linhas rejeitadas {dict(rejected)}. "
+            "Confira o arquivo e o --period."
+        )
     records = list(dict(records).items())
     previous = [
         (hashlib.sha256(json.dumps(r, sort_keys=True).encode()).hexdigest(), r)
@@ -367,6 +408,8 @@ def ingest_vra(path, root, period, source_url):
         "rows": len(raw),
         "silver_rows": len(records),
         "unmatched": unmatched,
+        "rejected_rows": total_rejected,
+        "rejected_reasons": dict(rejected),
         "source_url": source_url,
         "ingested_at": datetime.now(timezone.utc).isoformat(),
     }

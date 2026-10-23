@@ -100,6 +100,8 @@ TABLES = (
             Col("silver_rows", "int64", "Linhas que chegaram à silver após deduplicação."),
             Col("unmatched", "int64", "Linhas com aeroporto não resolvido para IATA."),
             Col("ingested_at", "timestamp", "Momento da ingestão (UTC)."),
+            Col("rejected_rows", "int64", "Linhas rejeitadas na ingestão (VRA).", nullable=True),
+            Col("rejected_reasons", "json", "Motivos das linhas rejeitadas (VRA).", nullable=True),
         ],
         primary_key=("sha256",),
     ),
@@ -173,6 +175,7 @@ TABLES = (
             Col("period", "string", "Mês de referência (AAAA-MM)."),
             Col("airline", "string", "Empresa aérea (ICAO)."),
             Col("flight_number", "string", "Número do voo."),
+            Col("line_type", "string", "Tipo de linha do VRA: N doméstica, I internacional.", True),
             Col("origin_icao", "string", "Aeroporto de origem (ICAO)."),
             Col("destination_icao", "string", "Aeroporto de destino (ICAO)."),
             Col("origin", "string", "Origem em IATA.", nullable=True),
@@ -445,11 +448,14 @@ TABLES = (
             Col(
                 "calibration_scope",
                 "string",
-                "O que foi calibrado (none ou route_mean_fares_and_route_demand).",
+                "O que foi calibrado (none, route_mean_fares_and_route_demand, e o sufixo _and_delays).",
             ),
             Col("churn_label_status", "string", "Origem do rótulo de churn."),
             Col("notes", "string", "Observações e limitações da geração."),
             Col("storage", "string", "Persistência usada: sqlite ou snowflake."),
+            Col(
+                "delay_calibration", "json", "Origem e taxas da calibração de atrasos (VRA).", True
+            ),
         ],
     ),
     _t(
