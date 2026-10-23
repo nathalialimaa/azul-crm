@@ -777,6 +777,11 @@ def export_lake(root: Path, store, out: Path | None = None, batch_size: int | No
             path = work / table.layer / f"{table.name}.parquet"
             schema, writer = arrow_schema(table), None
             digest, total, number = hashlib.sha256(), 0, 1
+            primary_key_indexes = [
+                [column.name for column in table.columns].index(key)
+                for key in table.primary_key
+            ]
+            seen_primary_keys = set()
             flag = (
                 [c.name for c in table.columns].index("is_synthetic")
                 if (table.qualified == "gold.customers")
@@ -788,6 +793,14 @@ def export_lake(root: Path, store, out: Path | None = None, batch_size: int | No
                     number += len(records)
                     if not rows:
                         continue
+                    if primary_key_indexes:
+                        for row in rows:
+                            primary_key = tuple(row[index] for index in primary_key_indexes)
+                            if primary_key in seen_primary_keys:
+                                raise ValueError(
+                                    f"{table.qualified}: chave primária duplicada {primary_key}"
+                                )
+                            seen_primary_keys.add(primary_key)
                     if writer is None:
                         path.parent.mkdir(parents=True, exist_ok=True)
                         writer = pq.ParquetWriter(path, schema, compression="snappy")

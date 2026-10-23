@@ -155,6 +155,18 @@ def test_data_outside_the_schema_fails_and_writes_nothing(root, mutate, message)
     assert not out.exists()
 
 
+def test_duplicate_primary_key_fails_and_writes_nothing(root):
+    store = Store(root)
+    duplicate = store.read("customers")[0]
+    store.publish({"customers": [("duplicate-storage-id", duplicate)]}, replace=False)
+    out = root / "lake"
+
+    with pytest.raises(ValueError, match="gold.customers.*chave primária duplicada"):
+        export_lake(root, store, out, batch_size=7)
+
+    assert not out.exists()
+
+
 def test_type_conversion_rules():
     trips = BY_NAME["gold.trips"]
     ok = {
