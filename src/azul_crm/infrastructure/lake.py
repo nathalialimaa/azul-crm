@@ -377,7 +377,7 @@ TABLES = (
             Col(
                 "calibration_scope",
                 "string",
-                "O que foi calibrado (none ou route_mean_fares_only).",
+                "O que foi calibrado (none ou route_mean_fares_and_route_demand).",
             ),
             Col("churn_label_status", "string", "Origem do rótulo de churn."),
             Col("notes", "string", "Observações e limitações da geração."),

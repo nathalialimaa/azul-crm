@@ -129,7 +129,7 @@ Para gerar uma carteira com médias tarifárias da Silver pública:
 .\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 ```
 
-Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota. Não calibra frequência individual, demanda, resgate, fidelidade ou atraso. O VRA é persistido na Silver, mas ainda não condiciona o gerador. Essas limitações são expostas no manifesto.
+Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota, e distribui os clientes pelas rotas na proporção dos assentos comercializados (sorteio com semente fixa). Não calibra frequência individual de viagens, resgate, fidelidade ou atraso. O VRA é persistido na Silver, mas ainda não condiciona o gerador. Essas limitações são expostas no manifesto.
 
 Os CSVs de tarifas não identificam clientes nem comprovam fidelidade. `period` representa mês de venda. Tarifas restritas e milhas são simulações separadas, sem alegação de cobertura pública.
 

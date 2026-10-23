@@ -178,3 +178,19 @@ def test_bias_endpoint(base):
         body = api.get("/api/v1/bias").json()
         assert body["available"] and body["stale"] is False
         assert set(body["attributes"]) == set(ATTRIBUTES)
+
+
+def test_small_samples_per_persona_are_not_called_confounded():
+    # Dois aeroportos com a MESMA mistura de personas, mas só 10 clientes de cada persona por
+    # aeroporto (abaixo do mínimo de 20): não há como comparar dentro da persona.
+    rows, i = [], 0
+    for persona in ["P1", "P2", "P3", "P4"]:
+        for airport in ["AAA", "BBB"]:
+            for _ in range(10):
+                score = 90 - i * 0.01 if airport == "AAA" else 10 - i * 0.01  # AAA é favorecido
+                rows.append(rec(i, persona, score, airport=airport))
+                i += 1
+    airport = run_audit(rows)["attributes"]["home_airport"]
+    assert airport["selection_flag"] is True and airport["within_persona"] == []
+    assert airport["persona_association"]["relevant"] is False  # a mistura é igual nos dois
+    assert airport["verdict"] == "amostra_insuficiente"

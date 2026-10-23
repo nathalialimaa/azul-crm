@@ -40,16 +40,22 @@ Grupos com menos de 30 clientes (20 dentro de uma persona) não são comparados 
 | 🟢 OK | Sem disparidade bruta relevante |
 | 🟡 Atenção | Há diferença bruta, mas ela some quando se compara a mesma persona (efeito do mix de personas) |
 | 🔴 Alerta | Clientes da mesma persona têm tratamento diferente conforme o grupo |
-| 🟠 Confundido | Há diferença bruta e os grupos nunca dividem a mesma persona: não dá para separar. Não afirma nem descarta viés |
-| ⚪ Amostra pequena | Grupos pequenos demais |
+| 🟠 Confundido | Há diferença bruta, não dá para comparar dentro da persona **e** o atributo praticamente determina a persona (associação relevante). Não afirma nem descarta viés |
+| ⚪ Amostra pequena | Grupos pequenos demais, inclusive dentro de cada persona, para comparar com segurança |
 
-## O que a base sintética mostra hoje
+## O que as bases sintéticas mostram
 
-Canal e tier: **OK**. Aeroporto e região: **confundido**. O gerador atual atribui o perfil de
-comportamento pela posição do cliente, então o aeroporto praticamente determina a persona
-(V de Cramér ≈ 0,78) e VCP e CNF nunca entram no top 20%. É um achado sobre o **gerador**, não
-sobre clientes reais, e some quando o gerador sortear o comportamento de forma independente do
-aeroporto.
+**Base de demonstração (rotas fictícias).** Canal e tier: OK. Aeroporto e região: **confundido**.
+O gerador original atribui o perfil de comportamento pela posição do cliente, então o aeroporto
+praticamente determina a persona (V de Cramér ≈ 0,78) e dois dos três aeroportos nunca entram no
+top 20%. É um achado sobre o **gerador**, não sobre clientes reais.
+
+**Base com rotas reais da ANAC** (`demo --public`, clientes sorteados pela demanda de assentos).
+Canal e tier: OK. Região: **atenção** (a diferença bruta some quando se compara a mesma persona).
+Aeroporto: **amostra pequena**: há dezenas de aeroportos e a maioria tem menos de 30 clientes, então
+não dá para comparar com segurança. Com mais clientes por grupo a comparação passa a ser possível.
+
+Nenhum dos dois cenários encontrou tratamento desigual dentro da mesma persona (nenhum alerta).
 
 ## Limitações
 

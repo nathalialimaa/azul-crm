@@ -168,13 +168,18 @@ def _attribute_report(rows, chosen, attribute):
             )
     within_flag = any(w["flag"] for w in within)
     comparable = [w for w in within if w["selection_ratio"] is not None]
+    association = _association(rows, attribute, names)
 
     if len(groups) < 2:
         verdict = "amostra_insuficiente"
     elif within_flag:
         verdict = "alerta"
     elif raw_flag and not comparable:
-        verdict = "confundido"  # grupos nunca dividem a mesma persona: não há como separar
+        # Sem comparação possível dentro da persona. Só é "confundido" se o atributo de fato
+        # determina a persona; se a mistura é parecida, o que falta é amostra por persona.
+        verdict = (
+            "confundido" if association and association["relevant"] else "amostra_insuficiente"
+        )
     elif raw_flag:
         verdict = "atencao"
     else:
@@ -189,7 +194,7 @@ def _attribute_report(rows, chosen, attribute):
         "recall_ratio": None if recall_ratio is None else round(recall_ratio, 4),
         "recall_flag": recall_ratio is not None and recall_ratio < FOUR_FIFTHS,
         "calibration_flag": any(abs(g["calibration_gap"]) >= CALIBRATION_GAP for g in groups),
-        "persona_association": _association(rows, attribute, names),
+        "persona_association": association,
         "within_persona": within,
     }
 
@@ -209,7 +214,10 @@ VERDICT_TEXT = {
         "comparar: o atributo praticamente determina a persona nesta base. Não dá para afirmar "
         "nem descartar tratamento desigual. Investigar a origem dos dados."
     ),
-    "amostra_insuficiente": "Grupos pequenos demais para comparar com segurança.",
+    "amostra_insuficiente": (
+        "Grupos pequenos demais para comparar com segurança, inclusive dentro de cada "
+        "persona. Com mais clientes por grupo a comparação passa a ser possível."
+    ),
 }
 
 
