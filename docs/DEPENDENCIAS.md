@@ -85,9 +85,9 @@ OLLAMA_MODEL=qwen2.5:3b
 6. Reinicie o aplicativo. Pergunte “Como o score combina gasto, frequência e recência?”. Confira referências e trechos.
 7. Pergunte algo ausente. Verifique abstenção; para o LLM, revise também conteúdo e citações. Se trocar o corpus/modelo de embeddings, gere o índice novamente.
 
-**Corpus oficial (bloqueia benefícios específicos):**
+**Corpus público importado — pendente de confirmação (bloqueia benefícios específicos):**
 
-1. Abra o regulamento público vigente e documentos de benefícios autorizados. O conteúdo do regulamento não pôde ser extraído neste ambiente.
+1. O regulamento público (versão "novo-2024") foi copiado manualmente e importado em 23/10/2026 como `fidelidade-regulamento`. A vigência, autorização e homologação desse conteúdo não foram confirmadas. Para benefícios específicos, abra os documentos de benefícios autorizados e repita o procedimento.
 2. Copie o texto pertinente para um JSON UTF-8 em `data/knowledge`, no formato dos exemplos existentes:
 
 ```json

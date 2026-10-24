@@ -1,23 +1,68 @@
-# Azul CRM — MVP integrado v0.2
+# Azul CRM — CRM de Alto Valor (Hacka Business 2026)
 
-Aplicação privada de inteligência de CRM com **FastAPI + Streamlit**, SQL como persistência da aplicação, pontuações explicáveis, treinamento demonstrativo e assistente documental.
+Painel de inteligência de CRM que encontra clientes de alto valor, mostra quem corre risco de sair e sugere a próxima ação, sempre com revisão humana. **FastAPI + Streamlit**, dados em SQLite (ou Snowflake) e um lake em Parquet com dicionário de dados.
 
-**Leia primeiro:** esta entrega roda localmente, mas não é uma solução inteiramente homologada no Snowflake nem um RAG validado contra o regulamento oficial do Azul Fidelidade. As pendências estão em `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`. O repositório e o protótipo devem permanecer privados conforme o enunciado.
+**Os clientes são sintéticos.** Tarifas, demanda por rota e atrasos podem ser calibrados com dados públicos da ANAC (veja "Calibração com dados da ANAC"). Nenhum dado real da empresa foi usado.
+
+**Leia primeiro:** esta entrega roda localmente, mas não está homologada no Snowflake, o assistente não usa LLM (o rascunho da mensagem vem de template) e o regulamento público do Azul Fidelidade está na base apenas para consulta (o assistente busca por semelhança de palavras e não valida a vigência nem benefícios específicos). O repositório e o protótipo devem permanecer privados conforme o enunciado. Índice dos documentos e premissas: `docs/INDICE.md`. Pendências: `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`.
+
+## Em três comandos (Windows / PowerShell)
+
+```powershell
+py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address 127.0.0.1
+```
+
+Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q` (180 testes).
+
+## O que a base de demonstração mostra
+
+Valores de referência com a seed 42. Podem variar levemente com a versão das bibliotecas.
+
+| Resultado | Valor |
+| --- | --- |
+| Personas | 4 grupos: Baixo Volume Ativo (119), Alto Valor Esfriando (102), Fiéis de Alto Valor (98) e Baixo Volume Ativo com Atrasos Frequentes (81) |
+| Alto valor | 80 clientes, os 20% de maior valor potencial (corte de R$ 3.252 de margem por ano). Concentram 41,5% do valor, e 46 estão em risco |
+| CLV de 12 meses | R$ 370.979 esperados e R$ 341.667 em risco, com margem de 15% e desconto de 10% ao ano, que são **hipóteses** |
+| Churn | A regra heurística é mantida: o modelo logístico não passa no teste estatístico (t = −0,40; mínimo de 1,65) |
+| Auditoria de viés | 0 alertas. Aeroporto e região aparecem como "confundido" porque o gerador sem calibração define o comportamento pela posição do cliente; com rotas reais isso deixa de acontecer |
+
+Com a calibração da ANAC os números mudam (por exemplo, 173, 103, 98 e 26 clientes nas personas, e 37 clientes de alto valor em risco). Veja `docs/CALIBRACAO_PUBLICA.md`.
+
+## Calibração com dados da ANAC
+
+Os arquivos públicos **não estão no repositório** (uns 40 MB). Fontes oficiais:
+
+- **Tarifas aéreas domésticas** (mensal): DataSAS da ANAC, `https://sistemas.anac.gov.br/sas/downloads/`, tema "Tarifas Transporte Aéreo Passageiros Domésticos".
+- **VRA, Voo Regular Ativo** (mensal): `https://sistemas.anac.gov.br/dadosabertos/`, pasta "Voos e operações aéreas / Voo Regular Ativo (VRA)".
+- **Aeroportos:** o comando `airports` baixa a lista do OurAirports.
+
+```powershell
+$dados = "C:\caminho\da\pasta"   # TROCAR pelo caminho real dos arquivos baixados
+.\.venv\Scripts\python.exe -m azul_crm.cli airports
+.\.venv\Scripts\python.exe -m azul_crm.cli fares --file "$dados\ARQUIVO-DE-TARIFAS.zip" --period 2026-09
+.\.venv\Scripts\python.exe -m azul_crm.cli vra --file "$dados\VRA_20268.csv" --period 2026-08
+.\.venv\Scripts\python.exe -m azul_crm.cli demo --public --customers 400 --seed 42
+```
+
+Depois rode, na ordem: `train`, `personas`, `sync-scores`, `bias-audit`, `clv-report` e `export-lake`. O passo `fares` é o mais pesado (de 1 a 3 minutos e uns 2 GB de memória).
+
 
 ## Demonstração rápida no Windows / PowerShell
 
-1. Instale Python **3.12** (incluindo Python Launcher). Extraia este ZIP.
+1. Instale Python **3.11 a 3.13** (incluindo o Python Launcher). Clone ou extraia o repositório.
 2. Abra o PowerShell na pasta `azul-crm`, onde está `pyproject.toml`.
 3. Execute, sem precisar ativar o ambiente virtual:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 Copy-Item .env.example .env
 .\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
 ```
 
-Abra `http://localhost:8501`. **É só um terminal.** O Streamlit usa os mesmos serviços de negócio da API diretamente. Se a base SQLite estiver ausente, a entrada `streamlit_app.py` gera 400 clientes com seed 42. O ZIP inclui um snapshot demonstrativo já preparado. Não é necessário instalar Node, React ou Django.
+Abra `http://localhost:8501`. **É só um terminal.** O Streamlit usa os mesmos serviços de negócio da API diretamente. Se a base SQLite estiver ausente, a entrada `streamlit_app.py` gera 400 clientes com seed 42. O app gera a base de demonstração sozinho na primeira execução. Não é necessário instalar Node, React ou Django.
 
 Se preferir, execute `powershell -ExecutionPolicy Bypass -File .\scripts\start_demo.ps1`. Essa opção aplica a política somente a esse processo, instala dependências e força o modo SQLite local. Não use esse script para demonstrar Snowflake.
 
@@ -33,7 +78,9 @@ Se o comando `py -3.12` falhar, confirme a instalação com `py --list`. Se a po
 6. Em **Assistente IA**, consulte a metodologia; uma pergunta sem correspondência deve produzir abstenção.
 7. Em **Dados e modelos**, mostre método ativo, métricas e limitações. Exporte o recorte no rodapé.
 
-A aparência segue a hierarquia e a paleta da imagem fornecida. A matriz usa score 0–100 no eixo vertical, evitando apresentar gasto passado como CLV validado. O resultado não é uma cópia pixel a pixel da imagem.
+Também vale mostrar **Segmentos** (as personas e a definição de alto valor, com a tabela de sensibilidade) e **Auditoria de viés** (o alerta exige significância estatística).
+
+A aparência segue a hierarquia e a paleta da imagem fornecida. A matriz usa o valor potencial de 12 meses (margem, em reais) no eixo vertical e o risco de evasão no horizontal; a divisória marca o corte do alto valor (top 20%). Margem e desconto são hipóteses, com tabela de sensibilidade (`docs/CLV.md`). O resultado não é uma cópia pixel a pixel da imagem.
 
 ## Usar FastAPI em processo separado
 
@@ -145,7 +192,7 @@ Siga `docs/DEPENDENCIAS.md`: contas, permissões, variáveis, comandos e verific
 - A demonstração entregue usa `CRM_STORAGE=sqlite` explicitamente.
 - `RAG_PROVIDER=local` usa TF-IDF e resposta extrativa, sem LLM.
 - `RAG_PROVIDER=ollama` usa embeddings e geração locais. É preciso instalar os modelos e construir o índice. Integração implementada, não executada com modelos reais nesta entrega.
-- O corpus entregue contém metodologia e regras internas do MVP. **Não contém regulamento oficial de fidelidade validado.**
+- O corpus contém a metodologia e o catálogo internos do MVP e o **regulamento público do Azul Fidelidade** (versão "novo-2024", copiada manualmente em 23/10/2026; último aditamento registrado em 28/02/2024). A importação **não certifica a vigência**, e o regulamento não fixa valores de bônus nem de upgrade. Veja `docs/BASE_DE_CONHECIMENTO.md`.
 - MLflow registra métricas e o artefato JSON se habilitado; não fornece infraestrutura gratuita.
 - Hospedagem externa, autenticação dos avaliadores e submissão não foram realizadas.
 
@@ -169,4 +216,8 @@ Os documentos anteriores foram preservados em `docs/legacy`; descrevem o estado 
 
 ## Limites que permanecem
 
-Integração Snowflake real, execução Ollama/MLflow, corpus oficial de fidelidade, coleta real de tarifas/VRA, calibração por demanda e operação, SHAP, sentimento público e publicação privada permanecem sem homologação ou pendentes, conforme a matriz de validação. Não alegue que todos os requisitos analíticos do hackathon estão concluídos. A entrega fornece um fluxo local executável e os adaptadores/configurações possíveis, com evidências e lacunas explícitas.
+**Feito:** coleta real das tarifas (setembro de 2026) e do VRA (agosto de 2026), com calibração de tarifa média, demanda por rota e atrasos; regulamento público do Azul Fidelidade na base do assistente; CLV de 12 meses com premissas explícitas; personas; auditoria de viés com taxa de erro medida; lake em Parquet com dicionário de dados.
+
+**Pendente ou sem homologação:** integração Snowflake real (o DDL tipado foi gerado, mas nunca executado), execução do Ollama e do MLflow, validação da vigência e dos benefícios específicos do Azul Fidelidade, agente com LLM (o rascunho vem de template), SHAP (as explicações são lineares), análise de sentimento público e a publicação privada do protótipo.
+
+Clientes, fidelidade, resgates, comportamento e desfechos são sintéticos, e a margem e o desconto do CLV são hipóteses. Não alegue que todos os requisitos analíticos do hackathon estão concluídos: a entrega fornece um fluxo local executável, com evidências e lacunas explícitas.

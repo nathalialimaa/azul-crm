@@ -76,7 +76,7 @@ def test_rag_sources_and_abstention(integrated):
     result = rag.answer("xyzzy zqxw plasma")
     assert not result["evidence"]
     assert "evidência suficiente" in result["answer"]
-    assert rag.build()["chunks"] == 2
+    assert rag.build()["chunks"] == len(rag.chunks) >= 2  # a base pode ter mais documentos
 
 
 @pytest.mark.parametrize(
