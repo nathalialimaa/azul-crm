@@ -4,7 +4,7 @@
 
 Ambientes: Windows com Python 3.11 (máquina da equipe) e Linux com Python 3.12.
 
-- `python -m pytest -q`: **176 testes passaram** nos dois ambientes. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
+- `python -m pytest -q`: **180 testes passaram** nos dois ambientes. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
 - `python -m ruff check .`: passou. O CI do GitHub passou no pull request da integração.
 - `python -m azul_crm.cli prepare` e `demo`: base de demonstração com 400 clientes sintéticos. `validate`: Gold SQL válida; clientes, viagens, features, desfechos e fidelidade consistentes.
 - **Dados reais da ANAC, arquivos oficiais baixados manualmente:** tarifas de setembro de 2026 (892.505 registros; 45 sem aeroporto reconhecido) e VRA de agosto de 2026 (88.064 linhas; 24 rejeitadas por estarem fora do mês). Testadas também idempotência, período inválido, NaN, preservação de ausências e aeroportos desconhecidos.
@@ -14,6 +14,7 @@ Ambientes: Windows com Python 3.11 (máquina da equipe) e Linux com Python 3.12.
 - API: contratos, paginação, ausências, filtros, simulação e revisão testados via TestClient. Inicialização real do Uvicorn e HTTP local verificadas.
 - Streamlit AppTest: todas as páginas executadas sem erros; geração de rascunho e consulta de fatores executadas. Não é equivalente a captura visual em navegador.
 - Importação de documento TXT, recuperação e rejeição de identificador inválido. O regulamento do Azul Fidelidade foi importado (48 trechos), e a busca de governança continua devolvendo o catálogo interno primeiro. PDF usa pypdf, mas não há teste de OCR (não implementado).
+- Contrato do adaptador Ollama testado com resposta HTTP simulada: respostas vazias, sem citação permitida ou com citação inválida são rejeitadas. Isso não é inferência Ollama real.
 - Integridade do cache HTTP testada com transporte simulado; não é prova de acesso aos endpoints da ANAC.
 
 ## Validado com serviço ou arquivo externo real
