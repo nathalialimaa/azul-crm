@@ -290,17 +290,23 @@ try:
         st.subheader("Visão 360 · " + cid)
         detail = api.customer(cid)
         st.write("**Fatores:**")
-        st.write(detail["scores"]["drivers"])
+        for driver in detail["scores"]["drivers"]:
+            st.markdown("- " + driver)
         trips = pd.DataFrame(detail["trips"])
         st.dataframe(trips, hide_index=True, width="stretch")
         st.subheader("Fidelidade simulada")
         loyalty = api.loyalty(cid)
         if loyalty:
-            a, b, c = st.columns(3)
+            o, a, b, c = st.columns(4)
+            o.metric("Saldo inicial (simulado)", loyalty["opening_points"])
             a.metric("Pontos acumulados", loyalty["earned"])
             b.metric("Pontos resgatados", loyalty["redeemed"])
             c.metric("Saldo", loyalty["balance"])
-            st.caption("Tier: " + loyalty["tier"] + " · sem elegibilidade oficial inferida")
+            st.caption(
+                "Saldo = saldo inicial simulado + acumulados − resgatados. O acúmulo segue 1 ponto por "
+                "real (Regulamento do Azul Fidelidade, item 5.5.3); resgates e saldo inicial são "
+                "simulados. Tier: " + loyalty["tier"] + " · sem elegibilidade oficial inferida"
+            )
             st.dataframe(pd.DataFrame(loyalty["transactions"]), hide_index=True, width="stretch")
     elif page == "Segmentos":
         st.subheader("Perfis e oportunidades")

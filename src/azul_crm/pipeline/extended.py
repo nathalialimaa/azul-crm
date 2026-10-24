@@ -55,7 +55,8 @@ def generate(settings, count=400, seed=42, public=False):
     features = [FeatureBuilder().build(c.customer_id, trips, start, end) for c in customers]
     for c, f in zip(customers, features):
         own = [t for t in transactions if t["customer_id"] == c.customer_id]
-        earned = round(f.spend * 3)
+        # 1 ponto por R$ 1,00 (Regulamento, item 5.5.3); o nível poderia multiplicar
+        earned = round(f.spend)
         redeemed = sum(t["points_redeemed"] for t in own)
         opening = redeemed + rng.randint(0, 50000)
         loyalty.append(
