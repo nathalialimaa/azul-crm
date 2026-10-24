@@ -116,14 +116,14 @@ status = "hypothesis_unverified"
 code = "POINTS_BONUS"
 title = "Bônus de pontos condicionado a nova viagem"
 description = "Bônus de pontos ao cliente que voltar a voar. Valor, prazo e elegibilidade a definir pelo Azul Fidelidade."
-requires = "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (ainda não coletada)."
+requires = "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (o regulamento está na base, mas não fixa valores nem elegibilidade)."
 status = "hypothesis_unverified"
 
 [[offer]]
 code = "UPGRADE"
 title = "Cortesia de upgrade ou benefício de status"
 description = "Cortesia ou benefício para reconhecer o cliente fiel. Disponibilidade e elegibilidade a verificar."
-requires = "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (ainda não coletada)."
+requires = "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (o regulamento está na base, mas não fixa valores nem elegibilidade)."
 status = "hypothesis_unverified"
 
 [[offer]]

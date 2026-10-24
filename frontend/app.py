@@ -28,7 +28,11 @@ h1{font-size:2rem!important;letter-spacing:-.8px;color:#08234c} h2,h3{color:#082
 .kpi .label{font-size:13px;font-weight:600}.kpi .value{font-size:30px;font-weight:800;margin:8px 0 3px}.kpi .sub{font-size:12px;color:#6982a3}
 .kpi .icon{float:left;width:45px;height:45px;background:#e7f5ff;color:#008ff2;border-radius:50%;text-align:center;line-height:45px;margin-right:14px;font-size:22px}
 [data-testid="stVerticalBlockBorderWrapper"]>div{border-color:#e0edf9!important;background:white;border-radius:12px}
-.stButton>button[kind="primary"]{background:#087bfa;border:0} .stButton>button{border-radius:7px}
+.stButton>button[kind="primary"]{background:#087bfa;border:0;color:#fff} .stButton>button{border-radius:7px}
+.stButton>button[kind="primary"]:disabled{background:#c9d6e6;cursor:not-allowed}
+.stButton>button[kind="primary"]:disabled *{color:#5d7390!important}
+.stButton>button[kind="primary"]:not(:disabled) *{color:#fff!important}
+[data-testid="stSidebar"] .stButton>button *,[data-testid="stSidebar"] [data-baseweb="select"] *{color:#08234c!important}
 .action{background:#eaf5ff;border-radius:10px;padding:16px;margin-bottom:14px;color:#0068df}
 .small{font-size:12px;color:#6380a4}.factors{background:#fff2f3;color:#bf3844;padding:12px;border-radius:9px;font-size:13px;margin:8px 0}
 [data-testid="stMetric"]{background:#f6faff;border:1px solid #e6eff8;border-radius:10px;padding:12px}

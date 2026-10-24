@@ -27,7 +27,7 @@ def review_checklist(action: Action, offer: Offer | None) -> tuple[ChecklistItem
         ChecklistItem(
             "HUMAN_REVIEW",
             "Ler o rascunho e conferir os fatos citados. O sistema não envia mensagens.",
-            "internal://catalogo-acoes-mvp",
+            "Catálogo interno do MVP",
         ),
     ]
     if offer is not None:
@@ -35,7 +35,7 @@ def review_checklist(action: Action, offer: Offer | None) -> tuple[ChecklistItem
             ChecklistItem(
                 "OFFER_NOT_IN_MESSAGE",
                 "A oferta sugerida é uma hipótese a validar e não deve aparecer na mensagem.",
-                "internal://playbook",
+                "Playbook interno (hipótese)",
             )
         )
     return tuple(items)

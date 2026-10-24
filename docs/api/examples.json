@@ -419,7 +419,7 @@
         "title": "Bônus de pontos condicionado a nova viagem",
         "description": "Bônus de pontos ao cliente que voltar a voar. Valor, prazo e elegibilidade a definir pelo Azul Fidelidade.",
         "status": "hypothesis_unverified",
-        "requires": "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (ainda não coletada)."
+        "requires": "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (o regulamento está na base, mas não fixa valores nem elegibilidade)."
       },
       "channel": "email",
       "persona": "Alto Valor Esfriando",
@@ -432,12 +432,12 @@
         {
           "code": "HUMAN_REVIEW",
           "text": "Ler o rascunho e conferir os fatos citados. O sistema não envia mensagens.",
-          "source": "internal://catalogo-acoes-mvp"
+          "source": "Catálogo interno do MVP"
         },
         {
           "code": "OFFER_NOT_IN_MESSAGE",
           "text": "A oferta sugerida é uma hipótese a validar e não deve aparecer na mensagem.",
-          "source": "internal://playbook"
+          "source": "Playbook interno (hipótese)"
         }
       ]
     }

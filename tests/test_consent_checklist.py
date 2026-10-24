@@ -143,3 +143,23 @@ def test_local_gateway_enforces_the_same_rule_as_the_api(base):
     saved = gateway.decide(cid, "APPROVED", "ok", codes)
     assert saved["confirmed_checklist"] == codes and len(store.read("decisions")) == 1
     assert gateway.decide(cid, "REJECTED", "")["status"] == "REJECTED"
+
+
+def test_disabled_approve_button_and_sidebar_controls_stay_readable():
+    css = (REPO / "frontend/app.py").read_text(encoding="utf-8")
+    assert 'button[kind="primary"]:disabled' in css  # aprovar bloqueado precisa parecer bloqueado
+    assert '[data-testid="stSidebar"] .stButton>button *' in css  # texto escuro em botão branco
+    assert '[data-baseweb="select"] *{color:#08234c!important}' in css
+
+
+def test_checklist_sources_are_readable_and_offers_do_not_claim_the_rules_are_missing(base):
+    root, _ = base
+    container = build_container(Settings(root))
+    seen = set()
+    for customer in container.crm.customers()[:25]:
+        rec = container.recommendations.recommend(customer.customer_id)
+        seen |= {item.source for item in rec.review_checklist}
+        if rec.offer:
+            assert "ainda não coletada" not in rec.offer.requires
+    assert not any(source.startswith("internal://") for source in seen)
+    assert "Regulamento do Azul Fidelidade, item 3.6" in seen
