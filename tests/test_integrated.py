@@ -57,7 +57,11 @@ def test_pipeline_and_api(integrated):
             "/api/v1/agent/ask", json={"question": "Por que o risco?", "customer_id": cid}
         ).json()
         assert answer["mode"] == "structured_customer_facts"
-        response = api.post("/api/v1/decisions", json={"customer_id": cid, "status": "APPROVED"})
+        confirmed = [item["code"] for item in rec["review_checklist"]]
+        response = api.post(
+            "/api/v1/decisions",
+            json={"customer_id": cid, "status": "APPROVED", "confirmed_checklist": confirmed},
+        )
         assert response.status_code == 200 and response.json()["sent"] is False
         assert len(store.read("decisions")) == 1
         result = api.post(
@@ -93,12 +97,8 @@ def test_ollama_rejects_invalid_grounded_answer(integrated, monkeypatch, invalid
     allowed_citation = rag.chunks[0].document_id
     responses = {
         "malformed_json": "not json",
-        "unknown_citation": json.dumps(
-            {"answer": "Resposta", "citations": ["unknown-document#0"]}
-        ),
-        "non_string_citation": json.dumps(
-            {"answer": "Resposta", "citations": [123]}
-        ),
+        "unknown_citation": json.dumps({"answer": "Resposta", "citations": ["unknown-document#0"]}),
+        "non_string_citation": json.dumps({"answer": "Resposta", "citations": [123]}),
         "blank_answer": json.dumps({"answer": "   ", "citations": [allowed_citation]}),
     }
 

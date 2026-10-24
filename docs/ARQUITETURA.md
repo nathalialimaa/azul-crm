@@ -111,7 +111,7 @@ Prefixo `/api/v1`; contratos antigos preservados:
 | GET | /dashboard | Recorte, KPIs e linhas |
 | POST | /agent/ask | Consulta documental ou fatos do cliente |
 | POST | /simulations | Hipóteses, custo e equilíbrio |
-| POST | /decisions | Registro APPROVED/REJECTED, nunca envio |
+| POST | /decisions | Registro APPROVED/REJECTED, nunca envio. APPROVED exige `confirmed_checklist` com os itens da recomendação (consentimento, revisão humana) |
 | GET | /customers/{id}/loyalty | Fidelidade demonstrativa |
 | GET | /models | Métricas/seleção |
 

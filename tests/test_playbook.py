@@ -220,7 +220,11 @@ def test_api_recommendation_playbook_and_decision(base):
         assert plan["totals"]["customers"] == sum(r["customers"] for r in plan["rows"])
         assert api.get("/api/v1/playbook?months=0").status_code == 422
 
-        saved = api.post("/api/v1/decisions", json={"customer_id": cid, "status": "APPROVED"})
+        confirmed = [item["code"] for item in rec["review_checklist"]]
+        saved = api.post(
+            "/api/v1/decisions",
+            json={"customer_id": cid, "status": "APPROVED", "confirmed_checklist": confirmed},
+        )
         assert saved.status_code == 200 and saved.json()["sent"] is False
         stored = store.read("decisions")[0]["recommendation"]
         assert stored["offer"]["status"] == "hypothesis_unverified"

@@ -14,7 +14,7 @@ py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
 .\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address 127.0.0.1
 ```
 
-Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q` (180 testes).
+Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q` (186 testes).
 
 ## O que a base de demonstração mostra
 
@@ -74,7 +74,7 @@ Se o comando `py -3.12` falhar, confirme a instalação com `py --list`. Se a po
 2. Escolha um cliente no menu lateral. A matriz destaca o cliente selecionado.
 3. Confira fatores e clique em **Gerar mensagem para revisão**. Abra as evidências.
 4. Em **Clientes**, veja viagens e fidelidade sintética, inclusive resgates e pagamentos restritos simulados.
-5. Em **Ações de CRM**, aprove ou rejeite o rascunho. A decisão é registrada; nenhuma mensagem é enviada. Compare uma hipótese de custo e retenção no simulador.
+5. Em **Ações de CRM**, marque o checklist de revisão (consentimento de comunicação, revisão humana e oferta fora da mensagem) e aprove ou rejeite o rascunho. A aprovação só é registrada com o checklist confirmado, e nenhuma mensagem é enviada. Compare uma hipótese de custo e retenção no simulador.
 6. Em **Assistente IA**, consulte a metodologia; uma pergunta sem correspondência deve produzir abstenção.
 7. Em **Dados e modelos**, mostre método ativo, métricas e limitações. Exporte o recorte no rodapé.
 

@@ -67,6 +67,12 @@ class OfferResponse(ApiModel):
     requires: str
 
 
+class ChecklistItemResponse(ApiModel):
+    code: str
+    text: str
+    source: str
+
+
 class RecommendationResponse(ApiModel):
     customer_id: str
     action: ActionResponse
@@ -77,6 +83,7 @@ class RecommendationResponse(ApiModel):
     offer: OfferResponse | None = None
     channel: str | None = None
     persona: str | None = None
+    review_checklist: list[ChecklistItemResponse] = Field(default_factory=list)
 
 
 class RecommendationRequest(ApiModel):

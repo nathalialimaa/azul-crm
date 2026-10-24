@@ -1,1 +1,1258 @@
-{"openapi":"3.1.0","info":{"title":"CRM de Alto Valor — Protótipo privado","version":"0.1.0"},"paths":{"/health":{"get":{"summary":"Health","operationId":"health_health_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/metadata":{"get":{"summary":"Metadata","operationId":"metadata_api_v1_metadata_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/customers":{"get":{"summary":"Customers","operationId":"customers_api_v1_customers_get","parameters":[{"name":"offset","in":"query","required":false,"schema":{"type":"integer","minimum":0,"default":0,"title":"Offset"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","maximum":500,"minimum":1,"default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CustomerPage"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/customers/{customer_id}":{"get":{"summary":"Customer","operationId":"customer_api_v1_customers__customer_id__get","parameters":[{"name":"customer_id","in":"path","required":true,"schema":{"type":"string","title":"Customer Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DetailResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/customers/{customer_id}/scores":{"get":{"summary":"Scores","operationId":"scores_api_v1_customers__customer_id__scores_get","parameters":[{"name":"customer_id","in":"path","required":true,"schema":{"type":"string","title":"Customer Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ScoresResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/customers/{customer_id}/recommendations":{"get":{"summary":"Recommendations","operationId":"recommendations_api_v1_customers__customer_id__recommendations_get","parameters":[{"name":"customer_id","in":"path","required":true,"schema":{"type":"string","title":"Customer Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/RecommendationResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/retention/priorities":{"get":{"summary":"Priorities","operationId":"priorities_api_v1_retention_priorities_get","parameters":[{"name":"segment","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Segment"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","maximum":500,"minimum":1,"default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/ScoresResponse"},"title":"Response Priorities Api V1 Retention Priorities Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/segments":{"get":{"summary":"Segments","operationId":"segments_api_v1_segments_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/agent/recommend":{"post":{"summary":"Recommend","operationId":"recommend_api_v1_agent_recommend_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RecommendationRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/RecommendationResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/dashboard":{"get":{"summary":"Dashboard","operationId":"dashboard_api_v1_dashboard_get","parameters":[{"name":"months","in":"query","required":false,"schema":{"type":"integer","maximum":12,"minimum":1,"default":12,"title":"Months"}},{"name":"segment","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Segment"}},{"name":"route","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Route"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/simulations":{"post":{"summary":"Simulate","operationId":"simulate_api_v1_simulations_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SimulationRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/agent/ask":{"post":{"summary":"Ask","operationId":"ask_api_v1_agent_ask_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Question"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/decisions":{"post":{"summary":"Decide","operationId":"decide_api_v1_decisions_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Decision"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/customers/{customer_id}/loyalty":{"get":{"summary":"Loyalty","operationId":"loyalty_api_v1_customers__customer_id__loyalty_get","parameters":[{"name":"customer_id","in":"path","required":true,"schema":{"type":"string","title":"Customer Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/models":{"get":{"summary":"Models","operationId":"models_api_v1_models_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}}},"components":{"schemas":{"ActionResponse":{"properties":{"code":{"type":"string","title":"Code"},"title":{"type":"string","title":"Title"},"reason":{"type":"string","title":"Reason"}},"additionalProperties":false,"type":"object","required":["code","title","reason"],"title":"ActionResponse"},"CustomerPage":{"properties":{"items":{"items":{"$ref":"#/components/schemas/CustomerResponse"},"type":"array","title":"Items"},"total":{"type":"integer","title":"Total"},"offset":{"type":"integer","title":"Offset"},"limit":{"type":"integer","title":"Limit"}},"additionalProperties":false,"type":"object","required":["items","total","offset","limit"],"title":"CustomerPage"},"CustomerResponse":{"properties":{"customer_id":{"type":"string","title":"Customer Id"},"home_airport":{"type":"string","title":"Home Airport"},"preferred_channel":{"type":"string","title":"Preferred Channel"},"loyalty_tier":{"type":"string","title":"Loyalty Tier"},"is_synthetic":{"type":"boolean","title":"Is Synthetic"}},"additionalProperties":false,"type":"object","required":["customer_id","home_airport","preferred_channel","loyalty_tier","is_synthetic"],"title":"CustomerResponse"},"Decision":{"properties":{"customer_id":{"type":"string","title":"Customer Id"},"status":{"type":"string","pattern":"^(APPROVED|REJECTED)$","title":"Status"},"note":{"type":"string","maxLength":1000,"title":"Note","default":""}},"type":"object","required":["customer_id","status"],"title":"Decision"},"DetailResponse":{"properties":{"customer":{"$ref":"#/components/schemas/CustomerResponse"},"trips":{"items":{"$ref":"#/components/schemas/TripResponse"},"type":"array","title":"Trips"},"scores":{"$ref":"#/components/schemas/ScoresResponse"}},"additionalProperties":false,"type":"object","required":["customer","trips","scores"],"title":"DetailResponse"},"EvidenceResponse":{"properties":{"document_id":{"type":"string","title":"Document Id"},"title":{"type":"string","title":"Title"},"text":{"type":"string","title":"Text"},"source":{"type":"string","title":"Source"},"version":{"type":"string","title":"Version"},"is_demo":{"type":"boolean","title":"Is Demo"}},"additionalProperties":false,"type":"object","required":["document_id","title","text","source","version","is_demo"],"title":"EvidenceResponse"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"Question":{"properties":{"question":{"type":"string","maxLength":2000,"minLength":3,"title":"Question"},"customer_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Customer Id"}},"type":"object","required":["question"],"title":"Question"},"RecommendationRequest":{"properties":{"customer_id":{"type":"string","maxLength":80,"minLength":1,"title":"Customer Id"}},"additionalProperties":false,"type":"object","required":["customer_id"],"title":"RecommendationRequest"},"RecommendationResponse":{"properties":{"customer_id":{"type":"string","title":"Customer Id"},"action":{"$ref":"#/components/schemas/ActionResponse"},"draft":{"type":"string","title":"Draft"},"evidence":{"items":{"$ref":"#/components/schemas/EvidenceResponse"},"type":"array","title":"Evidence"},"status":{"type":"string","const":"DRAFT_REQUIRES_REVIEW","title":"Status"},"mode":{"type":"string","const":"demo_template","title":"Mode"}},"additionalProperties":false,"type":"object","required":["customer_id","action","draft","evidence","status","mode"],"title":"RecommendationResponse"},"ScoresResponse":{"properties":{"customer_id":{"type":"string","title":"Customer Id"},"value_score":{"type":"number","maximum":100.0,"minimum":0.0,"title":"Value Score"},"churn_risk":{"type":"number","maximum":1.0,"minimum":0.0,"title":"Churn Risk"},"priority_score":{"type":"number","maximum":100.0,"minimum":0.0,"title":"Priority Score"},"estimated_value_at_risk":{"type":"number","minimum":0.0,"title":"Estimated Value At Risk"},"segment":{"type":"string","title":"Segment"},"drivers":{"items":{"type":"string"},"type":"array","title":"Drivers"},"model_version":{"type":"string","title":"Model Version"},"evaluated_at":{"type":"string","format":"date","title":"Evaluated At"}},"additionalProperties":false,"type":"object","required":["customer_id","value_score","churn_risk","priority_score","estimated_value_at_risk","segment","drivers","model_version","evaluated_at"],"title":"ScoresResponse"},"SimulationRequest":{"properties":{"cost_per_customer":{"type":"number","maximum":100000.0,"minimum":0.0,"title":"Cost Per Customer","default":10},"assumed_retention":{"type":"number","maximum":1.0,"minimum":0.0,"title":"Assumed Retention","default":0.1},"months":{"type":"integer","maximum":12.0,"minimum":1.0,"title":"Months","default":12},"segment":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Segment"},"route":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Route"}},"type":"object","title":"SimulationRequest"},"TripResponse":{"properties":{"trip_id":{"type":"string","title":"Trip Id"},"customer_id":{"type":"string","title":"Customer Id"},"origin":{"type":"string","title":"Origin"},"destination":{"type":"string","title":"Destination"},"flight_date":{"type":"string","format":"date","title":"Flight Date"},"fare_amount":{"type":"number","minimum":0.0,"title":"Fare Amount"},"delay_minutes":{"type":"integer","minimum":0.0,"title":"Delay Minutes"}},"additionalProperties":false,"type":"object","required":["trip_id","customer_id","origin","destination","flight_date","fare_amount","delay_minutes"],"title":"TripResponse"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"},"input":{"title":"Input"},"ctx":{"type":"object","title":"Context"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CRM de Alto Valor — Protótipo privado",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metadata": {
+      "get": {
+        "summary": "Metadata",
+        "operationId": "metadata_api_v1_metadata_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers": {
+      "get": {
+        "summary": "Customers",
+        "operationId": "customers_api_v1_customers_get",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}": {
+      "get": {
+        "summary": "Customer",
+        "operationId": "customer_api_v1_customers__customer_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/scores": {
+      "get": {
+        "summary": "Scores",
+        "operationId": "scores_api_v1_customers__customer_id__scores_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoresResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/recommendations": {
+      "get": {
+        "summary": "Recommendations",
+        "operationId": "recommendations_api_v1_customers__customer_id__recommendations_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/retention/priorities": {
+      "get": {
+        "summary": "Priorities",
+        "operationId": "priorities_api_v1_retention_priorities_get",
+        "parameters": [
+          {
+            "name": "segment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Segment"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScoresResponse"
+                  },
+                  "title": "Response Priorities Api V1 Retention Priorities Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/segments": {
+      "get": {
+        "summary": "Segments",
+        "operationId": "segments_api_v1_segments_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agent/recommend": {
+      "post": {
+        "summary": "Recommend",
+        "operationId": "recommend_api_v1_agent_recommend_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "summary": "Dashboard",
+        "operationId": "dashboard_api_v1_dashboard_get",
+        "parameters": [
+          {
+            "name": "months",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 12,
+              "minimum": 1,
+              "default": 12,
+              "title": "Months"
+            }
+          },
+          {
+            "name": "segment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Segment"
+            }
+          },
+          {
+            "name": "route",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Route"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/simulations": {
+      "post": {
+        "summary": "Simulate",
+        "operationId": "simulate_api_v1_simulations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agent/ask": {
+      "post": {
+        "summary": "Ask",
+        "operationId": "ask_api_v1_agent_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Question"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/decisions": {
+      "post": {
+        "summary": "Decide",
+        "operationId": "decide_api_v1_decisions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Decision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}/loyalty": {
+      "get": {
+        "summary": "Loyalty",
+        "operationId": "loyalty_api_v1_customers__customer_id__loyalty_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/personas": {
+      "get": {
+        "summary": "Personas",
+        "operationId": "personas_api_v1_personas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/playbook": {
+      "get": {
+        "summary": "Playbook",
+        "operationId": "playbook_api_v1_playbook_get",
+        "parameters": [
+          {
+            "name": "months",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 12,
+              "minimum": 1,
+              "default": 12,
+              "title": "Months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lake": {
+      "get": {
+        "summary": "Lake",
+        "operationId": "lake_api_v1_lake_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/clv": {
+      "get": {
+        "summary": "Clv",
+        "operationId": "clv_api_v1_clv_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bias": {
+      "get": {
+        "summary": "Bias",
+        "operationId": "bias_api_v1_bias_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models": {
+      "get": {
+        "summary": "Models",
+        "operationId": "models_api_v1_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "reason"
+        ],
+        "title": "ActionResponse"
+      },
+      "ChecklistItemResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "text",
+          "source"
+        ],
+        "title": "ChecklistItemResponse"
+      },
+      "CustomerPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "title": "CustomerPage"
+      },
+      "CustomerResponse": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "home_airport": {
+            "type": "string",
+            "title": "Home Airport"
+          },
+          "preferred_channel": {
+            "type": "string",
+            "title": "Preferred Channel"
+          },
+          "loyalty_tier": {
+            "type": "string",
+            "title": "Loyalty Tier"
+          },
+          "is_synthetic": {
+            "type": "boolean",
+            "title": "Is Synthetic"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "home_airport",
+          "preferred_channel",
+          "loyalty_tier",
+          "is_synthetic"
+        ],
+        "title": "CustomerResponse"
+      },
+      "Decision": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "status": {
+            "type": "string",
+            "pattern": "^(APPROVED|REJECTED)$",
+            "title": "Status"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          },
+          "confirmed_checklist": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Confirmed Checklist"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "status"
+        ],
+        "title": "Decision"
+      },
+      "DetailResponse": {
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/CustomerResponse"
+          },
+          "trips": {
+            "items": {
+              "$ref": "#/components/schemas/TripResponse"
+            },
+            "type": "array",
+            "title": "Trips"
+          },
+          "scores": {
+            "$ref": "#/components/schemas/ScoresResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer",
+          "trips",
+          "scores"
+        ],
+        "title": "DetailResponse"
+      },
+      "EvidenceResponse": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "document_id",
+          "title",
+          "text",
+          "source",
+          "version",
+          "is_demo"
+        ],
+        "title": "EvidenceResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "OfferResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "hypothesis_unverified",
+              "verified"
+            ],
+            "title": "Status"
+          },
+          "requires": {
+            "type": "string",
+            "title": "Requires"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "description",
+          "status",
+          "requires"
+        ],
+        "title": "OfferResponse"
+      },
+      "Question": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Question"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "Question"
+      },
+      "RecommendationRequest": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Customer Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id"
+        ],
+        "title": "RecommendationRequest"
+      },
+      "RecommendationResponse": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "action": {
+            "$ref": "#/components/schemas/ActionResponse"
+          },
+          "draft": {
+            "type": "string",
+            "title": "Draft"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceResponse"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "status": {
+            "type": "string",
+            "const": "DRAFT_REQUIRES_REVIEW",
+            "title": "Status"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "demo_template",
+              "playbook_template"
+            ],
+            "title": "Mode"
+          },
+          "offer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OfferResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
+          },
+          "review_checklist": {
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItemResponse"
+            },
+            "type": "array",
+            "title": "Review Checklist"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "action",
+          "draft",
+          "evidence",
+          "status",
+          "mode"
+        ],
+        "title": "RecommendationResponse"
+      },
+      "ScoresResponse": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "value_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Value Score"
+          },
+          "churn_risk": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Churn Risk"
+          },
+          "priority_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Priority Score"
+          },
+          "estimated_value_at_risk": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Estimated Value At Risk"
+          },
+          "segment": {
+            "type": "string",
+            "title": "Segment"
+          },
+          "drivers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Drivers"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date",
+            "title": "Evaluated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "value_score",
+          "churn_risk",
+          "priority_score",
+          "estimated_value_at_risk",
+          "segment",
+          "drivers",
+          "model_version",
+          "evaluated_at"
+        ],
+        "title": "ScoresResponse"
+      },
+      "SimulationRequest": {
+        "properties": {
+          "cost_per_customer": {
+            "type": "number",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Cost Per Customer",
+            "default": 10
+          },
+          "assumed_retention": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Assumed Retention",
+            "default": 0.1
+          },
+          "months": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Months",
+            "default": 12
+          },
+          "segment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route"
+          }
+        },
+        "type": "object",
+        "title": "SimulationRequest"
+      },
+      "TripResponse": {
+        "properties": {
+          "trip_id": {
+            "type": "string",
+            "title": "Trip Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "destination": {
+            "type": "string",
+            "title": "Destination"
+          },
+          "flight_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Flight Date"
+          },
+          "fare_amount": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Fare Amount"
+          },
+          "delay_minutes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Delay Minutes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "trip_id",
+          "customer_id",
+          "origin",
+          "destination",
+          "flight_date",
+          "fare_amount",
+          "delay_minutes"
+        ],
+        "title": "TripResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

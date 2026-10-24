@@ -2,11 +2,43 @@ from collections import Counter
 
 from azul_crm.application.crm import CrmService
 from azul_crm.domain.decisions import EligibilityPolicy
-from azul_crm.domain.models import Action, Evidence, Offer, Recommendation
+from azul_crm.domain.models import Action, ChecklistItem, Evidence, Offer, Recommendation
 from azul_crm.domain.playbook import Playbook, PlaybookAction
 from azul_crm.domain.ports import KnowledgeRetriever, MessageGenerator
 
 PLAYBOOK_SOURCE = "internal://playbook (hipótese interna; não é política da Azul)"
+
+
+CONSENT_SOURCE = "Regulamento do Azul Fidelidade, item 3.6"
+
+
+def review_checklist(action: Action, offer: Offer | None) -> tuple[ChecklistItem, ...]:
+    """O que o revisor confirma antes de aprovar. Sem ação não há contato, logo não há checklist."""
+    if action.code == "NO_ACTION":
+        return ()
+    items = [
+        ChecklistItem(
+            "CONSENT",
+            "Confirmar o consentimento de comunicação do cliente antes de qualquer contato. "
+            "O cadastro autoriza e-mail, push, SMS e telefone, e a autorização pode ser revogada "
+            "a qualquer momento. Esta base sintética não tem dados de consentimento.",
+            CONSENT_SOURCE,
+        ),
+        ChecklistItem(
+            "HUMAN_REVIEW",
+            "Ler o rascunho e conferir os fatos citados. O sistema não envia mensagens.",
+            "internal://catalogo-acoes-mvp",
+        ),
+    ]
+    if offer is not None:
+        items.append(
+            ChecklistItem(
+                "OFFER_NOT_IN_MESSAGE",
+                "A oferta sugerida é uma hipótese a validar e não deve aparecer na mensagem.",
+                "internal://playbook",
+            )
+        )
+    return tuple(items)
 
 
 class _Facts(dict):
@@ -45,6 +77,7 @@ class RecommendationService:
                 evidence,
                 channel=customer.preferred_channel,
                 persona=scores.segment,
+                review_checklist=review_checklist(action, None),
             )
 
         definition, offer_def = self.playbook.decide(traits)
@@ -85,6 +118,7 @@ class RecommendationService:
             offer=offer,
             channel=customer.preferred_channel,
             persona=scores.segment,
+            review_checklist=review_checklist(action, offer),
         )
 
     def _playbook_evidence(self, definition: PlaybookAction) -> Evidence:

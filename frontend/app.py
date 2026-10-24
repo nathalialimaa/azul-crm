@@ -251,6 +251,12 @@ try:
                 evidence_ui(rec["evidence"])
             if st.button("Gerar mensagem para revisão", type="primary", width="stretch"):
                 st.info(rec["draft"])
+                if rec.get("review_checklist"):
+                    st.caption(
+                        "Antes de qualquer contato, confirme o consentimento de comunicação "
+                        "do cliente (Regulamento do Azul Fidelidade, item 3.6). "
+                        "A revisão completa fica em Ações de CRM."
+                    )
         left, right = st.columns([1.6, 1])
         with left, st.container(border=True):
             st.subheader("Quem precisa de atenção agora?")
@@ -449,13 +455,22 @@ try:
                 st.caption(rec["offer"]["description"])
                 st.caption("Requer: " + rec["offer"]["requires"])
         evidence_ui(rec["evidence"])
+        checklist = rec.get("review_checklist") or []
+        confirmed = []
+        if checklist:
+            st.markdown("**Checklist de revisão** · marque cada item para poder aprovar")
+            for item in checklist:
+                label = item["text"] + " (" + item["source"] + ")"
+                if st.checkbox(label, key="chk-" + cid + "-" + item["code"]):
+                    confirmed.append(item["code"])
+        ready = len(confirmed) == len(checklist)
         note = st.text_area("Observação da revisão")
         a, b = st.columns(2)
-        if a.button("Aprovar rascunho", type="primary"):
-            api.decide(cid, "APPROVED", note)
+        if a.button("Aprovar rascunho", type="primary", disabled=not ready):
+            api.decide(cid, "APPROVED", note, confirmed)
             st.success("Aprovação registrada. Nenhuma mensagem enviada.")
         if b.button("Rejeitar rascunho"):
-            api.decide(cid, "REJECTED", note)
+            api.decide(cid, "REJECTED", note, confirmed)
             st.success("Rejeição registrada.")
         st.subheader("Simular um cenário")
         cost = st.number_input("Custo por cliente (R$)", min_value=0.0, value=10.0)
@@ -470,7 +485,7 @@ try:
     elif page == "Assistente IA":
         st.subheader("Respostas com evidências")
         st.caption(
-            "Indicadores são calculados por código. O corpus disponível contém metodologia e catálogo interno, sem regulamento oficial validado."
+            "Indicadores são calculados por código. O corpus contém a metodologia e o catálogo internos e o regulamento público do Azul Fidelidade (versão novo-2024, vigência não validada)."
         )
         ask_ui(api, cid)
     elif page == "Auditoria de viés":

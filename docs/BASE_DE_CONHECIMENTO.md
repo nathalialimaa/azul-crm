@@ -42,6 +42,10 @@ vira "revisão manual" e nada é sugerido. Com o regulamento na base, essa busca
 trecho do catálogo primeiro; isso é conferido pelo script de verificação e por testes com bases
 grandes (`tests/test_big_knowledge.py`).
 
+Além da busca, toda recomendação traz um **checklist de revisão** cujo primeiro item cita o item 3.6
+do regulamento (consentimento de comunicação). O texto do checklist é fixo no código e **não vem da
+busca**; veja `docs/PLAYBOOK.md`.
+
 ## Como importar e verificar
 
 ```powershell
