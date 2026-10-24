@@ -471,6 +471,12 @@ TABLES = (
             Col("recommendation", "json", "Recomendação revisada, como JSON."),
             Col("created_at", "timestamp", "Momento da decisão (UTC)."),
             Col("sent", "bool", "Sempre falso: o MVP não envia mensagens."),
+            Col(
+                "confirmed_checklist",
+                "json",
+                "Códigos do checklist de revisão que o revisor confirmou.",
+                True,
+            ),
         ],
         primary_key=("id",),
     ),

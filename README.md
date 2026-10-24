@@ -74,7 +74,7 @@ Se o comando `py -3.12` falhar, confirme a instalação com `py --list`. Se a po
 2. Escolha um cliente no menu lateral. A matriz destaca o cliente selecionado.
 3. Confira fatores e clique em **Gerar mensagem para revisão**. Abra as evidências.
 4. Em **Clientes**, veja viagens e fidelidade sintética, inclusive resgates e pagamentos restritos simulados.
-5. Em **Ações de CRM**, aprove ou rejeite o rascunho. A decisão é registrada; nenhuma mensagem é enviada. Compare uma hipótese de custo e retenção no simulador.
+5. Em **Ações de CRM**, marque o checklist de revisão (consentimento de comunicação, revisão humana e oferta fora da mensagem) e aprove ou rejeite o rascunho. A aprovação só é registrada com o checklist confirmado, e nenhuma mensagem é enviada. Compare uma hipótese de custo e retenção no simulador.
 6. Em **Assistente IA**, consulte a metodologia; uma pergunta sem correspondência deve produzir abstenção.
 7. Em **Dados e modelos**, mostre método ativo, métricas e limitações. Exporte o recorte no rodapé.
 

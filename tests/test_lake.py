@@ -240,9 +240,12 @@ def test_decisions_and_missing_artifacts(root):
     store = Store(root)
     with TestClient(create_app(build_container(Settings(root)))) as api:
         cid = api.get("/api/v1/customers?limit=1").json()["items"][0]["customer_id"]
+        rec = api.post("/api/v1/agent/recommend", json={"customer_id": cid}).json()
+        confirmed = [item["code"] for item in rec["review_checklist"]]
         assert (
             api.post(
-                "/api/v1/decisions", json={"customer_id": cid, "status": "APPROVED"}
+                "/api/v1/decisions",
+                json={"customer_id": cid, "status": "APPROVED", "confirmed_checklist": confirmed},
             ).status_code
             == 200
         )
@@ -254,6 +257,7 @@ def test_decisions_and_missing_artifacts(root):
     decision = parquet(root / "lake", "gold.decisions").to_pylist()[0]
     assert json.loads(decision["recommendation"])["customer_id"] == cid
     assert decision["created_at"].tzinfo is not None and decision["sent"] is False
+    assert "CONSENT" in json.loads(decision["confirmed_checklist"])
 
 
 def test_stale_files_are_removed_when_a_table_becomes_empty(root):

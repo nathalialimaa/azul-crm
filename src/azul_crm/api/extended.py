@@ -70,6 +70,7 @@ class Decision(BaseModel):
     customer_id: str
     status: str = Field(pattern="^(APPROVED|REJECTED)$")
     note: str = Field("", max_length=1000)
+    confirmed_checklist: list[str] = Field(default_factory=list, max_length=20)
 
 
 @router.post("/decisions")
@@ -77,6 +78,12 @@ def decide(body: Decision, c=Depends(get_container)):
     rec = c.recommendations.recommend(body.customer_id)
     if body.status == "APPROVED" and rec.action.code == "NO_ACTION":
         raise HTTPException(409, "Sem evidência: inclua e revise as fontes antes de aprovar.")
+    if body.status == "APPROVED":
+        missing = [i.code for i in rec.review_checklist if i.code not in body.confirmed_checklist]
+        if missing:
+            raise HTTPException(
+                409, "Confirme o checklist de revisão antes de aprovar: " + ", ".join(missing)
+            )
     from dataclasses import asdict
 
     row = {

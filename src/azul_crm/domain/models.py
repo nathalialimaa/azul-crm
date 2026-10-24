@@ -113,6 +113,15 @@ class Offer:
 
 
 @dataclass(frozen=True)
+class ChecklistItem:
+    """Item que o revisor humano confirma antes de aprovar um rascunho."""
+
+    code: str
+    text: str
+    source: str
+
+
+@dataclass(frozen=True)
 class Recommendation:
     customer_id: str
     action: Action
@@ -123,3 +132,4 @@ class Recommendation:
     offer: Offer | None = None
     channel: str | None = None
     persona: str | None = None
+    review_checklist: tuple[ChecklistItem, ...] = ()

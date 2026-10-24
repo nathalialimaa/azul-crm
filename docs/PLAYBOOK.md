@@ -32,6 +32,26 @@ Define a **próxima melhor ação** de cada persona. Substitui as duas ações g
   genérico em vez de inventar um número.
 - Todo rascunho exige revisão humana e nada é enviado.
 
+## Checklist de revisão
+
+Toda recomendação que gera um contato traz um checklist que o revisor confirma antes de aprovar:
+
+| Item | O que confirma | Fonte |
+| --- | --- | --- |
+| `CONSENT` | O cliente consentiu receber comunicação (e-mail, push, SMS ou telefone) e pode revogar a qualquer momento | Regulamento do Azul Fidelidade, item 3.6 |
+| `HUMAN_REVIEW` | O rascunho foi lido e os fatos citados conferidos; o sistema não envia mensagens | Catálogo interno |
+| `OFFER_NOT_IN_MESSAGE` | A oferta sugerida é hipótese e não aparece na mensagem (só quando há oferta) | Playbook |
+
+**A regra vale no servidor.** A API recusa `APPROVED` (erro 409) se o pedido não trouxer em
+`confirmed_checklist` todos os códigos do checklist, e a tela em modo local aplica a mesma regra. Na
+tela, o botão "Aprovar rascunho" fica bloqueado até todas as caixas serem marcadas. Rejeitar não exige
+o checklist. Os códigos confirmados ficam gravados na decisão (`gold.decisions.confirmed_checklist`).
+
+**O que isso não faz:** o sistema **não verifica** o consentimento, porque a base sintética não tem
+esse dado. O checklist obriga uma pessoa a confirmar; com dados reais, o ideal é trocar a
+confirmação manual por uma consulta ao cadastro de consentimento. Recomendações sem ação
+(`NO_ACTION`) não geram contato e não têm checklist.
+
 ## O que mudou na tela
 
 - **Ações de CRM**: tabela de estratégia por persona (ação, oferta, custo e valor protegido

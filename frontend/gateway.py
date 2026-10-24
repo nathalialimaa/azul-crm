@@ -118,19 +118,36 @@ class Gateway:
             (r for r in Store(self.settings.root).read("loyalty") if r["customer_id"] == cid), {}
         )
 
-    def decide(self, cid, status, note):
+    def decide(self, cid, status, note, confirmed=None):
+        confirmed = list(confirmed or [])
         if self.http:
             return self.request(
-                "POST", "/decisions", json={"customer_id": cid, "status": status, "note": note}
+                "POST",
+                "/decisions",
+                json={
+                    "customer_id": cid,
+                    "status": status,
+                    "note": note,
+                    "confirmed_checklist": confirmed,
+                },
             )
         rec = self.recommend(cid)
         if status == "APPROVED" and rec["action"]["code"] == "NO_ACTION":
             raise ValueError("Sem evidências; aprovação bloqueada")
+        if status == "APPROVED":
+            missing = [
+                i["code"] for i in rec.get("review_checklist", []) if i["code"] not in confirmed
+            ]
+            if missing:
+                raise ValueError(
+                    "Confirme o checklist de revisão antes de aprovar: " + ", ".join(missing)
+                )
         row = {
             "id": str(uuid4()),
             "customer_id": cid,
             "status": status,
             "note": note,
+            "confirmed_checklist": confirmed,
             "recommendation": rec,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "sent": False,
