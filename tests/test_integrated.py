@@ -97,8 +97,12 @@ def test_ollama_rejects_invalid_grounded_answer(integrated, monkeypatch, invalid
     allowed_citation = rag.chunks[0].document_id
     responses = {
         "malformed_json": "not json",
-        "unknown_citation": json.dumps({"answer": "Resposta", "citations": ["unknown-document#0"]}),
-        "non_string_citation": json.dumps({"answer": "Resposta", "citations": [123]}),
+        "unknown_citation": json.dumps(
+            {"answer": "Resposta", "citations": ["unknown-document#0"]}
+        ),
+        "non_string_citation": json.dumps(
+            {"answer": "Resposta", "citations": [123]}
+        ),
         "blank_answer": json.dumps({"answer": "   ", "citations": [allowed_citation]}),
     }
 

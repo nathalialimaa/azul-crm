@@ -784,7 +784,8 @@ def export_lake(root: Path, store, out: Path | None = None, batch_size: int | No
             schema, writer = arrow_schema(table), None
             digest, total, number = hashlib.sha256(), 0, 1
             primary_key_indexes = [
-                [column.name for column in table.columns].index(key) for key in table.primary_key
+                [column.name for column in table.columns].index(key)
+                for key in table.primary_key
             ]
             seen_primary_keys = set()
             flag = (
