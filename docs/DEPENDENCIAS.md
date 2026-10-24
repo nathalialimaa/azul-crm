@@ -85,7 +85,7 @@ OLLAMA_MODEL=qwen2.5:3b
 
 **Corpus oficial (bloqueia benefícios específicos):**
 
-1. Abra o regulamento público vigente e documentos de benefícios autorizados. O conteúdo do regulamento não pôde ser extraído neste ambiente.
+1. O regulamento público (versão "novo-2024") foi copiado manualmente e importado em 23/10/2026 como `fidelidade-regulamento`. Para benefícios específicos, abra os documentos de benefícios autorizados e repita o procedimento.
 2. Copie o texto pertinente para um JSON UTF-8 em `data/knowledge`, no formato dos exemplos existentes:
 
 ```json

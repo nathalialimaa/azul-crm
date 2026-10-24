@@ -28,5 +28,7 @@ def test_methodology_stays_in_a_single_retrieval_chunk():
 
 def test_assistant_explains_value_and_risk_with_the_current_method():
     answer = DocumentIndex(REPO).answer("Como o valor e o risco são calculados?")
-    assert [e["document_id"] for e in answer["evidence"]] == ["metodo-mvp-v2#0"]
+    assert (
+        answer["evidence"][0]["document_id"] == "metodo-mvp-v2#0"
+    )  # o primeiro, mesmo com mais documentos
     assert "20%" in answer["answer"] and "CLV" in answer["answer"]

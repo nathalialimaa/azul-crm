@@ -13,6 +13,7 @@ enunciado pede para documentar. Comece pelo `README.md`.
 | `PLAYBOOK.md` | A ação de cada persona e as proteções que impedem prometer benefício |
 | `AUDITORIA_VIES.md` | Como medimos viés e como evitamos falso alarme, com taxas de erro |
 | `MODELO_CHURN.md` | Quando o modelo de churn substitui a regra, e por que não substitui hoje |
+| `BASE_DE_CONHECIMENTO.md` | O que o assistente consulta (incluindo o regulamento do Azul Fidelidade), como importar e verificar, e os limites da busca |
 | `CALIBRACAO_PUBLICA.md` | Dados da ANAC: fontes, comandos, números e limites |
 | `DATA_LAKE.md` | Camadas bronze, silver e gold em Parquet, dicionário de dados e DDL do Snowflake |
 | `DEPLOY.md` | Docker, senha opcional e opções de hospedagem |

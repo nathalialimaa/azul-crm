@@ -24,7 +24,14 @@ def test_index_does_not_point_to_missing_documents():
 def test_readme_points_to_the_index_and_has_no_stale_claims():
     readme = (REPO / "README.md").read_text(encoding="utf-8")
     assert "docs/INDICE.md" in readme
-    for stale in ["score 0–100 no eixo vertical", "O ZIP inclui um snapshot", "MVP integrado v0.2"]:
+    stale_claims = [
+        "score 0–100 no eixo vertical",
+        "O ZIP inclui um snapshot",
+        "MVP integrado v0.2",
+        "Não contém regulamento oficial de fidelidade validado",
+        "a base de conhecimento não tem o regulamento oficial",
+    ]
+    for stale in stale_claims:
         assert stale not in readme
 
 
@@ -32,3 +39,19 @@ def test_readme_documents_the_public_data_sources_and_commands():
     readme = (REPO / "README.md").read_text(encoding="utf-8")
     for needle in ["sistemas.anac.gov.br/sas/downloads", "dadosabertos", "cli fares", "cli vra"]:
         assert needle in readme
+
+
+def test_validation_matrix_has_no_stale_claims():
+    text = (DOCS / "VALIDACAO.md").read_text(encoding="utf-8")
+    for stale in ["24 testes passaram", "validar CSV real", "segmentação por clustering e análise"]:
+        assert stale not in text
+
+
+def test_knowledge_doc_matches_the_imported_regulation_when_present():
+    import json
+
+    imported = REPO / "data/knowledge/fidelidade-regulamento.json"
+    if not imported.exists():  # o regulamento é importado e commitado pela equipe
+        return
+    version = json.loads(imported.read_text(encoding="utf-8"))["version"]
+    assert version in (DOCS / "BASE_DE_CONHECIMENTO.md").read_text(encoding="utf-8")

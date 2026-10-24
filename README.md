@@ -4,7 +4,7 @@ Painel de inteligência de CRM que encontra clientes de alto valor, mostra quem 
 
 **Os clientes são sintéticos.** Tarifas, demanda por rota e atrasos podem ser calibrados com dados públicos da ANAC (veja "Calibração com dados da ANAC"). Nenhum dado real da empresa foi usado.
 
-**Leia primeiro:** esta entrega roda localmente, mas não está homologada no Snowflake, o assistente não usa LLM (o rascunho da mensagem vem de template) e a base de conhecimento não tem o regulamento oficial do Azul Fidelidade. O repositório e o protótipo devem permanecer privados conforme o enunciado. Índice dos documentos e premissas: `docs/INDICE.md`. Pendências: `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`.
+**Leia primeiro:** esta entrega roda localmente, mas não está homologada no Snowflake, o assistente não usa LLM (o rascunho da mensagem vem de template) e o regulamento público do Azul Fidelidade está na base apenas para consulta (o assistente busca por semelhança de palavras e não valida a vigência nem benefícios específicos). O repositório e o protótipo devem permanecer privados conforme o enunciado. Índice dos documentos e premissas: `docs/INDICE.md`. Pendências: `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`.
 
 ## Em três comandos (Windows / PowerShell)
 
@@ -14,7 +14,7 @@ py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
 .\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address 127.0.0.1
 ```
 
-Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q` (166 testes).
+Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q` (176 testes).
 
 ## O que a base de demonstração mostra
 
@@ -192,7 +192,7 @@ Siga `docs/DEPENDENCIAS.md`: contas, permissões, variáveis, comandos e verific
 - A demonstração entregue usa `CRM_STORAGE=sqlite` explicitamente.
 - `RAG_PROVIDER=local` usa TF-IDF e resposta extrativa, sem LLM.
 - `RAG_PROVIDER=ollama` usa embeddings e geração locais. É preciso instalar os modelos e construir o índice. Integração implementada, não executada com modelos reais nesta entrega.
-- O corpus entregue contém metodologia e regras internas do MVP. **Não contém regulamento oficial de fidelidade validado.**
+- O corpus contém a metodologia e o catálogo internos do MVP e o **regulamento público do Azul Fidelidade** (versão "novo-2024", copiada manualmente em 23/10/2026; último aditamento registrado em 28/02/2024). A importação **não certifica a vigência**, e o regulamento não fixa valores de bônus nem de upgrade. Veja `docs/BASE_DE_CONHECIMENTO.md`.
 - MLflow registra métricas e o artefato JSON se habilitado; não fornece infraestrutura gratuita.
 - Hospedagem externa, autenticação dos avaliadores e submissão não foram realizadas.
 
@@ -216,8 +216,8 @@ Os documentos anteriores foram preservados em `docs/legacy`; descrevem o estado 
 
 ## Limites que permanecem
 
-**Feito:** coleta real das tarifas (setembro de 2026) e do VRA (agosto de 2026), com calibração de tarifa média, demanda por rota e atrasos; CLV de 12 meses com premissas explícitas; personas; auditoria de viés com taxa de erro medida; lake em Parquet com dicionário de dados.
+**Feito:** coleta real das tarifas (setembro de 2026) e do VRA (agosto de 2026), com calibração de tarifa média, demanda por rota e atrasos; regulamento público do Azul Fidelidade na base do assistente; CLV de 12 meses com premissas explícitas; personas; auditoria de viés com taxa de erro medida; lake em Parquet com dicionário de dados.
 
-**Pendente ou sem homologação:** integração Snowflake real (o DDL tipado foi gerado, mas nunca executado), execução do Ollama e do MLflow, regulamento oficial do Azul Fidelidade na base do assistente, agente com LLM (o rascunho vem de template), SHAP (as explicações são lineares), análise de sentimento público e a publicação privada do protótipo.
+**Pendente ou sem homologação:** integração Snowflake real (o DDL tipado foi gerado, mas nunca executado), execução do Ollama e do MLflow, validação da vigência e dos benefícios específicos do Azul Fidelidade, agente com LLM (o rascunho vem de template), SHAP (as explicações são lineares), análise de sentimento público e a publicação privada do protótipo.
 
 Clientes, fidelidade, resgates, comportamento e desfechos são sintéticos, e a margem e o desconto do CLV são hipóteses. Não alegue que todos os requisitos analíticos do hackathon estão concluídos: a entrega fornece um fluxo local executável, com evidências e lacunas explícitas.
