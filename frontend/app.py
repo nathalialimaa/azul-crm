@@ -32,7 +32,8 @@ h1{font-size:2rem!important;letter-spacing:-.8px;color:#08234c} h2,h3{color:#082
 .stButton>button[kind="primary"]:disabled{background:#c9d6e6;cursor:not-allowed}
 .stButton>button[kind="primary"]:disabled *{color:#5d7390!important}
 .stButton>button[kind="primary"]:not(:disabled) *{color:#fff!important}
-[data-testid="stSidebar"] .stButton>button *,[data-testid="stSidebar"] [data-baseweb="select"] *{color:#08234c!important}
+[data-testid="stSidebar"] .stButton>button *{color:#08234c!important}
+[data-testid="stSidebar"] [data-baseweb="select"]>div{background:#0b3a6e!important;border-color:#2f6aa8!important}
 .action{background:#eaf5ff;border-radius:10px;padding:16px;margin-bottom:14px;color:#0068df}
 .small{font-size:12px;color:#6380a4}.factors{background:#fff2f3;color:#bf3844;padding:12px;border-radius:9px;font-size:13px;margin:8px 0}
 [data-testid="stMetric"]{background:#f6faff;border:1px solid #e6eff8;border-radius:10px;padding:12px}

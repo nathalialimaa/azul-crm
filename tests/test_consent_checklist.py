@@ -149,7 +149,10 @@ def test_disabled_approve_button_and_sidebar_controls_stay_readable():
     css = (REPO / "frontend/app.py").read_text(encoding="utf-8")
     assert 'button[kind="primary"]:disabled' in css  # aprovar bloqueado precisa parecer bloqueado
     assert '[data-testid="stSidebar"] .stButton>button *' in css  # texto escuro em botão branco
-    assert '[data-baseweb="select"] *{color:#08234c!important}' in css
+    assert (
+        '[data-baseweb="select"]>div{background:#0b3a6e!important' in css
+    )  # fundo escuro, texto claro
+    assert '[data-baseweb="select"] *{color:#08234c' not in css  # texto escuro em fundo escuro some
 
 
 def test_checklist_sources_are_readable_and_offers_do_not_claim_the_rules_are_missing(base):
