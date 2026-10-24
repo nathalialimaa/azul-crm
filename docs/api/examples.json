@@ -4,21 +4,15 @@
     "path": "/api/v1/metadata",
     "status": 200,
     "body": {
-      "risk_method": "heuristic_not_calibrated",
-      "agent_mode": "retrieval_extractive",
-      "schema_version": "2.0",
+      "schema_version": "1.0",
       "mode": "demo_fixture",
       "seed": 42,
       "observation_start": "2025-10-01",
       "observation_end": "2026-09-30",
-      "customer_count": 400,
-      "trip_count": 6046,
+      "customer_count": 40,
+      "trip_count": 589,
       "calibrated_with_public_data": false,
-      "notes": "Clientes, fidelidade, resgates, atrasos e desfechos simulados. Sem clientes reais.",
-      "calibration_scope": "none",
-      "delay_calibration": null,
-      "churn_label_status": "synthetic_generated",
-      "storage": "sqlite",
+      "notes": "Sem treino de ML, rótulos de churn ou regras oficiais de fidelidade.",
       "scoring_policy": {
         "spend_weight": 0.5,
         "frequency_weight": 0.3,
@@ -29,14 +23,13 @@
         "high_value_threshold": 70.0,
         "high_risk_threshold": 0.6
       },
-      "segmenter": "kmeans_personas_v1",
-      "clv_policy": {
-        "margin": 0.15,
-        "discount_rate": 0.1,
-        "top_share": 0.2,
-        "horizon_months": 12
+      "planned_outcome_window": {
+        "outcome_start": "2026-10-01",
+        "outcome_end": "2027-03-31"
       },
-      "playbook": "playbook_v1"
+      "churn_label_status": "planned_not_generated",
+      "risk_method": "heuristic_not_calibrated",
+      "agent_mode": "demo_template"
     }
   },
   "customers": {
@@ -60,7 +53,7 @@
           "is_synthetic": true
         }
       ],
-      "total": 400,
+      "total": 40,
       "offset": 0,
       "limit": 2
     }
@@ -120,7 +113,7 @@
           "origin": "REC",
           "destination": "GRU",
           "flight_date": "2026-02-07",
-          "fare_amount": 898.02,
+          "fare_amount": 1122.53,
           "delay_minutes": 180
         },
         {
@@ -165,7 +158,7 @@
           "origin": "REC",
           "destination": "GRU",
           "flight_date": "2025-12-27",
-          "fare_amount": 700.94,
+          "fare_amount": 876.18,
           "delay_minutes": 0
         },
         {
@@ -192,7 +185,7 @@
           "origin": "REC",
           "destination": "GRU",
           "flight_date": "2026-03-04",
-          "fare_amount": 692.83,
+          "fare_amount": 866.04,
           "delay_minutes": 0
         },
         {
@@ -201,7 +194,7 @@
           "origin": "REC",
           "destination": "GRU",
           "flight_date": "2026-04-05",
-          "fare_amount": 811.33,
+          "fare_amount": 1014.16,
           "delay_minutes": 0
         },
         {
@@ -243,20 +236,18 @@
       ],
       "scores": {
         "customer_id": "SYN-0001",
-        "value_score": 73.27,
+        "value_score": 75.42,
         "churn_risk": 0.6761,
-        "priority_score": 49.54,
-        "estimated_value_at_risk": 11599.71,
-        "segment": "Alto Valor Esfriando",
+        "priority_score": 50.99,
+        "estimated_value_at_risk": 12124.22,
+        "segment": "Alto Valor em Risco",
         "drivers": [
-          "Gasto observado: R$ 17156.80",
+          "Gasto observado: R$ 17932.59",
           "Frequência: 18",
           "Recência: 152 dias",
-          "Taxa de viagens com atraso >= 60 min: 28%",
-          "Persona: Alto Valor Esfriando (distância ao centro do grupo: 1.02)",
-          "Gastam e voam acima da média da base, estão há bastante tempo sem voar. Em média: R$ 21.988 gastos, 25 viagens, 158 dias desde a última viagem."
+          "Taxa de viagens com atraso >= 60 min: 28%"
         ],
-        "model_version": "value_baseline_v1+baseline_heuristic_v1+kmeans_personas_v1",
+        "model_version": "value_baseline_v1+baseline_heuristic_v1",
         "evaluated_at": "2026-09-30"
       }
     }
@@ -267,20 +258,18 @@
     "status": 200,
     "body": {
       "customer_id": "SYN-0001",
-      "value_score": 73.27,
+      "value_score": 75.42,
       "churn_risk": 0.6761,
-      "priority_score": 49.54,
-      "estimated_value_at_risk": 11599.71,
-      "segment": "Alto Valor Esfriando",
+      "priority_score": 50.99,
+      "estimated_value_at_risk": 12124.22,
+      "segment": "Alto Valor em Risco",
       "drivers": [
-        "Gasto observado: R$ 17156.80",
+        "Gasto observado: R$ 17932.59",
         "Frequência: 18",
         "Recência: 152 dias",
-        "Taxa de viagens com atraso >= 60 min: 28%",
-        "Persona: Alto Valor Esfriando (distância ao centro do grupo: 1.02)",
-        "Gastam e voam acima da média da base, estão há bastante tempo sem voar. Em média: R$ 21.988 gastos, 25 viagens, 158 dias desde a última viagem."
+        "Taxa de viagens com atraso >= 60 min: 28%"
       ],
-      "model_version": "value_baseline_v1+baseline_heuristic_v1+kmeans_personas_v1",
+      "model_version": "value_baseline_v1+baseline_heuristic_v1",
       "evaluated_at": "2026-09-30"
     }
   },
@@ -290,39 +279,35 @@
     "status": 200,
     "body": [
       {
-        "customer_id": "SYN-0077",
-        "value_score": 80.0,
-        "churn_risk": 0.825,
-        "priority_score": 66.0,
-        "estimated_value_at_risk": 23787.79,
-        "segment": "Alto Valor Esfriando",
+        "customer_id": "SYN-0021",
+        "value_score": 83.22,
+        "churn_risk": 0.7515,
+        "priority_score": 62.54,
+        "estimated_value_at_risk": 21542.65,
+        "segment": "Alto Valor em Risco",
         "drivers": [
-          "Gasto observado: R$ 28833.69",
-          "Frequência: 30",
-          "Recência: 186 dias",
-          "Taxa de viagens com atraso >= 60 min: 50%",
-          "Persona: Alto Valor Esfriando (distância ao centro do grupo: 0.99)",
-          "Gastam e voam acima da média da base, estão há bastante tempo sem voar. Em média: R$ 21.988 gastos, 25 viagens, 158 dias desde a última viagem."
+          "Gasto observado: R$ 28666.20",
+          "Frequência: 27",
+          "Recência: 151 dias",
+          "Taxa de viagens com atraso >= 60 min: 59%"
         ],
-        "model_version": "value_baseline_v1+baseline_heuristic_v1+kmeans_personas_v1",
+        "model_version": "value_baseline_v1+baseline_heuristic_v1",
         "evaluated_at": "2026-09-30"
       },
       {
-        "customer_id": "SYN-0045",
-        "value_score": 80.56,
-        "churn_risk": 0.8187,
-        "priority_score": 65.95,
-        "estimated_value_at_risk": 19472.8,
-        "segment": "Alto Valor Esfriando",
+        "customer_id": "SYN-0013",
+        "value_score": 79.72,
+        "churn_risk": 0.7697,
+        "priority_score": 61.36,
+        "estimated_value_at_risk": 18094.99,
+        "segment": "Alto Valor em Risco",
         "drivers": [
-          "Gasto observado: R$ 23785.03",
-          "Frequência: 24",
-          "Recência: 175 dias",
-          "Taxa de viagens com atraso >= 60 min: 54%",
-          "Persona: Alto Valor Esfriando (distância ao centro do grupo: 1.00)",
-          "Gastam e voam acima da média da base, estão há bastante tempo sem voar. Em média: R$ 21.988 gastos, 25 viagens, 158 dias desde a última viagem."
+          "Gasto observado: R$ 23509.14",
+          "Frequência: 22",
+          "Recência: 160 dias",
+          "Taxa de viagens com atraso >= 60 min: 55%"
         ],
-        "model_version": "value_baseline_v1+baseline_heuristic_v1+kmeans_personas_v1",
+        "model_version": "value_baseline_v1+baseline_heuristic_v1",
         "evaluated_at": "2026-09-30"
       }
     ]
@@ -333,20 +318,20 @@
     "status": 200,
     "body": [
       {
-        "segment": "Alto Valor Esfriando",
-        "count": 102
+        "segment": "Alto Valor em Risco",
+        "count": 10
       },
       {
-        "segment": "Baixo Volume Ativo",
-        "count": 119
+        "segment": "Lazer com Potencial",
+        "count": 19
       },
       {
-        "segment": "Baixo Volume Ativo com Atrasos Frequentes",
-        "count": 81
+        "segment": "Premium Leal",
+        "count": 10
       },
       {
-        "segment": "Fiéis de Alto Valor",
-        "count": 98
+        "segment": "Reativação de Baixo Custo",
+        "count": 1
       }
     ]
   },
@@ -389,57 +374,23 @@
     "body": {
       "customer_id": "SYN-0001",
       "action": {
-        "code": "WIN_BACK_PERSONAL",
-        "title": "Reativação personalizada",
-        "reason": "Cliente de alto valor há bastante tempo sem voar: contato pessoal antes de perder a relação."
+        "code": "CONTACT_SUPPORT",
+        "title": "Contato de escuta",
+        "reason": "Entender possíveis atritos, sem prometer benefícios."
       },
-      "draft": "Olá! Faz 152 dias desde a sua última viagem com a gente e sentimos a sua falta. Há algo que possamos fazer para facilitar a sua próxima viagem na rota REC-GRU? [Rascunho para revisão humana; nenhuma mensagem foi enviada.]",
+      "draft": "Olá, SYN-0001! Gostaríamos de ouvir como foi sua experiência de viagem e entender como podemos melhorar nosso atendimento. Rascunho de demonstração; revisar antes de qualquer contato.",
       "evidence": [
         {
-          "document_id": "catalogo-mvp-v2#0",
-          "title": "Relacionamento e contato sem benefício prometido",
-          "text": "O catálogo interno permite contato de escuta para compreender atritos e contato de relacionamento para manter proximidade. Nenhuma mensagem é enviada. Toda recomendação exige revisão humana. Bônus de pontos, upgrade e resgate não são autorizados sem regra pública vigente e elegibilidade verificada. Estas são regras internas do protótipo, não políticas oficiais do Azul Fidelidade.",
-          "source": "internal://catalogo-acoes-mvp",
-          "version": "2026-10-21",
-          "is_demo": true
-        },
-        {
-          "document_id": "playbook-WIN_BACK_PERSONAL",
-          "title": "Playbook · Reativação personalizada",
-          "text": "Alto valor esfriando: contato personalizado perguntando se algo impede a próxima viagem. Sem oferta comercial no texto.",
-          "source": "internal://playbook (hipótese interna; não é política da Azul)",
-          "version": "playbook_v1",
+          "document_id": "demo-contact-v1",
+          "title": "Catálogo fictício de contato de relacionamento",
+          "text": "No protótipo, contato de relacionamento sem benefício comercial pode gerar somente um rascunho para revisão humana. Nenhum bônus, upgrade, desconto ou concessão é autorizado por este documento fictício.",
+          "source": "fixture interna de demonstração; não é política da Azul",
+          "version": "1.0",
           "is_demo": true
         }
       ],
       "status": "DRAFT_REQUIRES_REVIEW",
-      "mode": "playbook_template",
-      "offer": {
-        "code": "POINTS_BONUS",
-        "title": "Bônus de pontos condicionado a nova viagem",
-        "description": "Bônus de pontos ao cliente que voltar a voar. Valor, prazo e elegibilidade a definir pelo Azul Fidelidade.",
-        "status": "hypothesis_unverified",
-        "requires": "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (ainda não coletada)."
-      },
-      "channel": "email",
-      "persona": "Alto Valor Esfriando",
-      "review_checklist": [
-        {
-          "code": "CONSENT",
-          "text": "Confirmar o consentimento de comunicação do cliente antes de qualquer contato. O cadastro autoriza e-mail, push, SMS e telefone, e a autorização pode ser revogada a qualquer momento. Esta base sintética não tem dados de consentimento.",
-          "source": "Regulamento do Azul Fidelidade, item 3.6"
-        },
-        {
-          "code": "HUMAN_REVIEW",
-          "text": "Ler o rascunho e conferir os fatos citados. O sistema não envia mensagens.",
-          "source": "internal://catalogo-acoes-mvp"
-        },
-        {
-          "code": "OFFER_NOT_IN_MESSAGE",
-          "text": "A oferta sugerida é uma hipótese a validar e não deve aparecer na mensagem.",
-          "source": "internal://playbook"
-        }
-      ]
+      "mode": "demo_template"
     }
   }
 }
