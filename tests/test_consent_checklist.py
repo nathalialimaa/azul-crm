@@ -111,6 +111,9 @@ def test_screen_blocks_approval_until_every_item_is_checked(base):
         return next(b for b in at.button if b.label == "Aprovar rascunho")
 
     assert len(at.checkbox) >= 2 and approve_button().disabled
+    labels = [box.label for box in at.checkbox]
+    assert "Fonte: Regulamento do Azul Fidelidade, item 3.6." in labels[0]
+    assert not any("((" in label or "))" in label for label in labels)  # sem parênteses duplos
     at.checkbox[0].check().run()
     assert approve_button().disabled  # ainda faltam itens
     for box in at.checkbox:
@@ -150,8 +153,9 @@ def test_disabled_approve_button_and_sidebar_controls_stay_readable():
     assert 'button[kind="primary"]:disabled' in css  # aprovar bloqueado precisa parecer bloqueado
     assert '[data-testid="stSidebar"] .stButton>button *' in css  # texto escuro em botão branco
     assert (
-        '[data-baseweb="select"]>div{background:#0b3a6e!important' in css
-    )  # fundo escuro, texto claro
+        '[data-testid="stSelectbox"] [role="group"]' in css
+    )  # a caixa real, nesta versão do Streamlit
+    assert "{background:#0b3a6e!important" in css  # fundo escuro, com o texto claro do menu
     assert '[data-baseweb="select"] *{color:#08234c' not in css  # texto escuro em fundo escuro some
 
 

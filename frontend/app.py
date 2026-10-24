@@ -33,7 +33,8 @@ h1{font-size:2rem!important;letter-spacing:-.8px;color:#08234c} h2,h3{color:#082
 .stButton>button[kind="primary"]:disabled *{color:#5d7390!important}
 .stButton>button[kind="primary"]:not(:disabled) *{color:#fff!important}
 [data-testid="stSidebar"] .stButton>button *{color:#08234c!important}
-[data-testid="stSidebar"] [data-baseweb="select"]>div{background:#0b3a6e!important;border-color:#2f6aa8!important}
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [role="group"],[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"]>div{background:#0b3a6e!important;border-color:#2f6aa8!important}
+[data-testid="stSidebar"] [data-testid="stSelectbox"] input{color:#e1efff!important;-webkit-text-fill-color:#e1efff!important;opacity:1!important}
 .action{background:#eaf5ff;border-radius:10px;padding:16px;margin-bottom:14px;color:#0068df}
 .small{font-size:12px;color:#6380a4}.factors{background:#fff2f3;color:#bf3844;padding:12px;border-radius:9px;font-size:13px;margin:8px 0}
 [data-testid="stMetric"]{background:#f6faff;border:1px solid #e6eff8;border-radius:10px;padding:12px}
@@ -471,7 +472,7 @@ try:
         if checklist:
             st.markdown("**Checklist de revisão** · marque cada item para poder aprovar")
             for item in checklist:
-                label = item["text"] + " (" + item["source"] + ")"
+                label = item["text"] + " Fonte: " + item["source"] + "."
                 if st.checkbox(label, key="chk-" + cid + "-" + item["code"]):
                     confirmed.append(item["code"])
         ready = len(confirmed) == len(checklist)
