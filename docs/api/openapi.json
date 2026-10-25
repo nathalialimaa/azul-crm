@@ -540,110 +540,6 @@
         }
       }
     },
-    "/api/v1/personas": {
-      "get": {
-        "summary": "Personas",
-        "operationId": "personas_api_v1_personas_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/playbook": {
-      "get": {
-        "summary": "Playbook",
-        "operationId": "playbook_api_v1_playbook_get",
-        "parameters": [
-          {
-            "name": "months",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 12,
-              "minimum": 1,
-              "default": 12,
-              "title": "Months"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/lake": {
-      "get": {
-        "summary": "Lake",
-        "operationId": "lake_api_v1_lake_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/clv": {
-      "get": {
-        "summary": "Clv",
-        "operationId": "clv_api_v1_clv_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/bias": {
-      "get": {
-        "summary": "Bias",
-        "operationId": "bias_api_v1_bias_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/models": {
       "get": {
         "summary": "Models",
@@ -686,30 +582,6 @@
           "reason"
         ],
         "title": "ActionResponse"
-      },
-      "ChecklistItemResponse": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code"
-          },
-          "text": {
-            "type": "string",
-            "title": "Text"
-          },
-          "source": {
-            "type": "string",
-            "title": "Source"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "code",
-          "text",
-          "source"
-        ],
-        "title": "ChecklistItemResponse"
       },
       "CustomerPage": {
         "properties": {
@@ -887,44 +759,6 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "OfferResponse": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "hypothesis_unverified",
-              "verified"
-            ],
-            "title": "Status"
-          },
-          "requires": {
-            "type": "string",
-            "title": "Requires"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "code",
-          "title",
-          "description",
-          "status",
-          "requires"
-        ],
-        "title": "OfferResponse"
-      },
       "Question": {
         "properties": {
           "question": {
@@ -994,43 +828,8 @@
           },
           "mode": {
             "type": "string",
-            "enum": [
-              "demo_template",
-              "playbook_template"
-            ],
+            "const": "demo_template",
             "title": "Mode"
-          },
-          "offer": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/OfferResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "channel": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Channel"
-          },
-          "persona": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Persona"
           },
           "review_checklist": {
             "items": {
@@ -1252,6 +1051,30 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "ChecklistItemResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "text",
+          "source"
+        ],
+        "title": "ChecklistItemResponse"
       }
     }
   }

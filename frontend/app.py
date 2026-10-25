@@ -497,7 +497,7 @@ try:
     elif page == "Assistente IA":
         st.subheader("Respostas com evidências")
         st.caption(
-            "Indicadores são calculados por código. O corpus contém a metodologia e o catálogo internos e o regulamento público do Azul Fidelidade (versão novo-2024, vigência não validada)."
+            "Indicadores são calculados por código. O corpus disponível contém metodologia e catálogo interno, sem regulamento oficial validado."
         )
         ask_ui(api, cid)
     elif page == "Auditoria de viés":

@@ -25,6 +25,10 @@ QUESTIONS = [
 ]
 
 
+def provenance_label(is_demo: bool) -> str:
+    return "demonstração" if is_demo else "público/importado"
+
+
 def ask(index, questions) -> None:
     for question in questions:
         answer = index.answer(question)
@@ -48,7 +52,7 @@ def main() -> int:
     for name, count in per_document.items():
         source, demo = sources[name]
         print(
-            f"  {name:<28} {count:>3} trechos | {'demonstração' if demo else 'oficial'} | {source[:60]}"
+            f"  {name:<28} {count:>3} trechos | {provenance_label(demo)} | {source[:60]}"
         )
     print(f"  total: {len(index.chunks)} trechos")
 

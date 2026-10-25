@@ -25,7 +25,7 @@ O texto fica em repositório privado. Se o repositório um dia for público, rem
 Os números entre parênteses são os itens do regulamento.
 
 - **Níveis (12.1):** Básico, Topázio, Safira e Diamante, por pontos qualificáveis, trechos qualificáveis ou gasto aéreo. A qualificação zera todo ano, em 1º de janeiro (11.7).
-- **Acúmulo (5.5.3):** 1 ponto a cada R$ 1,00 da tarifa, podendo variar conforme o nível. A fidelidade simulada do app segue essa regra; os resgates e o saldo inicial são simulados.
+- **Acúmulo (5.5.3):** 1 ponto a cada R$ 1,00 da tarifa, podendo variar conforme o nível.
 - **Validade (6.1):** no mínimo 24 meses a partir do acúmulo.
 - **Pontos Bônus (1.1.7):** são "dados mediante uma campanha promocional". O regulamento permite promoções por prazo determinado (14.7) e dá até 90 dias, depois do fim da campanha, para creditar (5.2 e 14.18).
 - **Mudança de regras (12.5):** a Azul pode alterar regras e benefícios dos níveis com aviso prévio de 15 dias.

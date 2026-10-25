@@ -4,7 +4,7 @@
 
 Ambientes: Windows com Python 3.11 (máquina da equipe) e Linux com Python 3.12.
 
-- `python -m pytest -q`: **190 testes passaram** nos dois ambientes. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
+- `python -m pytest -q`: **180 testes passaram** nos dois ambientes. Um aviso de depreciação Starlette/httpx, sem falhas; não suprimido.
 - `python -m ruff check .`: passou. O CI do GitHub passou no pull request da integração.
 - `python -m azul_crm.cli prepare` e `demo`: base de demonstração com 400 clientes sintéticos. `validate`: Gold SQL válida; clientes, viagens, features, desfechos e fidelidade consistentes.
 - **Dados reais da ANAC, arquivos oficiais baixados manualmente:** tarifas de setembro de 2026 (892.505 registros; 45 sem aeroporto reconhecido) e VRA de agosto de 2026 (88.064 linhas; 24 rejeitadas por estarem fora do mês). Testadas também idempotência, período inválido, NaN, preservação de ausências e aeroportos desconhecidos.
