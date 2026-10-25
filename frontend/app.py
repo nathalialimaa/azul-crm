@@ -28,7 +28,13 @@ h1{font-size:2rem!important;letter-spacing:-.8px;color:#08234c} h2,h3{color:#082
 .kpi .label{font-size:13px;font-weight:600}.kpi .value{font-size:30px;font-weight:800;margin:8px 0 3px}.kpi .sub{font-size:12px;color:#6982a3}
 .kpi .icon{float:left;width:45px;height:45px;background:#e7f5ff;color:#008ff2;border-radius:50%;text-align:center;line-height:45px;margin-right:14px;font-size:22px}
 [data-testid="stVerticalBlockBorderWrapper"]>div{border-color:#e0edf9!important;background:white;border-radius:12px}
-.stButton>button[kind="primary"]{background:#087bfa;border:0} .stButton>button{border-radius:7px}
+.stButton>button[kind="primary"]{background:#087bfa;border:0;color:#fff} .stButton>button{border-radius:7px}
+.stButton>button[kind="primary"]:disabled{background:#c9d6e6;cursor:not-allowed}
+.stButton>button[kind="primary"]:disabled *{color:#5d7390!important}
+.stButton>button[kind="primary"]:not(:disabled) *{color:#fff!important}
+[data-testid="stSidebar"] .stButton>button *{color:#08234c!important}
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [role="group"],[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"]>div{background:#0b3a6e!important;border-color:#2f6aa8!important}
+[data-testid="stSidebar"] [data-testid="stSelectbox"] input{color:#e1efff!important;-webkit-text-fill-color:#e1efff!important;opacity:1!important}
 .action{background:#eaf5ff;border-radius:10px;padding:16px;margin-bottom:14px;color:#0068df}
 .small{font-size:12px;color:#6380a4}.factors{background:#fff2f3;color:#bf3844;padding:12px;border-radius:9px;font-size:13px;margin:8px 0}
 [data-testid="stMetric"]{background:#f6faff;border:1px solid #e6eff8;border-radius:10px;padding:12px}
@@ -285,17 +291,23 @@ try:
         st.subheader("Visão 360 · " + cid)
         detail = api.customer(cid)
         st.write("**Fatores:**")
-        st.write(detail["scores"]["drivers"])
+        for driver in detail["scores"]["drivers"]:
+            st.markdown("- " + driver)
         trips = pd.DataFrame(detail["trips"])
         st.dataframe(trips, hide_index=True, width="stretch")
         st.subheader("Fidelidade simulada")
         loyalty = api.loyalty(cid)
         if loyalty:
-            a, b, c = st.columns(3)
+            o, a, b, c = st.columns(4)
+            o.metric("Saldo inicial (simulado)", loyalty["opening_points"])
             a.metric("Pontos acumulados", loyalty["earned"])
             b.metric("Pontos resgatados", loyalty["redeemed"])
             c.metric("Saldo", loyalty["balance"])
-            st.caption("Tier: " + loyalty["tier"] + " · sem elegibilidade oficial inferida")
+            st.caption(
+                "Saldo = saldo inicial simulado + acumulados − resgatados. O acúmulo segue 1 ponto por "
+                "real (Regulamento do Azul Fidelidade, item 5.5.3); resgates e saldo inicial são "
+                "simulados. Tier: " + loyalty["tier"] + " · sem elegibilidade oficial inferida"
+            )
             st.dataframe(pd.DataFrame(loyalty["transactions"]), hide_index=True, width="stretch")
     elif page == "Segmentos":
         st.subheader("Perfis e oportunidades")
@@ -460,7 +472,7 @@ try:
         if checklist:
             st.markdown("**Checklist de revisão** · marque cada item para poder aprovar")
             for item in checklist:
-                label = item["text"] + " (" + item["source"] + ")"
+                label = item["text"] + " Fonte: " + item["source"] + "."
                 if st.checkbox(label, key="chk-" + cid + "-" + item["code"]):
                     confirmed.append(item["code"])
         ready = len(confirmed) == len(checklist)
