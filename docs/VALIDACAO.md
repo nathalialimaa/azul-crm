@@ -30,7 +30,67 @@ Sem evidência adicional, não declarar como realizado: **Snowflake real**, **Ol
 
 ## Comandos e CI
 
-Os comandos de validação reproduzíveis são `python -m ruff check .`, `python -m pytest -q`, `python -m azul_crm.pipeline.cli demo`, `python -m azul_crm.pipeline.cli validate`, `python scripts/export_contracts.py` e `python -m azul_crm.cli prepare --customers 120`. Nesta atualização documental eles **não foram executados**; o CI de `develop@5d7fafc` passou com Gitleaks, Ruff, 191 testes, demo, validação, exportação de contratos e preparo de 120 clientes. Workflow: `.github/workflows/ci.yml`.
+Todos os comandos abaixo devem ser executados a partir da raiz do repositório/worktree:
+
+```bash
+cd /home/linho/Documentos/Projects/Hackathon/Avanade/.maestri/floors/azul-crm--docsmatriz-final-requisitos
+python -m ruff check .
+python -m pytest -q
+python -m pytest -q \
+  tests/test_clv.py::test_estimate_formula \
+  tests/test_personas.py::test_training_produces_balanced_named_personas \
+  tests/test_playbook.py::test_each_persona_gets_its_own_action_and_evidence \
+  tests/test_integrated.py::test_pipeline_and_api \
+  tests/test_public_demand.py::test_public_generation_uses_real_demand_end_to_end \
+  tests/test_vra_delays.py::test_public_generation_uses_real_delays_when_the_vra_is_ingested \
+  tests/test_lake.py::test_dictionary_describes_every_table_and_column \
+  tests/test_lake.py::test_snowflake_ddl_is_typed_and_explicit_about_being_untested \
+  tests/test_flow.py::test_missing_evidence_blocks_action \
+  tests/test_big_knowledge.py::test_assistant_finds_a_new_clause_and_still_abstains \
+  tests/test_knowledge.py::test_assistant_explains_value_and_risk_with_the_current_method \
+  tests/test_bias_audit.py::test_calibration_and_recall_are_reported_per_group \
+  tests/test_deploy.py::test_prepare_builds_everything_once_and_is_idempotent \
+  tests/test_consent_checklist.py::test_api_refuses_approval_without_the_confirmed_checklist \
+  tests/test_verificar_base_conhecimento.py::test_non_demo_documents_are_labeled_public_imported \
+  tests/test_customer_page.py::test_points_accrue_one_per_real_and_the_balance_adds_up
+python -m azul_crm.pipeline.cli demo
+python -m azul_crm.pipeline.cli validate
+python scripts/export_contracts.py
+python -m azul_crm.cli prepare --customers 120
+```
+
+O bloco direcionado é evidência de teste reproduzível, não resultado desta atualização. Nesta atualização documental os comandos **não foram executados**; o CI de `develop@5d7fafc` passou com Gitleaks, Ruff, 191 testes, demo, validação, exportação de contratos e preparo de 120 clientes. Workflow: `.github/workflows/ci.yml`.
+
+## Glossário para iniciantes
+
+- **MVP:** produto mínimo viável, uma primeira versão funcional para validar a ideia.
+- **CLV:** *Customer Lifetime Value*, valor estimado de um cliente ao longo do tempo.
+- **Churn:** evasão; risco de o cliente deixar de comprar ou voar.
+- **LLM:** modelo de linguagem grande, usado para gerar ou interpretar texto.
+- **RAG:** busca documentos relevantes antes de responder; aqui a resposta deve citar evidências.
+- **Groundedness:** grau em que uma resposta está apoiada nas evidências recuperadas, em vez de inventar fatos.
+- **SHAP:** método para explicar quanto cada variável contribuiu para uma previsão; não está implementado neste MVP.
+- **K-means:** algoritmo que agrupa registros semelhantes em grupos (*clusters*).
+- **API:** interface HTTP usada por programas para trocar dados; **UI** é a interface visual usada por pessoas.
+- **CI:** integração contínua; o workflow executado pelo GitHub para verificar o repositório.
+- **DDL:** comandos SQL que descrevem/criam tabelas e seus tipos.
+- **Parquet:** formato colunar aberto para armazenar tabelas com esquema.
+- **Streamlit/AppTest:** framework da interface visual e ferramenta de teste dessa interface sem navegador.
+- **Fail-closed:** em caso de falta de evidência ou consentimento, bloquear a ação em vez de aprová-la.
+- **Bronze/Silver/Gold:** camadas do data lake: dados brutos, tratados e prontos para consumo.
+- **ANAC/VRA:** Agência Nacional de Aviação Civil e o conjunto de dados de voos regulares ativos.
+
+## Pitch: roteiro de apresentação versus requisito técnico
+
+O PDF oficial usa “pitch” como **entregável de apresentação de até cinco minutos** (p. 9), e sugere tópicos de solução na p. 7. Isso orienta o roteiro, mas não transforma vídeo em teste técnico nem comprova integrações externas.
+
+| Tópico sugerido no pitch (PDF, p. 7) | Onde a solução o demonstra | Evidência | Classificação |
+|---|---|---|---|
+| Modelo de identificação de alto valor | CLV, risco e explicações em `src/azul_crm/domain/clv.py`, `src/azul_crm/pipeline/modeling.py` e UI | `tests/test_clv.py::test_high_value_is_a_percentile_of_potential_value`; métricas sintéticas | **Roteiro apoiado parcialmente**; não é desempenho real |
+| Segmentação de personas | K-means e perfis em `src/azul_crm/pipeline/personas.py` | `tests/test_personas.py::test_training_produces_balanced_named_personas` | **Roteiro apoiado localmente** na base sintética |
+| Estratégia de ativação/retenção | Playbook por persona em `config/playbook.toml` e `src/azul_crm/domain/playbook.py` | `tests/test_playbook.py::test_each_persona_gets_its_own_action_and_evidence` | **Roteiro apoiado parcialmente**; ofertas continuam hipóteses |
+| Protótipo funcional | Streamlit/API em `frontend/app.py` e `src/azul_crm/api/` | `tests/test_customer_page.py::test_customer_page_shows_the_opening_balance_and_lists_the_factors`; CI demo | **Requisito técnico comprovado localmente** |
+| Vídeo de até cinco minutos | Não há vídeo versionado neste checkout | Entrega externa da organização, PDF p. 9 | **Entregável externo bloqueado**, não requisito técnico comprovado pelo código |
 
 ## Evidência histórica de validação local/CI
 
