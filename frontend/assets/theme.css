@@ -50,3 +50,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 
 .st-key-radar-panel,.st-key-action-panel,.st-key-queue-panel,.st-key-copilot-panel{background:#fff!important;border-color:var(--az-line)!important;border-radius:var(--az-radius)!important;transition:border-color .2s ease}
 .flight-masthead:after{transition:transform .3s ease}.flight-masthead:hover:after{transform:translateX(-12px)}
+
+/* Não reservar largura para a navegação nativa quando ela estiver recolhida. */
+[data-testid="stSidebar"][data-collapsed="true"]{min-width:0!important;max-width:0!important;width:0!important}

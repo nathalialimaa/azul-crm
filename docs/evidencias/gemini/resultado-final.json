@@ -34,6 +34,21 @@
     "local_font_loaded": true,
     "taste_lint_failures": 0,
     "taste_lint_warnings": 2,
-    "mobile_emulation": "not_run"
+    "mobile_emulation": "passed_css_viewport",
+    "tested_viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        768,
+        1024
+      ],
+      [
+        1440,
+        1000
+      ]
+    ],
+    "tablet_collapsed_sidebar": "fixed_and_verified_main_x_0"
   }
 }
