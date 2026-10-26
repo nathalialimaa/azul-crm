@@ -10,12 +10,15 @@
   },
   "automated": {
     "full_run": {
-      "passed": 263,
-      "failed": 1,
-      "failure": "docs/VERCEL.md ausente do índice, corrigido e retestado"
+      "passed": 265,
+      "failed": 0,
+      "warnings": 1,
+      "source": "GitHub Actions · Python 3.11 / Linux",
+      "url": "https://github.com/nathalialimaa/azul-crm/actions/runs/40418744552",
+      "verified_code_revision": "327d722d89592a7bffddcf3bcc4105aadd603c34"
     },
     "corrected_targeted_run": {
-      "passed": 44
+      "passed": 45
     },
     "lint": "passed",
     "javascript_syntax": "passed",
