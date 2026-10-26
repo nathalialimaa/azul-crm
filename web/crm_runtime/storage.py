@@ -76,7 +76,7 @@ class Storage:
     def reserve(self, bucket, limit, cooldown=20):
         now = time.time()
         if self.remote:
-            script = "local n=tonumber(redis.call('GET',KEYS[1]) or '0'); local t=tonumber(redis.call('GET',KEYS[2]) or '0'); if n>=tonumber(ARGV[1]) then return -1 end; if tonumber(ARGV[2])-t<tonumber(ARGV[3]) then return -2 end; redis.call('SET',KEYS[1],n+1,'EX',172800); redis.call('SET',KEYS[2],ARGV[2],'EX',172800); return n+1"
+            script = "local n=tonumber(redis.call('GET',KEYS[1]) or '0'); local t=tonumber(redis.call('GET',KEYS[2]) or '0'); if n>=tonumber(ARGV[1]) then return -1 end; if tonumber(ARGV[3])>0 and tonumber(ARGV[2])-t<tonumber(ARGV[3]) then return -2 end; redis.call('SET',KEYS[1],n+1,'EX',172800); redis.call('SET',KEYS[2],ARGV[2],'EX',172800); return n+1"
             return int(
                 self.redis(
                     "EVAL",
@@ -96,7 +96,7 @@ class Storage:
             value = json.loads(row[0]) if row else {"count": 0, "last": 0}
             if value["count"] >= limit:
                 return -1
-            if now - value["last"] < cooldown:
+            if cooldown > 0 and now - value["last"] < cooldown:
                 return -2
             value = {"count": value["count"] + 1, "last": now}
             db.execute("INSERT OR REPLACE INTO kv VALUES (?,?)", (key, json.dumps(value)))

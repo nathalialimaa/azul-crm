@@ -163,7 +163,11 @@ def dashboard(months=12, segment=None, route=None):
             continue
         row = copy.deepcopy(source)
         row["frequency"] = len(trips)
+        row["recency_days"] = (end - max(date.fromisoformat(t["flight_date"]) for t in trips)).days
         row["observed_spend"] = round(sum(t["fare_amount"] for t in trips), 2)
+        annual = row["observed_spend"] * 365.25 / ((end - start).days + 1)
+        row["clv_12m_proxy"] = round(annual * (1 - 0.5 * row["churn_risk"]), 2)
+        row["weighted_value_at_risk"] = round(row["clv_12m_proxy"] * row["churn_risk"], 2)
         row["route"] = Counter(t["origin"] + "-" + t["destination"] for t in trips).most_common(1)[
             0
         ][0]

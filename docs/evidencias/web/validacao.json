@@ -18,7 +18,9 @@
       "passed": 44
     },
     "lint": "passed",
-    "javascript_syntax": "passed"
+    "javascript_syntax": "passed",
+    "concurrency_correction": "Intervalo zero agora ignora a comparação temporal, evitando bloqueio espúrio com solicitações concorrentes fora de ordem; cota continua atômica.",
+    "web_final_tests": 18
   },
   "runtime": {
     "minimal_python_environment": "passed",

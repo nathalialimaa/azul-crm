@@ -267,3 +267,24 @@ def test_generated_runtime_matches_canonical_sources():
         assert (ROOT / original).read_text(encoding="utf-8") == (
             ROOT / "web/crm_runtime" / generated
         ).read_text(encoding="utf-8")
+
+
+def test_filtered_observed_values_match_selected_trips(client):
+    response = client.get("/api/dashboard?months=3").json()
+    from datetime import date, timedelta
+
+    end = date.fromisoformat(web.snapshot()["dashboard"]["rows"][0]["evaluated_at"])
+    start = end - timedelta(days=round(3 * 365.25 / 12) - 1)
+    for row in response["rows"]:
+        trips = [
+            t
+            for t in web.snapshot()["customers"][row["customer_id"]]["trips"]
+            if start.isoformat() <= t["flight_date"] <= end.isoformat()
+        ]
+        assert row["frequency"] == len(trips)
+        assert (
+            row["recency_days"]
+            == (end - max(date.fromisoformat(t["flight_date"]) for t in trips)).days
+        )
+        assert row["observed_spend"] == round(sum(t["fare_amount"] for t in trips), 2)
+        assert row["weighted_value_at_risk"] == round(row["clv_12m_proxy"] * row["churn_risk"], 2)
