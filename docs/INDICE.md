@@ -58,3 +58,5 @@ Apenas dados públicos da ANAC, e só quando ingeridos: tarifas aéreas domésti
 - [`REVISAO_FINAL.md`](REVISAO_FINAL.md)
 - [`BASE_REGULATORIA_OFERTAS.md`](BASE_REGULATORIA_OFERTAS.md)
 - [Roteiro de execução](../LEIA_PRIMEIRO.md)
+
+| `VERCEL.md` | Interface web, variáveis privadas, Redis e publicação na Vercel |

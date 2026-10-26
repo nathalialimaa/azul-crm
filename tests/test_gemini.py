@@ -144,6 +144,7 @@ def test_model_name_cannot_change_endpoint(monkeypatch):
 
 
 def test_temporary_overload_retries_then_returns_real_response(monkeypatch):
+    monkeypatch.setenv("GEMINI_MAX_ATTEMPTS", "3")
     monkeypatch.setenv("GEMINI_API_KEY", "unit-test-key")
     monkeypatch.setattr("azul_crm.infrastructure.gemini.time.sleep", lambda delay: None)
     replies = iter(
@@ -161,6 +162,7 @@ def test_temporary_overload_retries_then_returns_real_response(monkeypatch):
 
 
 def test_retry_respects_overall_deadline(monkeypatch):
+    monkeypatch.setenv("GEMINI_MAX_ATTEMPTS", "3")
     monkeypatch.setenv("GEMINI_API_KEY", "unit-test-key")
     times = iter([0, 0, 46])
     monkeypatch.setattr("azul_crm.infrastructure.gemini.time.monotonic", lambda: next(times))

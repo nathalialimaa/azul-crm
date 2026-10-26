@@ -1,3 +1,5 @@
+> **Interface principal na Vercel:** use a pasta `web` e siga [VERCEL.md](VERCEL.md). As instruções abaixo preservam o ambiente analítico Streamlit/Docker.
+
 # Deploy do protótipo
 
 O protótipo é **confidencial**: repositório privado, acesso só para avaliadores. Antes de

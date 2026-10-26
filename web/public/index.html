@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#061e42" />
+    <meta
+      name="description"
+      content="Inteligência de CRM: valor, risco e relacionamento em uma única visão de voo."
+    />
+    <title>Azul · CRM Intelligence</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Ir para o conteúdo</a>
+    <div id="login" class="login-screen" hidden>
+      <form id="login-form" class="login-card">
+        <div class="brand">
+          <span class="mosaic" aria-hidden="true"
+            ><i></i><i></i><i></i><i></i></span
+          ><span>Azul</span>
+        </div>
+        <p class="eyebrow">CRM Intelligence</p>
+        <h1>Uma nova perspectiva<br />para decidir.</h1>
+        <p>Demonstração privada com carteira sintética e revisão humana.</p>
+        <label for="password">Senha de acesso</label
+        ><input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        /><button class="primary" type="submit">
+          Entrar no cockpit <span aria-hidden="true">→</span>
+        </button>
+        <p id="login-error" role="alert"></p>
+      </form>
+    </div>
+    <div id="app" hidden>
+      <aside id="sidebar" class="sidebar" aria-label="Navegação principal">
+        <a class="brand" href="#overview" aria-label="Azul CRM — visão geral"
+          ><span class="mosaic" aria-hidden="true"
+            ><i></i><i></i><i></i><i></i></span
+          ><span>Azul</span></a
+        >
+        <p class="brand-sub">CRM Intelligence</p>
+        <div class="workspace">
+          <span class="live-dot"></span> Carteira de demonstração
+        </div>
+        <nav id="navigation"></nav>
+        <div class="sidebar-bottom">
+          <div class="orbital" aria-hidden="true">✈</div>
+          <p>Mais que destinos.<br /><strong>Conexões que importam.</strong></p>
+          <small>Dados sintéticos · ANAC como referência</small
+          ><button id="logout" class="logout">Sair da sessão</button>
+        </div>
+      </aside>
+      <div id="nav-backdrop" hidden></div>
+      <div class="workspace-main">
+        <header class="topbar">
+          <button
+            id="menu"
+            class="icon-button mobile-menu"
+            aria-label="Abrir navegação"
+            aria-expanded="false"
+          >
+            ☰
+          </button>
+          <div class="top-search">
+            <span id="search-icon"></span
+            ><label class="sr-only" for="global-search"
+              >Buscar cliente pelo código</label
+            ><input
+              id="global-search"
+              placeholder="Buscar cliente pelo código, ex.: SYN-0077"
+              autocomplete="off"
+            /><kbd>↵</kbd>
+          </div>
+          <div class="top-meta">
+            <span class="live-dot"></span><span>Ambiente de demonstração</span
+            ><span class="account-avatar" title="CRM Intelligence">CI</span>
+          </div>
+        </header>
+        <main id="main" tabindex="-1">
+          <div id="content" aria-live="polite">
+            <div class="loading">Preparando sua visão de voo…</div>
+          </div>
+        </main>
+        <footer>
+          <span>Azul CRM Intelligence</span
+          ><span
+            >Carteira sintética · Sem envio de campanhas · Revisão humana</span
+          >
+        </footer>
+      </div>
+    </div>
+    <dialog id="review-dialog" aria-labelledby="dialog-title">
+      <div id="review-content"></div>
+    </dialog>
+    <div id="toast" role="status" hidden></div>
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>

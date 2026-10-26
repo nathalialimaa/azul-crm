@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-26",
+  "gemini": {
+    "real_requests_by_agent": 1,
+    "maximum_authorized": 5,
+    "http_status": 503,
+    "automatic_retries": 0,
+    "model": "gemini-3.8-flash",
+    "secret_versioned": false
+  },
+  "automated": {
+    "full_run": {
+      "passed": 263,
+      "failed": 1,
+      "failure": "docs/VERCEL.md ausente do índice, corrigido e retestado"
+    },
+    "corrected_targeted_run": {
+      "passed": 44
+    },
+    "lint": "passed",
+    "javascript_syntax": "passed"
+  },
+  "runtime": {
+    "minimal_python_environment": "passed",
+    "heavy_dependencies_loaded": false,
+    "customers": 400,
+    "snapshot_sha256": "3f46c7d680ec593ee0af05a3e04dffaff0e5191bab3789606a1d8ce75f3e3654"
+  },
+  "browser": {
+    "screens_checked": 8,
+    "desktop_width": 1440,
+    "tablet_width": 768,
+    "mobile_width": 390,
+    "horizontal_page_overflow": false,
+    "sentiment_form": "passed",
+    "local_draft_preview": "passed"
+  },
+  "vercel": {
+    "configuration_schema": "passed (Draft7 instance validation)",
+    "deployed": false,
+    "external_redis_credentials_required": true
+  }
+}

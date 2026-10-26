@@ -30,6 +30,10 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -e ".[dev]"
       - run: ruff check .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check web/public/assets/app.js
       - run: pytest -q
       - run: python -m azul_crm.pipeline.cli demo
       - run: python -m azul_crm.pipeline.cli validate

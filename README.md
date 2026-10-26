@@ -1,8 +1,34 @@
-# Azul CRM · Flight Deck
+# Azul CRM Intelligence
 
-Uma plataforma de inteligência de relacionamento para identificar clientes de alto valor, entender sinais de evasão e preparar a próxima ação de retenção. **FastAPI + Streamlit + Gemini**, com dados públicos da ANAC e clientes inteiramente sintéticos.
+Uma plataforma de inteligência de relacionamento para identificar clientes de alto valor, entender sinais de evasão e preparar a próxima ação de retenção. **Web responsiva + FastAPI + Gemini**, com ambiente analítico Streamlit preservado, com dados públicos da ANAC e clientes inteiramente sintéticos.
 
-> **Para apresentar:** abra o projeto no VS Code e use **Executar tarefa → Azul CRM: executar**. Acesse `http://127.0.0.1:8501`. O guia organizado da entrega está em [docs/entrega-final-pitch](docs/entrega-final-pitch/README.md).
+> **Abrir a interface principal:** no VS Code, use **Executar tarefa → Azul CRM: web** ou execute `python -m uvicorn web.api.index:app --host 127.0.0.1 --port 8503`. Acesse [localhost:8503](http://127.0.0.1:8503). O snapshot sintético já está incluído; não é necessário reprocessar a ANAC para abrir a aplicação.
+>
+> **Publicar:** siga [o passo a passo da Vercel](docs/VERCEL.md). A pasta raiz do deploy é **web**, com API Python leve, frontend estático e persistência Redis. O ambiente analítico completo continua em [localhost:8501](http://127.0.0.1:8501).
+
+![Visão geral da aplicação](docs/evidencias/design/vercel-desktop.png)
+
+## Interface web e organização
+
+A experiência principal segue a referência visual: navegação azul-marinho, banner de aviação, radar interativo, indicadores, fila de prioridades e cliente em foco. As oito áreas compartilham a carteira calculada: Visão geral, Clientes, Segmentos, Ações de CRM, Assistente IA, Sentimento, Auditoria de viés e Dados e modelos. O layout se adapta a desktop, tablet e celular; respeita redução de movimento e usa fonte local.
+
+| Pasta | Responsabilidade |
+|---|---|
+| `web/public` | Interface responsiva, estilos e imagens locais |
+| `web/api` | API privada compatível com Vercel Functions |
+| `web/crm_runtime` | Gemini, sentimento e armazenamento leve |
+| `web/data/snapshot.json` | Projeção versionada de dados exclusivamente sintéticos |
+| `src/azul_crm` | Motor analítico, pipeline ANAC, regras e contratos |
+| `frontend` | Interface Streamlit do ambiente analítico completo |
+| `scripts/export_web.py` | Atualização da projeção e dos módulos compartilhados |
+| `tests` | Testes de domínio, integração, segurança e versão web |
+
+Na interface web, o Gemini tem **uma tentativa por solicitação, cinco chamadas por dia por padrão, intervalo global de 20 segundos e cache de 20 minutos**. Abrir telas, filtrar clientes, analisar sentimento e aprovar rascunhos não chama a API. Falhas também consomem a cota interna para impedir ciclos de tentativas. Na Vercel, o contador e as decisões são mantidos em Redis externo, compartilhados por todas as instâncias. Localmente, ficam no SQLite ignorado pelo Git.
+
+O snapshot preserva CLV e scores anuais; filtros de período/rota recortam viagens e público. O pipeline não roda durante requisições na Vercel. Para atualizar a base publicada, execute o pipeline local, depois `python scripts/export_web.py`, revise o diff e publique novamente. O histórico da versão web é separado do banco analítico.
+
+**Estado da validação externa:** uma chamada real com a nova configuração retornou HTTP 503. Não houve retentativa. O produto distingue claramente a contingência local de uma resposta gerada por LLM. A configuração não elimina indisponibilidade ou cotas do Google.
+
 
 ## O que a plataforma entrega
 
@@ -20,7 +46,7 @@ Uma plataforma de inteligência de relacionamento para identificar clientes de a
 
 ## Começar no Windows
 
-Requisitos: Python **3.11 a 3.13**; para a configuração validada nesta máquina, Python **3.12**. Não é necessário instalar Node, Ollama ou Snowflake para o fluxo local com Gemini.
+Requisitos: Python **3.11 a 3.13**; para a configuração validada nesta máquina, Python **3.12**. Não é necessário instalar Node, Ollama ou Snowflake para o fluxo local com Gemini. Para abrir apenas a versão web, basta `python -m pip install -r web/requirements.txt`; o ambiente analítico usa a instalação completa abaixo.
 
 Abra o terminal na pasta onde está `pyproject.toml`:
 
@@ -44,11 +70,13 @@ CRM_LLM_PROVIDER=gemini
 CRM_MESSAGE_PROVIDER=gemini
 GEMINI_MODEL=gemini-3.8-flash
 GEMINI_API_KEY=SUA_CHAVE_LOCAL
+GEMINI_MAX_ATTEMPTS=1
+GEMINI_DAILY_LIMIT=5
 ```
 
 A chave fica no servidor, nunca no navegador ou no GitHub. O arquivo `.env` já é ignorado pelo Git. O exemplo acima é um placeholder, não uma credencial.
 
-O modelo `gemini-3.8-flash` respondeu na conta usada na validação. A API informou que `gemini-2.5-flash` não está disponível para novos usuários; por isso ele não é usado nesta entrega. Disponibilidade, cotas e cobrança dependem da sua conta Google. O modelo pode ser alterado em `GEMINI_MODEL`.
+O modelo configurado permanece `gemini-3.8-flash`. A validação mais recente retornou HTTP 503; consulte o estado acima antes de uma demonstração. Disponibilidade, cotas e cobrança dependem da sua conta Google. O modelo pode ser alterado em `GEMINI_MODEL`.
 
 **Após mudar o .env, reinicie o processo Streamlit.** Recarregar apenas o navegador pode manter a configuração antiga no servidor.
 
@@ -79,7 +107,7 @@ Se a porta 8501 já estiver ocupada pelo app em execução, use a instância exi
 ## Como demonstrar em cinco minutos
 
 1. **Visão geral:** apresente o radar de retenção, clientes de alto valor e CLV em risco. Os filtros alteram o recorte, sem recalcular modelos indevidamente.
-2. **Clientes:** abra uma pessoa sintética e mostre viagens, fidelidade e explicação exata de Shapley.
+2. **Clientes:** abra um perfil sintético e mostre viagens, fidelidade e contribuições exatas de Shapley nos sinais para decisão.
 3. **Segmentos:** explique as quatro personas e as premissas de alto valor.
 4. **Assistente IA:** pergunte “Quais são as principais oportunidades de retenção desta carteira?” e confira a resposta do Gemini com suas fontes.
 5. **Ações de CRM:** gere uma mensagem original, confira os fatos/fontes e complete o checklist antes de aprovar. O registro mantém o mesmo rascunho gerado; não chama o modelo novamente na aprovação.
@@ -104,7 +132,7 @@ O Gemini explica e redige. CLV, churn, prioridade e elegibilidade continuam calc
 
 As mensagens não podem mudar a ação selecionada, incluir números ou prometer benefícios, pontos, descontos ou compensações. A aplicação valida esses limites e os IDs das citações. Isso reduz riscos, mas não substitui avaliação humana da fidelidade semântica.
 
-Em falha de rede, indisponibilidade ou limite da API, o painel informa **structured_fallback** ou **Modo de contingência**. Esse resultado é explicitamente local; não é apresentado como resposta do Gemini. Erros temporários 5xx têm tentativas limitadas. Não há troca automática para outro provedor.
+Em falha de rede, indisponibilidade ou limite da API, o painel informa **structured_fallback** ou **Modo de contingência**. Esse resultado é explicitamente local; não é apresentado como resposta do Gemini. A configuração padrão faz uma única tentativa e não repete erros 5xx automaticamente. Não há troca automática para outro provedor.
 
 Para usar somente recursos locais, configure `CRM_LLM_PROVIDER=local` e `CRM_MESSAGE_PROVIDER=template`. O adaptador Ollama anterior continua opcional. Detalhes: [docs/GEMINI.md](docs/GEMINI.md).
 

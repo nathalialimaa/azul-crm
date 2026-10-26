@@ -36,7 +36,10 @@ class GeminiClient:
             if self.model.startswith("gemini-3."):
                 generation.pop("temperature", None)
                 generation["thinkingConfig"] = {"thinkingLevel": "low"}
-            for attempt in range(3):
+            attempts = max(
+                1, min(3, int(getattr(self, "max_attempts", os.getenv("GEMINI_MAX_ATTEMPTS", "1"))))
+            )
+            for attempt in range(attempts):
                 remaining = deadline - time.monotonic()
                 if remaining <= 1:
                     raise GeminiUnavailable("Gemini excedeu o tempo de resposta; tente novamente")
@@ -57,7 +60,7 @@ class GeminiClient:
                     },
                     timeout=httpx.Timeout(min(35, remaining), connect=min(10, remaining)),
                 )
-                if response.status_code not in {500, 502, 503, 504} or attempt == 2:
+                if response.status_code not in {500, 502, 503, 504} or attempt == attempts - 1:
                     break
                 time.sleep(0.6 * (attempt + 1))
             if response.status_code != 200:

@@ -1,3 +1,9 @@
+# Versão web responsiva
+
+Abra a tarefa **Azul CRM: web** no VS Code e acesse http://127.0.0.1:8503. O novo painel está em `web/`. Consulte o [README](README.md) e o [guia de publicação Vercel](docs/VERCEL.md). A chave fica somente no `.env` local ou no ambiente privado da Vercel.
+
+---
+
 > Versão consolidada em 26/10/2026: veja [docs/CONSOLIDACAO.md](docs/CONSOLIDACAO.md) e o [pacote de pitch](docs/entrega-final-pitch/README.md). Resultados atuais: 225 testes passaram; API, oito páginas e pipeline ANAC verificados. O conteúdo abaixo registra a revisão anterior.
 
 # Azul CRM — ajustes finais de 25/10/2026

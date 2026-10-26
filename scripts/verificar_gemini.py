@@ -1,41 +1,58 @@
-"""Teste real opcional; exige GEMINI_API_KEY no .env. Não imprime credenciais."""
+"""Validação manual opcional: uma solicitação, com a mesma cota da interface web."""
 
+import argparse
 import json
-
-from azul_crm.application.assistant import answer_question
-from azul_crm.bootstrap import build_container
-from azul_crm.infrastructure.settings import Settings
+from datetime import datetime, timezone
 
 
 def main():
-    settings = Settings.load()
-    container = build_container(settings)
-    cid = container.crm.priorities()[0].customer_id
-    answer = answer_question(
-        container,
-        settings.root,
-        "Quais são as principais oportunidades de retenção desta carteira e por onde começar?",
-        cid,
-    )
-    rec = container.recommendations.recommend(cid)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--real", action="store_true", help="Autoriza uma chamada real ao Gemini")
+    parser.add_argument("--kind", choices=["assistant", "draft"], default="assistant")
+    args = parser.parse_args()
+    if not args.real:
+        parser.error("Use --real somente quando desejar consumir uma chamada da cota diária.")
+    import os
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root))
+    from fastapi.testclient import TestClient
+
+    from web.api.index import app
+
+    with TestClient(app) as client:
+        login = client.post("/api/session", json={"password": os.getenv("CRM_APP_PASSWORD", "")})
+        login.raise_for_status()
+        if args.kind == "assistant":
+            response = client.post(
+                "/api/ask",
+                json={
+                    "question": "Explique em duas frases os sinais de risco deste cliente.",
+                    "customer_id": "SYN-0077",
+                },
+            )
+        else:
+            response = client.post(
+                "/api/drafts", json={"customer_id": "SYN-0077", "generate": True}
+            )
+        response.raise_for_status()
+        result = response.json()
     report = {
-        "assistant": answer,
-        "message": {"customer_id": cid, "mode": rec.mode, "draft": rec.draft},
-        "real_assistant_passed": answer["mode"] == "gemini_grounded",
-        "real_message_passed": "Gerado por Gemini" in rec.draft,
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "maximum_provider_calls": 1,
+        "kind": args.kind,
+        "mode": result.get("mode"),
+        "notice": result.get("notice"),
+        "passed": result.get("mode") in {"gemini_grounded", "gemini_grounded_draft"},
     }
-    out = settings.root / "docs/evidencias/gemini"
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "validacao-real.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    print(
-        json.dumps(
-            {k: report[k] for k in ("real_assistant_passed", "real_message_passed")}, indent=2
-        )
-    )
-    if not report["real_assistant_passed"] or not report["real_message_passed"]:
-        raise SystemExit("Verificação real incompleta; veja a evidência sanitizada.")
+    target = root / ".runtime/gemini-check.json"
+    target.parent.mkdir(exist_ok=True)
+    target.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    if not report["passed"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
