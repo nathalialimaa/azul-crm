@@ -50,5 +50,14 @@
       ]
     ],
     "tablet_collapsed_sidebar": "fixed_and_verified_main_x_0"
+  },
+  "ci_regression_fix": {
+    "issue": "draft_id ausente do esquema tipado de gold.decisions",
+    "resolution": "campo nullable acrescentado ao final para preservar a ordem anterior",
+    "compatibility_tests": {
+      "passed": 3,
+      "seconds": 37.76
+    },
+    "remote_recheck": "pending_after_fix"
   }
 }

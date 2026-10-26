@@ -354,3 +354,35 @@ def test_calibrated_routes_streams_in_batches(root, monkeypatch):
         ("REC", "GRU", 3),
     ]
     assert routes[1]["mean_fare"] == pytest.approx((400 * 2 + 700 * 1) / 3)
+
+
+def test_review_snapshot_exports_and_legacy_decisions_remain_compatible(root):
+    store = Store(root)
+    with TestClient(create_app(build_container(Settings(root)))) as api:
+        cid = api.get("/api/v1/customers?limit=1").json()["items"][0]["customer_id"]
+        rec = api.post(
+            "/api/v1/agent/recommend", json={"customer_id": cid, "generate": False}
+        ).json()
+        codes = [i["code"] for i in rec["review_checklist"]]
+        response = api.post(
+            "/api/v1/decisions",
+            json={
+                "customer_id": cid,
+                "status": "APPROVED",
+                "confirmed_checklist": codes,
+                "draft_id": rec["draft_id"],
+            },
+        )
+        assert response.status_code == 200
+        reviewed = response.json()
+    assert reviewed["draft_id"] == reviewed["recommendation"]["draft_id"] == rec["draft_id"]
+    legacy = {**reviewed, "id": "legacy-record"}
+    legacy.pop("draft_id")
+    legacy["recommendation"] = {
+        k: v for k, v in reviewed["recommendation"].items() if k != "draft_id"
+    }
+    store.publish({"decisions": [(legacy["id"], legacy)]}, replace=False)
+    export_lake(root, store, root / "lake")
+    rows = {r["id"]: r for r in parquet(root / "lake", "gold.decisions").to_pylist()}
+    assert rows[reviewed["id"]]["draft_id"] == rec["draft_id"]
+    assert rows["legacy-record"]["draft_id"] is None

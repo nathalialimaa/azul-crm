@@ -84,6 +84,7 @@ def decide(body: Decision, c=Depends(get_container)):
     row = {
         "id": str(uuid4()),
         **body.model_dump(),
+        "draft_id": rec.draft_id,
         "recommendation": asdict(rec),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "sent": False,

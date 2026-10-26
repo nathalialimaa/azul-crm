@@ -27,7 +27,7 @@ Abra o terminal na pasta onde está `pyproject.toml`:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
 Se o `.env` já existe, mantenha seu arquivo e ajuste somente as variáveis necessárias. Não substitua uma configuração que já contém sua chave.

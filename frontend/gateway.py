@@ -173,6 +173,7 @@ class Gateway:
             "status": status,
             "note": note,
             "confirmed_checklist": confirmed,
+            "draft_id": rec.get("draft_id"),
             "recommendation": rec,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "sent": False,

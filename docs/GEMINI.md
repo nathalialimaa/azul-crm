@@ -44,3 +44,6 @@ O cliente limita a janela total de tentativas a aproximadamente 45 segundos, com
 A chave autenticou e houve geração estruturada de conexão com 3.8 Flash. Também foram observadas resposta fundamentada e mensagem original com 3.5 Flash, em chamadas separadas. Na validação completa mais recente, o Google retornou HTTP 503 por alta demanda. O teste da API Interactions estável retornou o mesmo erro. A execução completa com 3.8 não está sendo apresentada como homologada/estável. Veja `evidencias/gemini/resultado-final.json` e `validacao-real.json`.
 
 O aplicativo está configurado para usar a API e informar claramente qualquer contingência. Resolver a disponibilidade do serviço Google não está sob controle do projeto. Não é necessário substituir a chave por causa de um 503; aguarde e tente novamente. Um 429 indica limite de uso e não provoca repetição automática.
+
+
+A exportação tipada do lake inclui `draft_id` como coluna opcional em decisões: rascunhos novos preservam o identificador revisado, enquanto registros anteriores continuam aceitos sem esse campo. A regressão de CI que identificou esse contrato foi corrigida com teste ponta a ponta de Parquet.
