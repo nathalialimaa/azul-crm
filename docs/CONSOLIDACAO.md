@@ -45,7 +45,7 @@ Para a composição opcional de mensagens, configure `CRM_MESSAGE_PROVIDER=ollam
 
 ## Requisitos e pendências
 
-A matriz `VALIDACAO.md` veio nos pacotes e cita o enunciado do Hackathon. Os documentos originais de regulamento CRM de Alto Valor e proposta geral ainda serão reenviados pela usuária; a pasta local estava vazia e não havia sessão documental conectada. Portanto, a comparação direta com esses dois originais permanece pendente. Não se afirma conformidade integral com documentos que não foram lidos.
+Os dois documentos originais enviados via Drive foram lidos integralmente em 26/10/2026: enunciado com quatro páginas e proposta com 25 seções. A matriz `VALIDACAO.md` foi reescrita com referências corretas, distinguindo o núcleo obrigatório dos diferenciais. A versão anterior apontava páginas inexistentes. Os originais ficam fora do repositório; hashes registram a proveniência.
 
 | Item | Estado |
 |---|---|
@@ -56,9 +56,9 @@ A matriz `VALIDACAO.md` veio nos pacotes e cita o enunciado do Hackathon. Os doc
 | LLM em mensagens | Adaptador limitado implementado; serviço/modelo real indisponível nesta máquina |
 | Snowflake | Conector existente; conta e homologação externa pendentes |
 | Benefícios/vigência do Azul Fidelidade | Documento importado para consulta; não habilita benefícios oficiais |
-| SHAP | Não implementado; explicações existentes são regras/contribuições lineares |
+| Shapley/SHAP com referência única | Implementado por enumeração exata para os scores ativos; API e visão 360 |
 | Hospedagem, avaliadores, vídeo e submissão | Entregas externas sem evidência de execução |
-| Regulamento CRM e proposta original | Aguardando reenvio para comparação direta |
+| Regulamento CRM e proposta original | Ambos lidos; matriz final corrigida e lacunas classificadas |
 
 ## Resultados desta execução
 
@@ -79,4 +79,24 @@ A matriz `VALIDACAO.md` veio nos pacotes e cita o enunciado do Hackathon. Os doc
 
 Evidências: `docs/evidencias/integracao/pytest.log`, `pipeline-anac.log`, `smoke.json`, `novas-funcionalidades.log`, `ruff.log`, `dependencias.txt` e `comparacao-pacotes.json`. A primeira tentativa do smoke falhou por caminho de importação do script; o script foi corrigido e a execução subsequente está comprovada por `smoke.json`.
 
-A branch local `integracao/consolidacao-crm-2026-10-26` está preparada. A publicação no GitHub permanece pendente da leitura dos dois documentos originais que a usuária informou que reenviará.
+Branch de entrega: `integracao/consolidacao-crm-2026-10-26`. Privacidade do repositório e permissão de push verificadas pela API do GitHub antes da publicação.
+
+
+## Ajustes após a leitura dos originais
+
+- Sentimento agora informa os sete assuntos da proposta, etapa da jornada, intensidade lexical e hipóteses de atrito; apresenta contagens agregadas e continua sem vincular opiniões a clientes.
+- Recomendações recuperam contexto público de comunicação do regulamento do Azul Fidelidade, além da governança e do playbook. Isso não habilita benefícios ou comprova consentimento individual.
+- A explicação exata de Shapley foi implementada para os scores ativos, com referência única explícita, testes de aditividade e API/visão 360.
+- A matriz final identifica como parciais o agente LLM completo, validação de sentimento com corpus real e homologações externas. Nenhuma dessas lacunas foi escondida como “100% entregue”.
+- O PDF exige repositório privado, acesso ao protótipo, vídeo e submissão; o código não realiza essas duas últimas entregas pela equipe.
+
+
+## Validação final após os dois documentos originais
+
+- Suíte completa final: **225 testes passaram em 392,88 segundos**, com um aviso de depreciação Starlette/httpx e nenhuma falha (`pytest-final.log`).
+- Testes direcionados de requisitos: 72 passaram; explicações/visão Clientes: 5 passaram; consistência documental: 6 passaram.
+- Lint final passou (`ruff-final.log`). Contratos reexportados.
+- Smoke final: Uvicorn e Streamlit HTTP 200, 400 clientes, recomendações revisáveis, assistente com evidência, sentimento por gateway HTTP e oito páginas sem erro (`smoke.json`).
+- O pipeline ANAC completo já havia passado e não foi repetido, pois seus dados e ingestores não mudaram.
+- Documentos originais não foram incluídos no repositório; apenas a análise e seus hashes.
+- Repositório privado confirmado antes do push. Branch: `integracao/consolidacao-crm-2026-10-26`.

@@ -233,3 +233,15 @@ def test_api_recommendation_playbook_and_decision(base):
 def test_playbook_endpoint_is_unavailable_without_playbook(client):
     # `client` usa o container legado, sem personas e sem playbook.
     assert client.get("/api/v1/playbook").json() == {"available": False}
+
+
+def test_recommendation_includes_public_communication_context_without_granting_benefits(base):
+    root, _ = base
+    container = build_container(Settings(root))
+    customer = container.crm.customers()[0]
+    rec = container.recommendations.recommend(customer.customer_id)
+    assert any(
+        not e.is_demo and e.document_id.startswith("fidelidade-regulamento#") for e in rec.evidence
+    )
+    assert rec.offer is None or rec.offer.status == STATUS_HYPOTHESIS
+    assert rec.status == "DRAFT_REQUIRES_REVIEW"

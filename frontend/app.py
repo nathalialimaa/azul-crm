@@ -294,6 +294,14 @@ try:
         st.write("**Fatores:**")
         for driver in detail["scores"]["drivers"]:
             st.markdown("- " + driver)
+        with st.expander("Explicação exata por valores de Shapley"):
+            explanation = api.explanation(cid)
+            st.caption(explanation["limitation"])
+            for target, result in explanation["outputs"].items():
+                st.markdown("**" + target + "**")
+                st.write({"referência": result["base_value"], "score do cliente": result["prediction"], "erro de aditividade": result["additivity_error"]})
+                st.dataframe(pd.DataFrame(result["features"]), hide_index=True)
+            st.caption("Versão: " + explanation["model_version"] + " · " + explanation["evaluated_at"])
         trips = pd.DataFrame(detail["trips"])
         st.dataframe(trips, hide_index=True, width="stretch")
         st.subheader("Fidelidade simulada")
@@ -504,7 +512,7 @@ try:
         if st.button("Analisar avaliações"):
             content = upload.getvalue() if upload else sample
             result = api.sentiment(content)
-            st.json({"total": result["total"], "sintéticas": result["synthetic"], "contagens": result["counts"]})
+            st.json({"total": result["total"], "sintéticas": result["synthetic"], "contagens": result["counts"], "assuntos": result["topic_counts"], "hipóteses de atrito": result["friction_counts"]})
             st.dataframe(pd.DataFrame(result["reviews"]), hide_index=True)
             st.caption(result["limitations"])
             st.download_button("Exportar análise de sentimento", json.dumps(result, ensure_ascii=False, indent=2), "sentimento.json", "application/json")

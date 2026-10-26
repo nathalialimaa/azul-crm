@@ -15,4 +15,4 @@ Resultados atuais em [CONSOLIDACAO.md](../CONSOLIDACAO.md) e [evidencias/integra
 
 ## Pendente
 
-Conferência direta do regulamento CRM e proposta que serão reenviados; homologação Snowflake/Ollama; corpus público de sentimento rotulado; vigência dos benefícios; hospedagem, acesso de avaliadores, vídeo e submissão. A branch alternativa será publicada após a revisão final dos documentos.
+Homologação do agente LLM completo; homologação Snowflake/Ollama; corpus público de sentimento rotulado; vigência dos benefícios; hospedagem, acesso de avaliadores, vídeo e submissão. Os originais foram revisados e a matriz final distingue núcleo, diferenciais e limitações.

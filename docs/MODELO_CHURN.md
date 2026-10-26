@@ -41,3 +41,8 @@ Por simulação (60 bases de 320 clientes):
 - Com 320 clientes, só ganhos relativamente grandes passam no critério; é intencional.
 - A regra e o modelo usam as mesmas quatro variáveis. Variáveis novas (tendência de frequência,
   cancelamentos) mudariam a comparação.
+
+
+## Explicador acrescentado em 26/10/2026
+
+A API e a visão Clientes agora apresentam valores de Shapley exatos dos scores ativos, com referência única. Isso complementa os drivers descritos anteriormente; veja [EXPLICABILIDADE.md](EXPLICABILIDADE.md). Não altera seleção, calibração ou desempenho do modelo.

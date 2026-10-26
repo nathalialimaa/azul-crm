@@ -10,6 +10,7 @@
 | Composição limitada opcional por LLM | infrastructure/message_agent.py | test_message_agent.py com HTTP simulado; sem inferência real |
 | Sentimento explicável | application/sentiment.py, API/CLI/painel | test_sentiment.py, smoke HTTP e Streamlit; fixture sintética |
 | Revisão humana e consentimento | application/recommendations.py, API/gateway | test_consent_checklist.py |
+| Shapley exato | application/explanations.py | test_explanations.py e visão 360 |
 | Protótipo | frontend/app.py e FastAPI | oito páginas e servidores reais no smoke |
 
-Todos os caminhos de código da tabela são relativos a `src/azul_crm`, exceto frontend/config/tests. A classificação completa e suas limitações estão em [CONSOLIDACAO.md](../CONSOLIDACAO.md). Esta lista não substitui a leitura dos documentos originais do desafio e da proposta, ainda pendentes de reenvio.
+Todos os caminhos de código da tabela são relativos a `src/azul_crm`, exceto frontend/config/tests. A classificação completa e suas limitações estão em [CONSOLIDACAO.md](../CONSOLIDACAO.md). A leitura dos dois originais está registrada na matriz final em [VALIDACAO.md](../VALIDACAO.md).

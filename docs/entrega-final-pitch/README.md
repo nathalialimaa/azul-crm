@@ -12,6 +12,6 @@ Versão integrada em 26/10/2026: código corrigido e dados públicos do chore, b
 | [05-limitacoes-e-proximos-passos.md](05-limitacoes-e-proximos-passos.md) | Dependências e próximos passos |
 | [06-roteiro-pitch.md](06-roteiro-pitch.md) | Roteiro de até cinco minutos |
 
-O relatório central é [CONSOLIDACAO.md](../CONSOLIDACAO.md). Ele registra a comparação dos três pacotes e os resultados atuais. A matriz anterior em [VALIDACAO.md](../VALIDACAO.md) é histórica. A comparação direta com regulamento CRM de Alto Valor e proposta geral aguarda o reenvio dos originais.
+O relatório central é [CONSOLIDACAO.md](../CONSOLIDACAO.md). Ele registra a comparação dos três pacotes e os resultados atuais. A matriz anterior em [VALIDACAO.md](../VALIDACAO.md) é histórica. Os dois originais foram conferidos; veja a matriz final em [VALIDACAO.md](../VALIDACAO.md).
 
 Clientes, fidelidade e desfechos são sintéticos; a calibração usa dados públicos da ANAC. Não declarar Snowflake, Ollama real, benefícios oficiais, hospedagem ou submissão como homologados.

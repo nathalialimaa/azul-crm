@@ -7,7 +7,7 @@ import unicodedata
 from collections import Counter
 from urllib.parse import urlparse
 
-METHOD = "lexicon_pt_v1_not_validated"
+METHOD = "lexicon_pt_v2_topics_not_validated"
 POSITIVE = {
     "bom",
     "boa",
@@ -44,6 +44,21 @@ NEGATIVE = {
     "horrivel",
 }
 NEGATORS = {"nao", "nunca", "nem", "sem"}
+TOPICS = {
+    "atraso": ({"atraso", "atrasou", "atrasado", "atrasada"}, "embarque e voo"),
+    "cancelamento": (
+        {"cancelamento", "cancelado", "cancelada", "cancelaram"},
+        "planejamento e operação",
+    ),
+    "bagagem": ({"bagagem", "mala", "malas", "extraviada", "extravio"}, "despacho e desembarque"),
+    "atendimento": (
+        {"atendimento", "atendente", "atencioso", "atenciosa", "desrespeito"},
+        "atendimento",
+    ),
+    "check-in": ({"check-in", "checkin", "check in"}, "check-in e embarque"),
+    "aplicativo": ({"aplicativo", "app", "aplicacao"}, "compra e autoatendimento digital"),
+    "fidelidade": ({"fidelidade", "pontos", "milhas", "resgate"}, "relacionamento e fidelidade"),
+}
 
 
 def analyze_text(text):
@@ -74,8 +89,31 @@ def analyze_text(text):
         if positive
         else "negativo"
     )
+    topics = []
+    for name, (keywords, stage) in TOPICS.items():
+        matches = sorted(
+            word for word in keywords if re.search(r"\b" + re.escape(word) + r"\b", normalized)
+        )
+        if matches:
+            topics.append({"subject": name, "journey_stage": stage, "matched_terms": matches})
+    # Intensidade lexical não é confiança estatística nem severidade comprovada.
+    intensifiers = {"pessimo", "pessima", "horrivel", "excelente", "adorei"}
+    intensity = (
+        "inconclusiva"
+        if not evidence
+        else "alta"
+        if any(e["term"] in intensifiers for e in evidence) or len(evidence) >= 3
+        else "moderada"
+        if len(evidence) == 2
+        else "baixa"
+    )
+    friction = [t["subject"] for t in topics] if negative else []
     return {
         "label": label,
+        "topics": topics,
+        "intensity": intensity,
+        "friction_causes": friction,
+        "friction_is_hypothesis": True,
         "score": round((positive - negative) / len(evidence), 3) if evidence else None,
         "evidence": evidence,
     }
@@ -118,10 +156,12 @@ def analyze_reviews(reviews):
         "method": METHOD,
         "validated_on_real_labels": False,
         "counts": dict(Counter(r["label"] for r in rows)),
+        "topic_counts": dict(Counter(t["subject"] for r in rows for t in r["topics"])),
+        "friction_counts": dict(Counter(t for r in rows for t in r["friction_causes"])),
         "total": len(rows),
         "synthetic": sum(r["is_synthetic"] for r in rows),
         "reviews": rows,
-        "limitations": "Regra lexical em português, sem validação em corpus rotulado. Ironia e contexto podem causar erros. Não vincula avaliações a clientes nem altera scores de churn.",
+        "limitations": "Regra lexical em português, sem validação em corpus rotulado. Ironia e contexto podem causar erros. Intensidade é lexical; causas de atrito são hipóteses temáticas, não causalidade ou sentimento por aspecto. Não vincula avaliações a clientes nem altera scores de churn.",
     }
 
 

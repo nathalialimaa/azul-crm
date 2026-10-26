@@ -64,6 +64,15 @@ class RecommendationService:
         scores = self.crm.scores(customer_id)
         # Evidência de governança: sem ela nenhuma ação é liberada (regra anterior mantida).
         evidence = self.retriever.retrieve("relacionamento contato sem benefício")
+        # O regulamento contextualiza revisão/consentimento; não concede benefícios.
+        if evidence:
+            public_context = self.retriever.retrieve(
+                "consentimento comunicação e-mail SMS revogada regulamento Azul Fidelidade"
+            )
+            seen = {e.document_id for e in evidence}
+            evidence += tuple(
+                e for e in public_context if not e.is_demo and e.document_id not in seen
+            )
         traits_of = getattr(self.crm.segments, "traits", None)
         traits = traits_of(scores.segment) if traits_of else None
 

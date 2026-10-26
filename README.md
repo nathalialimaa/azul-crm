@@ -130,7 +130,7 @@ Após mudar a Gold/modelo, reinicie a API e clique **Atualizar dados** no Stream
 
 `train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A escolha entre a logística e a regra usa **validação cruzada** (5×3, em treino + validação, sem o teste): a logística só entra se o ganho de AUC for distinguível de ruído (teste t pareado com correção de Nadeau e Bengio, t > 1,65) e o Brier for menor; veja `docs/MODELO_CHURN.md`. Na base de demonstração, a logística **não é promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
 
-O baseline de valor e os segmentos continuam sendo regras. A explicação da logística é aditiva em log-odds, **não SHAP**. O CLV de 12 meses é calculado com premissas explícitas e configuráveis (margem e desconto, que são hipóteses), não treinado com dados reais; veja `docs/CLV.md`.
+O baseline de valor e os segmentos continuam sendo regras. Os drivers da logística são aditivos em log-odds; a visão Clientes oferece também decomposição exata de Shapley dos scores ativos, com referência única explícita (veja `docs/EXPLICABILIDADE.md`). O CLV de 12 meses é calculado com premissas explícitas e configuráveis (margem e desconto, que são hipóteses), não treinado com dados reais; veja `docs/CLV.md`.
 
 O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
 
@@ -223,6 +223,6 @@ Os documentos anteriores foram preservados em `docs/legacy`; descrevem o estado 
 
 **Feito:** coleta real das tarifas (setembro de 2026) e do VRA (agosto de 2026), com calibração de tarifa média, demanda por rota e atrasos; regulamento público do Azul Fidelidade na base do assistente; CLV de 12 meses com premissas explícitas; personas; auditoria de viés com taxa de erro medida; lake em Parquet com dicionário de dados.
 
-**Pendente ou sem homologação:** integração Snowflake real (o DDL tipado foi gerado, mas nunca executado), execução do Ollama e do MLflow, validação da vigência e dos benefícios específicos do Azul Fidelidade, agente com LLM (o rascunho vem de template), SHAP (as explicações são lineares), análise de sentimento público e a publicação privada do protótipo.
+**Pendente ou sem homologação:** Snowflake, Ollama e MLflow reais; vigência e condições específicas dos benefícios; agente LLM completo; avaliação de sentimento com corpus público rotulado e hospedagem privada do protótipo. Sentimento lexical com temas/jornada e decomposição exata de Shapley já estão implementados; consulte `docs/VALIDACAO.md` e `docs/EXPLICABILIDADE.md`.
 
 Clientes, fidelidade, resgates, comportamento e desfechos são sintéticos, e a margem e o desconto do CLV são hipóteses. Não alegue que todos os requisitos analíticos do hackathon estão concluídos: a entrega fornece um fluxo local executável, com evidências e lacunas explícitas.

@@ -173,3 +173,10 @@ def sentiment(body: SentimentRequest):
         return analyze_reviews([r.model_dump() for r in body.reviews])
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@router.get("/customers/{customer_id}/explanation")
+def explanation(customer_id: str, c=Depends(get_container)):
+    from azul_crm.application.explanations import explain_customer
+
+    return explain_customer(c, Settings.load().root, customer_id)

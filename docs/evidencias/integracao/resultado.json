@@ -1,12 +1,14 @@
 {
   "pytest": {
-    "passed": 213,
+    "passed": 225,
     "warnings": 1,
-    "seconds": 368.43
+    "seconds": 392.88
   },
   "ruff": "passed",
   "anac_pipeline": "passed",
   "http_and_streamlit": "passed",
-  "original_requirements_review": "awaiting_user_documents",
-  "github_push": "pending_original_requirements_review"
+  "original_requirements_review": "completed_pdf_4_pages_and_proposal_25_sections",
+  "github_push": "authorized_private_repository_branch",
+  "explanation": "exact_shapley_single_reference",
+  "remaining_gaps": "See docs/VALIDACAO.md; external validation and full LLM agent remain partial"
 }

@@ -51,6 +51,13 @@ class Gateway:
             )
         return overview(self.c, months, segment, route)
 
+    def explanation(self, cid):
+        if self.http:
+            return self.request("GET", "/customers/" + cid + "/explanation")
+        from azul_crm.application.explanations import explain_customer
+
+        return explain_customer(self.c, self.settings.root, cid)
+
     def customer(self, cid):
         if self.http:
             return self.request("GET", "/customers/" + cid)

@@ -74,3 +74,29 @@ def test_sentiment_cli_writes_report(tmp_path, monkeypatch, capsys):
     )
     main()
     assert json.loads(output.read_text(encoding="utf-8"))["total"] == 5
+
+
+@pytest.mark.parametrize(
+    "text,topic,stage",
+    [
+        ("Atraso no voo", "atraso", "embarque e voo"),
+        ("Voo cancelado", "cancelamento", "planejamento e operação"),
+        ("Bagagem extraviada", "bagagem", "despacho e desembarque"),
+        ("Atendimento péssimo", "atendimento", "atendimento"),
+        ("Check-in ruim", "check-in", "check-in e embarque"),
+        ("Aplicativo ruim", "aplicativo", "compra e autoatendimento digital"),
+        ("Resgate de pontos ruim", "fidelidade", "relacionamento e fidelidade"),
+    ],
+)
+def test_sentiment_reports_subject_journey_and_friction(text, topic, stage):
+    result = analyze_text(text)
+    assert any(t["subject"] == topic and t["journey_stage"] == stage for t in result["topics"])
+    assert topic in result["friction_causes"]
+    assert result["friction_is_hypothesis"] is True
+
+
+def test_intensity_is_explicit_and_positive_topic_is_not_friction():
+    positive = analyze_text("Atendimento excelente")
+    assert positive["intensity"] == "alta" and not positive["friction_causes"]
+    assert analyze_text("Voo Recife Campinas")["intensity"] == "inconclusiva"
+    assert analyze_text("Sem atraso")["friction_causes"] == []
