@@ -1,0 +1,7 @@
+{
+  "checked_at": "2026-10-25T14:08:52.426789+00:00",
+  "status": "failed",
+  "error_type": "ConnectError",
+  "error": "[Errno 111] Connection refused",
+  "next_step": "Inicie ollama serve, instale os modelos configurados e execute novamente. Mantenha RAG_PROVIDER=local no .env enquanto o diagnóstico não passar."
+}

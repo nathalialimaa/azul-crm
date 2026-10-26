@@ -1,0 +1,10 @@
+{
+  "sha256": "458f3b2e3d330c10517b69edc237b2a0351e0d879c01e006f6414cf361b1a1e4",
+  "period": "2026-09",
+  "source_url": "official_local_file",
+  "rows": 892505,
+  "silver_rows": 892505,
+  "unmatched": 45,
+  "ingested_at": "2026-10-25T14:08:29.162830+00:00",
+  "dataset": "fares"
+}

@@ -1,0 +1,109 @@
+{
+  "synthetic_only": true,
+  "seed": 42,
+  "features": [
+    "spend",
+    "frequency",
+    "recency_days",
+    "incident_rate"
+  ],
+  "split": {
+    "train": 240,
+    "validation": 80,
+    "test": 80
+  },
+  "validation_model": {
+    "roc_auc": 0.716,
+    "pr_auc": 0.584121014004288,
+    "brier": 0.20557196279495882,
+    "precision": 0.5454545454545454,
+    "recall": 0.4,
+    "confusion_matrix": [
+      [
+        40,
+        10
+      ],
+      [
+        18,
+        12
+      ]
+    ]
+  },
+  "validation_baseline": {
+    "roc_auc": 0.6966666666666667,
+    "pr_auc": 0.566168678962549,
+    "brier": 0.2162704246626034,
+    "precision": 0.5333333333333333,
+    "recall": 0.5333333333333333,
+    "confusion_matrix": [
+      [
+        36,
+        14
+      ],
+      [
+        14,
+        16
+      ]
+    ]
+  },
+  "test_model": {
+    "roc_auc": 0.562,
+    "pr_auc": 0.4565375685488059,
+    "brier": 0.24878230821152006,
+    "precision": 0.36363636363636365,
+    "recall": 0.26666666666666666,
+    "confusion_matrix": [
+      [
+        36,
+        14
+      ],
+      [
+        22,
+        8
+      ]
+    ]
+  },
+  "test_baseline": {
+    "roc_auc": 0.6163333333333333,
+    "pr_auc": 0.5000843126761936,
+    "brier": 0.24905919409924962,
+    "precision": 0.4482758620689655,
+    "recall": 0.43333333333333335,
+    "confusion_matrix": [
+      [
+        34,
+        16
+      ],
+      [
+        17,
+        13
+      ]
+    ]
+  },
+  "selected": "heuristic",
+  "cross_validation": {
+    "splits": 5,
+    "repeats": 3,
+    "customers": 320,
+    "min_t_statistic": 1.65,
+    "model": {
+      "roc_auc_mean": 0.6593850889595853,
+      "roc_auc_std": 0.05890406561316265,
+      "brier_mean": 0.21655973178676174
+    },
+    "baseline": {
+      "roc_auc_mean": 0.6648883586661953,
+      "roc_auc_std": 0.06845726106190152,
+      "brier_mean": 0.22394602615992729
+    },
+    "auc_gain": {
+      "mean": -0.005503269706610125,
+      "std_error": 0.02398941421859493,
+      "t_statistic": -0.2294040886727602
+    }
+  },
+  "validation_only_would_select": true,
+  "selection_rule": "valida\u00e7\u00e3o cruzada 5x3 em treino+valida\u00e7\u00e3o: ganho de AUC com t > 1.65 (teste pareado corrigido) E Brier menor. O teste n\u00e3o participa da escolha.",
+  "limitation": "Desfechos simulados. N\u00e3o comprova previs\u00e3o de churn real.",
+  "leakage_warning": false
+}

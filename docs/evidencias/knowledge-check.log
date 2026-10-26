@@ -1,0 +1,35 @@
+== Documentos na base
+  catalogo-mvp-v2                1 trechos | demonstração | internal://catalogo-acoes-mvp
+  fidelidade-regulamento        48 trechos | público/importado | https://www.voeazul.com.br/br/pt/programa-fidelidade/regulam
+  metodo-mvp-v2                  1 trechos | demonstração | internal://metodologia-mvp
+  total: 50 trechos
+
+== Busca de governança (o que a recomendação usa)
+  devolve: ['catalogo-mvp-v2#0']
+
+== Perguntas ao Assistente IA
+  Como acumulo pontos?
+     fontes: ['fidelidade-regulamento#11', 'fidelidade-regulamento#14', 'fidelidade-regulamento#18']
+     [1] 4.5.4. Comprar ou renovar pontos Azul a expirar ou expirados; 4.5.5. Transferir Pontos Azul para outros Pa
+  Quando os pontos expiram?
+     fontes: nenhuma (abstenção)
+     Não encontrei evidência suficiente no corpus para responder.
+  Qual é a regra de upgrade?
+     fontes: ['fidelidade-regulamento#20']
+     [1] de acordo com o respectivo Nível do Participante no Programa descritos no site Azul. 6.1.1. Pontos Azul ob
+  Quais são os níveis do programa?
+     fontes: ['fidelidade-regulamento#33']
+     [1] em sua área de acesso, um cartão virtual que comprove o Nível indicado que terá validade no mínimo de 12 (
+  Posso prometer bônus de pontos ao cliente?
+     fontes: ['catalogo-mvp-v2#0']
+     [1] O catálogo interno permite contato de escuta para compreender atritos e contato de relacionamento para man
+  O que é alto valor?
+     fontes: ['metodo-mvp-v2#0']
+     [1] Alto valor são os 20% de clientes com maior valor potencial em 12 meses: gasto em dinheiro dos últimos 12 
+  xyzzy zqxw plasma
+     fontes: nenhuma (abstenção)
+     Não encontrei evidência suficiente no corpus para responder.
+
+== Recomendações de 10 clientes: {'WIN_BACK_PERSONAL': 3, 'GROW_FREQUENCY': 5, 'RECOGNITION': 2}
+
+RESULTADO: OK

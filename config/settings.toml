@@ -1,0 +1,23 @@
+# Hipóteses de demonstração; nenhuma delas representa política da Azul.
+[scoring]
+spend_weight = 0.5
+frequency_weight = 0.3
+recency_weight = 0.2
+spend_reference = 18000.0
+frequency_reference = 24
+recency_reference = 180
+high_value_threshold = 70.0
+high_risk_threshold = 0.6
+
+[clv]
+# Premissas do CLV de 12 meses. São HIPÓTESES de demonstração, não dados da Azul.
+# Margem e desconto mudam o tamanho do valor, não quem é de alto valor (veja docs/CLV.md).
+margin = 0.15
+discount_rate = 0.10
+top_share = 0.20
+
+[windows]
+observation_start = 2025-10-01
+observation_end = 2026-09-30
+outcome_start = 2026-10-01
+outcome_end = 2027-03-31

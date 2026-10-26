@@ -1,0 +1,11 @@
+id,ident,icao_code,iata_code,name,latitude_deg,longitude_deg,iso_country,municipality
+5872,SBBR,SBBR,BSB,Presidente Juscelino Kubitschek International Airport,-15.869167,-47.920834,BR,Brasília
+5882,SBCF,SBCF,CNF,Tancredo Neves International Airport,-19.63571,-43.966928,BR,Belo Horizonte
+5891,SBCT,SBCT,CWB,Curitiba-Afonso Pena International Airport,-25.5285,-49.1758,BR,Curitiba
+5905,SBFZ,SBFZ,FOR,Pinto Martins International Airport,-3.775833,-38.532222,BR,Fortaleza
+5906,SBGL,SBGL,GIG,Rio de Janeiro Galeão – Tom Jobim International Airport,-22.809999,-43.250557,BR,Rio De Janeiro
+5910,SBGR,SBGR,GRU,São Paulo/Guarulhos–Governor André Franco Montoro International Airport,-23.431274,-46.469954,BR,São Paulo
+5927,SBKP,SBKP,VCP,Viracopos International Airport,-23.007404,-47.134502,BR,Campinas
+5951,SBPA,SBPA,POA,Porto Alegre-Salgado Filho International Airport,-29.993984,-51.167482,BR,Porto Alegre
+5965,SBRF,SBRF,REC,Recife/Guararapes - Gilberto Freyre International Airport,-8.12747,-34.922961,BR,Recife
+5977,SBSV,SBSV,SSA,Deputado Luiz Eduardo Magalhães International Airport,-12.908611,-38.322498,BR,Salvador

@@ -1,0 +1,5 @@
+origin,destination,mean_fare
+REC,GRU,950
+REC,BSB,780
+VCP,REC,890
+CNF,SSA,620

@@ -1,0 +1,47 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+.venv312/*
+!.env.example
+.streamlit/secrets.toml
+credentials/
+data/bronze/*
+data/silver/*
+data/gold/*
+data/lake/
+!data/**/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+build/
+dist/
+.venv*/
+
+# Runtime e segredos
+.env
+*.sqlite3
+*.db
+*.pem
+*.p8
+data/downloads/
+artifacts/rag-index.json
+
+# Estado local do canvas Maestri (papéis e sessões desta máquina)
+.maestri/
+
+# Ignorar outras entradas por padrao
+data/inputs/*
+
+# Permitir apenas os dados publicos da ANAC
+!data/inputs/ANAC/
+data/inputs/ANAC/*
+
+!data/inputs/ANAC/anac_tarifa_setembro2026.zip
+!data/inputs/ANAC/VRA-agosto_2026.csv
+!data/inputs/ANAC/airports.csv
+!data/inputs/ANAC/airports.source.json
+!data/inputs/ANAC/LEIA-ME-DADOS-ANAC.md

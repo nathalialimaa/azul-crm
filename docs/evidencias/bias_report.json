@@ -1,0 +1,735 @@
+{
+  "method": "bias_audit_v1",
+  "synthetic_only": true,
+  "settings": {
+    "favorable_outcome": "estar entre os 20% mais prioritários",
+    "selected_customers": 80,
+    "customers": 400,
+    "min_group": 30,
+    "min_within_persona": 20,
+    "four_fifths_rule": 0.8,
+    "calibration_gap_threshold": 0.1
+  },
+  "summary": {
+    "alerts": 0,
+    "attention": 2,
+    "confounded": 0,
+    "ok": 2,
+    "insufficient": 0
+  },
+  "attributes": {
+    "home_airport": {
+      "label": "Aeroporto de origem",
+      "verdict": "ok",
+      "groups": [
+        {
+          "group": "GRU",
+          "customers": 33,
+          "selection_rate": 0.2727,
+          "recall_among_churners": 0.5385,
+          "mean_predicted_risk": 0.3738,
+          "observed_churn": 0.3939,
+          "calibration_gap": -0.0201,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.3333,
+            "Baixo Volume Ativo": 0.303,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0303,
+            "Fiéis de Alto Valor": 0.3333
+          }
+        },
+        {
+          "group": "REC",
+          "customers": 57,
+          "selection_rate": 0.2281,
+          "recall_among_churners": 0.25,
+          "mean_predicted_risk": 0.4159,
+          "observed_churn": 0.3509,
+          "calibration_gap": 0.065,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.386,
+            "Baixo Volume Ativo": 0.3684,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0351,
+            "Fiéis de Alto Valor": 0.2105
+          }
+        },
+        {
+          "group": "VCP",
+          "customers": 37,
+          "selection_rate": 0.2703,
+          "recall_among_churners": 0.2857,
+          "mean_predicted_risk": 0.3354,
+          "observed_churn": 0.3784,
+          "calibration_gap": -0.043,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.2973,
+            "Baixo Volume Ativo": 0.3514,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0541,
+            "Fiéis de Alto Valor": 0.2973
+          }
+        }
+      ],
+      "skipped_small_groups": [
+        {
+          "group": "AJU",
+          "customers": 2
+        },
+        {
+          "group": "BEL",
+          "customers": 11
+        },
+        {
+          "group": "BPS",
+          "customers": 3
+        },
+        {
+          "group": "BSB",
+          "customers": 13
+        },
+        {
+          "group": "BVB",
+          "customers": 3
+        },
+        {
+          "group": "BVH",
+          "customers": 1
+        },
+        {
+          "group": "CAC",
+          "customers": 5
+        },
+        {
+          "group": "CGB",
+          "customers": 8
+        },
+        {
+          "group": "CGH",
+          "customers": 24
+        },
+        {
+          "group": "CGR",
+          "customers": 6
+        },
+        {
+          "group": "CKS",
+          "customers": 1
+        },
+        {
+          "group": "CNF",
+          "customers": 21
+        },
+        {
+          "group": "CWB",
+          "customers": 25
+        },
+        {
+          "group": "FLN",
+          "customers": 4
+        },
+        {
+          "group": "FOR",
+          "customers": 10
+        },
+        {
+          "group": "GIG",
+          "customers": 10
+        },
+        {
+          "group": "GVR",
+          "customers": 1
+        },
+        {
+          "group": "GYN",
+          "customers": 9
+        },
+        {
+          "group": "IGU",
+          "customers": 4
+        },
+        {
+          "group": "IMP",
+          "customers": 1
+        },
+        {
+          "group": "IOS",
+          "customers": 2
+        },
+        {
+          "group": "JOI",
+          "customers": 2
+        },
+        {
+          "group": "JPA",
+          "customers": 4
+        },
+        {
+          "group": "LDB",
+          "customers": 1
+        },
+        {
+          "group": "MAB",
+          "customers": 1
+        },
+        {
+          "group": "MAO",
+          "customers": 7
+        },
+        {
+          "group": "MCP",
+          "customers": 5
+        },
+        {
+          "group": "MCZ",
+          "customers": 6
+        },
+        {
+          "group": "MGF",
+          "customers": 1
+        },
+        {
+          "group": "MOC",
+          "customers": 2
+        },
+        {
+          "group": "NAT",
+          "customers": 2
+        },
+        {
+          "group": "NVT",
+          "customers": 3
+        },
+        {
+          "group": "PMW",
+          "customers": 3
+        },
+        {
+          "group": "PNZ",
+          "customers": 2
+        },
+        {
+          "group": "POA",
+          "customers": 18
+        },
+        {
+          "group": "PTO",
+          "customers": 1
+        },
+        {
+          "group": "PVH",
+          "customers": 2
+        },
+        {
+          "group": "RAO",
+          "customers": 3
+        },
+        {
+          "group": "SDU",
+          "customers": 18
+        },
+        {
+          "group": "SJP",
+          "customers": 2
+        },
+        {
+          "group": "SLZ",
+          "customers": 4
+        },
+        {
+          "group": "SMT",
+          "customers": 1
+        },
+        {
+          "group": "SSA",
+          "customers": 7
+        },
+        {
+          "group": "STM",
+          "customers": 2
+        },
+        {
+          "group": "THE",
+          "customers": 3
+        },
+        {
+          "group": "UDI",
+          "customers": 4
+        },
+        {
+          "group": "VIX",
+          "customers": 3
+        },
+        {
+          "group": "XAP",
+          "customers": 2
+        }
+      ],
+      "selection_ratio": 0.8365,
+      "selection_flag": false,
+      "recall_ratio": 0.4643,
+      "recall_flag": true,
+      "calibration_flag": false,
+      "persona_association": {
+        "chi2": 2.439,
+        "p_value": 0.875233,
+        "cramers_v": 0.098,
+        "relevant": false
+      },
+      "within_persona": [],
+      "verdict_text": "Sem disparidade relevante."
+    },
+    "region": {
+      "label": "Região do aeroporto de origem",
+      "verdict": "atencao",
+      "groups": [
+        {
+          "group": "Centro-Oeste",
+          "customers": 36,
+          "selection_rate": 0.1111,
+          "recall_among_churners": 0.2857,
+          "mean_predicted_risk": 0.332,
+          "observed_churn": 0.3889,
+          "calibration_gap": -0.0568,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.1667,
+            "Baixo Volume Ativo": 0.5833,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0278,
+            "Fiéis de Alto Valor": 0.2222
+          }
+        },
+        {
+          "group": "Nordeste",
+          "customers": 102,
+          "selection_rate": 0.2157,
+          "recall_among_churners": 0.2093,
+          "mean_predicted_risk": 0.3764,
+          "observed_churn": 0.4216,
+          "calibration_gap": -0.0452,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.3235,
+            "Baixo Volume Ativo": 0.402,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0392,
+            "Fiéis de Alto Valor": 0.2353
+          }
+        },
+        {
+          "group": "Norte",
+          "customers": 33,
+          "selection_rate": 0.3636,
+          "recall_among_churners": 0.5,
+          "mean_predicted_risk": 0.3717,
+          "observed_churn": 0.3636,
+          "calibration_gap": 0.0081,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.3636,
+            "Baixo Volume Ativo": 0.303,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0909,
+            "Fiéis de Alto Valor": 0.2424
+          }
+        },
+        {
+          "group": "Sudeste",
+          "customers": 155,
+          "selection_rate": 0.2129,
+          "recall_among_churners": 0.375,
+          "mean_predicted_risk": 0.3503,
+          "observed_churn": 0.3613,
+          "calibration_gap": -0.011,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.2645,
+            "Baixo Volume Ativo": 0.4065,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0774,
+            "Fiéis de Alto Valor": 0.2516
+          }
+        },
+        {
+          "group": "Sul",
+          "customers": 57,
+          "selection_rate": 0.0877,
+          "recall_among_churners": 0.1,
+          "mean_predicted_risk": 0.298,
+          "observed_churn": 0.3509,
+          "calibration_gap": -0.0529,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.1228,
+            "Baixo Volume Ativo": 0.5263,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0702,
+            "Fiéis de Alto Valor": 0.2807
+          }
+        }
+      ],
+      "skipped_small_groups": [
+        {
+          "group": "Outra",
+          "customers": 17
+        }
+      ],
+      "selection_ratio": 0.2412,
+      "selection_flag": true,
+      "recall_ratio": 0.2,
+      "recall_flag": true,
+      "calibration_flag": false,
+      "persona_association": {
+        "chi2": 16.173,
+        "p_value": 0.18342,
+        "cramers_v": 0.1186,
+        "relevant": false
+      },
+      "within_persona": [
+        {
+          "persona": "Alto Valor Esfriando",
+          "groups": [
+            {
+              "group": "Nordeste",
+              "customers": 33,
+              "selected": 22,
+              "selection_rate": 0.6667
+            },
+            {
+              "group": "Sudeste",
+              "customers": 41,
+              "selected": 33,
+              "selection_rate": 0.8049
+            }
+          ],
+          "selected": 55,
+          "selection_ratio": 0.8283,
+          "p_value": 0.1932,
+          "flag": false,
+          "inconclusive": false
+        },
+        {
+          "persona": "Baixo Volume Ativo",
+          "groups": [
+            {
+              "group": "Centro-Oeste",
+              "customers": 21,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "Nordeste",
+              "customers": 41,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "Sudeste",
+              "customers": 63,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "Sul",
+              "customers": 30,
+              "selected": 0,
+              "selection_rate": 0.0
+            }
+          ],
+          "selected": 0,
+          "selection_ratio": null,
+          "p_value": null,
+          "flag": false,
+          "inconclusive": false
+        },
+        {
+          "persona": "Fiéis de Alto Valor",
+          "groups": [
+            {
+              "group": "Nordeste",
+              "customers": 24,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "Sudeste",
+              "customers": 39,
+              "selected": 0,
+              "selection_rate": 0.0
+            }
+          ],
+          "selected": 0,
+          "selection_ratio": null,
+          "p_value": null,
+          "flag": false,
+          "inconclusive": false
+        }
+      ],
+      "verdict_text": "Há diferença bruta entre grupos, mas ela some quando se compara clientes da mesma persona, ou não se distingue do acaso: é explicada pelo comportamento (mix de personas) ou pelo tamanho pequeno dos grupos, e não indica tratamento desigual."
+    },
+    "preferred_channel": {
+      "label": "Canal preferido",
+      "verdict": "ok",
+      "groups": [
+        {
+          "group": "app",
+          "customers": 200,
+          "selection_rate": 0.195,
+          "recall_among_churners": 0.284,
+          "mean_predicted_risk": 0.3475,
+          "observed_churn": 0.405,
+          "calibration_gap": -0.0575,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.245,
+            "Baixo Volume Ativo": 0.42,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.085,
+            "Fiéis de Alto Valor": 0.25
+          }
+        },
+        {
+          "group": "email",
+          "customers": 200,
+          "selection_rate": 0.205,
+          "recall_among_churners": 0.2794,
+          "mean_predicted_risk": 0.3544,
+          "observed_churn": 0.34,
+          "calibration_gap": 0.0144,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.27,
+            "Baixo Volume Ativo": 0.445,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.045,
+            "Fiéis de Alto Valor": 0.24
+          }
+        }
+      ],
+      "skipped_small_groups": [],
+      "selection_ratio": 0.9512,
+      "selection_flag": false,
+      "recall_ratio": 0.9838,
+      "recall_flag": false,
+      "calibration_flag": false,
+      "persona_association": {
+        "chi2": 2.89,
+        "p_value": 0.408965,
+        "cramers_v": 0.085,
+        "relevant": false
+      },
+      "within_persona": [
+        {
+          "persona": "Alto Valor Esfriando",
+          "groups": [
+            {
+              "group": "app",
+              "customers": 49,
+              "selected": 39,
+              "selection_rate": 0.7959
+            },
+            {
+              "group": "email",
+              "customers": 54,
+              "selected": 41,
+              "selection_rate": 0.7593
+            }
+          ],
+          "selected": 80,
+          "selection_ratio": 0.954,
+          "p_value": 0.8133,
+          "flag": false,
+          "inconclusive": false
+        },
+        {
+          "persona": "Baixo Volume Ativo",
+          "groups": [
+            {
+              "group": "app",
+              "customers": 84,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "email",
+              "customers": 89,
+              "selected": 0,
+              "selection_rate": 0.0
+            }
+          ],
+          "selected": 0,
+          "selection_ratio": null,
+          "p_value": null,
+          "flag": false,
+          "inconclusive": false
+        },
+        {
+          "persona": "Fiéis de Alto Valor",
+          "groups": [
+            {
+              "group": "app",
+              "customers": 50,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "email",
+              "customers": 48,
+              "selected": 0,
+              "selection_rate": 0.0
+            }
+          ],
+          "selected": 0,
+          "selection_ratio": null,
+          "p_value": null,
+          "flag": false,
+          "inconclusive": false
+        }
+      ],
+      "verdict_text": "Sem disparidade relevante."
+    },
+    "tier": {
+      "label": "Tier de fidelidade (simulado)",
+      "verdict": "atencao",
+      "groups": [
+        {
+          "group": "SIMULADO_BASICO",
+          "customers": 139,
+          "selection_rate": 0.2518,
+          "recall_among_churners": 0.34,
+          "mean_predicted_risk": 0.3884,
+          "observed_churn": 0.3597,
+          "calibration_gap": 0.0287,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.3237,
+            "Baixo Volume Ativo": 0.3453,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.1007,
+            "Fiéis de Alto Valor": 0.2302
+          }
+        },
+        {
+          "group": "SIMULADO_INTERMEDIARIO",
+          "customers": 138,
+          "selection_rate": 0.1739,
+          "recall_among_churners": 0.2593,
+          "mean_predicted_risk": 0.3307,
+          "observed_churn": 0.3913,
+          "calibration_gap": -0.0606,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.2319,
+            "Baixo Volume Ativo": 0.4275,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.058,
+            "Fiéis de Alto Valor": 0.2826
+          }
+        },
+        {
+          "group": "SIMULADO_PREMIUM",
+          "customers": 123,
+          "selection_rate": 0.1707,
+          "recall_among_churners": 0.2444,
+          "mean_predicted_risk": 0.3312,
+          "observed_churn": 0.3659,
+          "calibration_gap": -0.0347,
+          "persona_mix": {
+            "Alto Valor Esfriando": 0.2114,
+            "Baixo Volume Ativo": 0.5366,
+            "Baixo Volume Ativo com Atrasos Acima da Média": 0.0325,
+            "Fiéis de Alto Valor": 0.2195
+          }
+        }
+      ],
+      "skipped_small_groups": [],
+      "selection_ratio": 0.6779,
+      "selection_flag": true,
+      "recall_ratio": 0.7188,
+      "recall_flag": true,
+      "calibration_flag": false,
+      "persona_association": {
+        "chi2": 15.344,
+        "p_value": 0.017744,
+        "cramers_v": 0.1385,
+        "relevant": false
+      },
+      "within_persona": [
+        {
+          "persona": "Alto Valor Esfriando",
+          "groups": [
+            {
+              "group": "SIMULADO_BASICO",
+              "customers": 45,
+              "selected": 35,
+              "selection_rate": 0.7778
+            },
+            {
+              "group": "SIMULADO_INTERMEDIARIO",
+              "customers": 32,
+              "selected": 24,
+              "selection_rate": 0.75
+            },
+            {
+              "group": "SIMULADO_PREMIUM",
+              "customers": 26,
+              "selected": 21,
+              "selection_rate": 0.8077
+            }
+          ],
+          "selected": 80,
+          "selection_ratio": 0.9286,
+          "p_value": 0.8712,
+          "flag": false,
+          "inconclusive": false
+        },
+        {
+          "persona": "Baixo Volume Ativo",
+          "groups": [
+            {
+              "group": "SIMULADO_BASICO",
+              "customers": 48,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "SIMULADO_INTERMEDIARIO",
+              "customers": 59,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "SIMULADO_PREMIUM",
+              "customers": 66,
+              "selected": 0,
+              "selection_rate": 0.0
+            }
+          ],
+          "selected": 0,
+          "selection_ratio": null,
+          "p_value": null,
+          "flag": false,
+          "inconclusive": false
+        },
+        {
+          "persona": "Fiéis de Alto Valor",
+          "groups": [
+            {
+              "group": "SIMULADO_BASICO",
+              "customers": 32,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "SIMULADO_INTERMEDIARIO",
+              "customers": 39,
+              "selected": 0,
+              "selection_rate": 0.0
+            },
+            {
+              "group": "SIMULADO_PREMIUM",
+              "customers": 27,
+              "selected": 0,
+              "selection_rate": 0.0
+            }
+          ],
+          "selected": 0,
+          "selection_ratio": null,
+          "p_value": null,
+          "flag": false,
+          "inconclusive": false
+        }
+      ],
+      "verdict_text": "Há diferença bruta entre grupos, mas ela some quando se compara clientes da mesma persona, ou não se distingue do acaso: é explicada pelo comportamento (mix de personas) ou pelo tamanho pequeno dos grupos, e não indica tratamento desigual."
+    }
+  },
+  "limitations": [
+    "Dados sintéticos: o resultado descreve o gerador, não clientes reais.",
+    "A regra dos 4/5 é um alarme, não prova de discriminação nem de ausência dela.",
+    "Só os atributos existentes na base foram auditados. Gênero, idade e raça não existem aqui; com dados reais, auditar também esses atributos com base legal.",
+    "Recall e calibração usam o desfecho simulado, não churn real."
+  ],
+  "gold_fingerprint": "b42a08e547c6c1c44dbd984551b52474c4ce10df86bd4bb029fb1b662c9fef23",
+  "segmenter": "kmeans_personas_v1",
+  "report_sha256": "8ebf8d22373859b3a74d0bc34c7fa25b1dec20dbc44ae65eb0d373003818dc9e"
+}

@@ -1,0 +1,134 @@
+# Playbook de retenção do MVP.
+# TODAS as premissas abaixo (custos, retenção, ofertas) são hipóteses internas para demonstração.
+# Nenhuma é política do Azul Fidelidade. Calibrar com teste A/B e dados reais antes de qualquer uso.
+version = "playbook_v1"
+note = "Hipóteses internas do MVP. Ofertas comerciais exigem regra pública vigente verificada."
+
+# ---- Regras: a PRIMEIRA que casa vence. A ordem é a prioridade. ----
+# Condições possíveis: high_value, cooling (há tempo sem voar), delays (atrasos frequentes).
+# O playbook precisa cobrir todas as combinações; senão a aplicação não inicia.
+
+[[rule]]
+id = "service_recovery"
+when = { delays = true }
+action = "SERVICE_RECOVERY"
+offer = "REVIEW_GESTURE"
+
+[[rule]]
+id = "high_cooling"
+when = { high_value = true, cooling = true }
+action = "WIN_BACK_PERSONAL"
+offer = "POINTS_BONUS"
+
+[[rule]]
+id = "high_active"
+when = { high_value = true, cooling = false }
+action = "RECOGNITION"
+offer = "UPGRADE"
+
+[[rule]]
+id = "low_cooling"
+when = { high_value = false, cooling = true }
+action = "LOW_COST_REACTIVATION"
+offer = "ROUTE_OFFER"
+
+[[rule]]
+id = "low_active"
+when = { high_value = false, cooling = false }
+action = "GROW_FREQUENCY"
+offer = "ROUTE_OFFER"
+
+# ---- Ações principais: contato sem benefício comercial, sempre com revisão humana. ----
+# Placeholders do texto: {delayed_trips} {trips} {days_since_last} {favorite_route} {route_clause}
+# "needs" lista fatos que precisam existir; se faltar algum, usa-se o texto "fallback".
+
+[[action]]
+code = "SERVICE_RECOVERY"
+title = "Recuperação de serviço"
+kind = "service_recovery"
+reason = "Muitas viagens com atraso de 60 minutos ou mais: ouvir antes de oferecer qualquer coisa."
+rule_text = "Persona com atrasos frequentes: o primeiro contato é de escuta sobre a experiência. Nenhuma compensação é prometida sem política verificada."
+template = "Olá! Notamos que {delayed_trips} de {trips} viagens suas neste período tiveram atraso de 60 minutos ou mais. Queremos ouvir como foi a sua experiência e entender como podemos melhorar. Pode nos contar?"
+fallback = "Olá! Queremos ouvir como tem sido a sua experiência de viagem com a gente e entender como podemos melhorar. Pode nos contar?"
+needs = ["delayed_trips"]
+assumed_cost = 15.0
+assumed_retention = 0.08
+
+[[action]]
+code = "WIN_BACK_PERSONAL"
+title = "Reativação personalizada"
+kind = "reactivation"
+reason = "Cliente de alto valor há bastante tempo sem voar: contato pessoal antes de perder a relação."
+rule_text = "Alto valor esfriando: contato personalizado perguntando se algo impede a próxima viagem. Sem oferta comercial no texto."
+template = "Olá! Faz {days_since_last} dias desde a sua última viagem com a gente e sentimos a sua falta. Há algo que possamos fazer para facilitar a sua próxima viagem{route_clause}?"
+fallback = "Olá! Faz algum tempo desde a sua última viagem e sentimos a sua falta. Há algo que possamos fazer para facilitar a próxima?"
+needs = ["days_since_last"]
+assumed_cost = 20.0
+assumed_retention = 0.10
+
+[[action]]
+code = "RECOGNITION"
+title = "Reconhecimento e relacionamento"
+kind = "recognition"
+reason = "Cliente fiel e ativo: manter a relação e agradecer, sem oferta automática."
+rule_text = "Alto valor ativo: agradecimento e canal de relacionamento. Nenhum benefício automático."
+template = "Olá! Obrigado por voar com a gente {trips} vezes neste período. A sua preferência faz diferença e queremos continuar cuidando bem de você."
+fallback = "Olá! Obrigado por voar com a gente. A sua preferência faz diferença e queremos continuar cuidando bem de você."
+needs = ["trips"]
+assumed_cost = 5.0
+assumed_retention = 0.03
+
+[[action]]
+code = "LOW_COST_REACTIVATION"
+title = "Reativação de baixo custo"
+kind = "reactivation"
+reason = "Baixo volume e há tempo sem voar: lembrete leve, em canal digital de baixo custo."
+rule_text = "Baixo volume esfriando: lembrete digital de baixo custo, sem oferta."
+template = "Olá! Faz {days_since_last} dias desde a sua última viagem. Que tal planejar a próxima{route_clause}?"
+fallback = "Olá! Faz algum tempo desde a sua última viagem. Que tal planejar a próxima?"
+needs = ["days_since_last"]
+assumed_cost = 2.0
+assumed_retention = 0.04
+
+[[action]]
+code = "GROW_FREQUENCY"
+title = "Incentivo à próxima viagem"
+kind = "growth"
+reason = "Baixo volume e ativo: apoiar o planejamento da próxima viagem."
+rule_text = "Baixo volume ativo: apoio ao planejamento da próxima viagem na rota mais usada. Sem oferta."
+template = "Olá! Vimos que você voou {trips} vezes neste período{route_clause}. Estamos à disposição para ajudar a planejar as próximas viagens."
+fallback = "Olá! Estamos à disposição para ajudar a planejar as suas próximas viagens."
+needs = ["trips"]
+assumed_cost = 2.0
+assumed_retention = 0.03
+
+# ---- Ofertas: HIPÓTESES a validar. Nunca entram no texto da mensagem. ----
+# Só podem virar status = "verified" com "source" apontando a regra oficial vigente.
+
+[[offer]]
+code = "REVIEW_GESTURE"
+title = "Gesto de reconhecimento pelo atraso"
+description = "Avaliar com o Atendimento um gesto de reconhecimento para quem teve atrasos. Tipo e valor a definir pela área responsável."
+requires = "Política de compensação vigente e aprovação do Atendimento."
+status = "hypothesis_unverified"
+
+[[offer]]
+code = "POINTS_BONUS"
+title = "Bônus de pontos condicionado a nova viagem"
+description = "Bônus de pontos ao cliente que voltar a voar. Valor, prazo e elegibilidade a definir pelo Azul Fidelidade."
+requires = "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (o regulamento está na base, mas não autoriza esta oferta específica)."
+status = "hypothesis_unverified"
+
+[[offer]]
+code = "UPGRADE"
+title = "Cortesia de upgrade ou benefício de status"
+description = "Cortesia ou benefício para reconhecer o cliente fiel. Disponibilidade e elegibilidade a verificar."
+requires = "Regra pública vigente do Azul Fidelidade e elegibilidade verificada (o regulamento está na base, mas não autoriza esta oferta específica)."
+status = "hypothesis_unverified"
+
+[[offer]]
+code = "ROUTE_OFFER"
+title = "Oferta na rota favorita"
+description = "Condição especial na rota mais usada pelo cliente ({favorite_route}). Condição e viabilidade a definir pela área comercial."
+requires = "Aprovação da área comercial e regras tarifárias vigentes."
+status = "hypothesis_unverified"

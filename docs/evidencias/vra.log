@@ -1,0 +1,14 @@
+{
+  "dataset": "vra",
+  "sha256": "2414e55a3baf16600462119192af3dcdc2775420942f997bc1b897d75a78392b",
+  "period": "2026-08",
+  "rows": 88040,
+  "silver_rows": 87996,
+  "unmatched": 101,
+  "rejected_rows": 24,
+  "rejected_reasons": {
+    "fora_do_periodo": 24
+  },
+  "source_url": "official_local_file",
+  "ingested_at": "2026-10-25T14:09:10.306978+00:00"
+}
