@@ -1,4 +1,6 @@
 from collections import Counter
+from dataclasses import replace
+from uuid import uuid4
 
 from azul_crm.application.crm import CrmService
 from azul_crm.domain.decisions import EligibilityPolicy
@@ -58,8 +60,34 @@ class RecommendationService:
         self.crm, self.retriever = crm, retriever
         self.eligibility, self.generator = eligibility, generator
         self.playbook = playbook
+        self._drafts = {}
+        self._latest_draft = {}
 
-    def recommend(self, customer_id: str) -> Recommendation:
+    def recommend(self, customer_id: str, generate=True) -> Recommendation:
+        rec = self._recommend(customer_id, generate)
+        if rec.mode == "gemini_grounded_draft" and "Modo de contingência:" in rec.draft:
+            rec = replace(rec, mode="playbook_template")
+        rec = replace(rec, draft_id=str(uuid4()))
+        if len(self._drafts) >= 500:
+            self._drafts.pop(next(iter(self._drafts)))
+        self._drafts[rec.draft_id] = rec
+        self._latest_draft[customer_id] = rec.draft_id
+        return rec
+
+    def for_review(self, customer_id, draft_id=None):
+        if draft_id:
+            rec = self._drafts.get(draft_id)
+            if rec is None or rec.customer_id != customer_id:
+                raise ValueError("Rascunho expirado ou incompatível. Gere e revise novamente.")
+            return rec
+        # Compatibilidade: clientes antigos podem omitir o ID. A UI nova sempre o envia.
+        latest = self._drafts.get(self._latest_draft.get(customer_id))
+        return latest or self.recommend(customer_id, generate=False)
+
+    def _recommend(self, customer_id: str, generate=True) -> Recommendation:
+        generator = (
+            self.generator if generate else getattr(self.generator, "fallback", self.generator)
+        )
         customer = self.crm.customer(customer_id)
         scores = self.crm.scores(customer_id)
         # Evidência de governança: sem ela nenhuma ação é liberada (regra anterior mantida).
@@ -78,7 +106,7 @@ class RecommendationService:
 
         if self.playbook is None or traits is None:
             action = self.eligibility.select(scores, bool(evidence))
-            draft = self.generator.draft(customer, scores, action, evidence)
+            draft = generator.draft(customer, scores, action, evidence)
             return Recommendation(
                 customer_id,
                 action,
@@ -97,7 +125,7 @@ class RecommendationService:
             return Recommendation(
                 customer_id,
                 action,
-                self.generator.draft(customer, scores, action, evidence),
+                generator.draft(customer, scores, action, evidence),
                 evidence,
                 mode="playbook_template",
                 channel=customer.preferred_channel,
@@ -121,9 +149,9 @@ class RecommendationService:
         return Recommendation(
             customer_id,
             action,
-            self.generator.draft(customer, scores, action, all_evidence, context),
+            generator.draft(customer, scores, action, all_evidence, context),
             all_evidence,
-            mode=getattr(self.generator, "mode", "playbook_template"),
+            mode=getattr(generator, "mode", "playbook_template"),
             offer=offer,
             channel=customer.preferred_channel,
             persona=scores.segment,

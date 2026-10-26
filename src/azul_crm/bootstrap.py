@@ -127,12 +127,16 @@ def build_stored_container(settings, store, manifest):
         playbook = load_playbook(playbook_path)
         generator = PlaybookMessageGenerator(playbook)
     message_provider = os.getenv("CRM_MESSAGE_PROVIDER", "template")
-    if message_provider not in {"template", "ollama"}:
-        raise ValueError("CRM_MESSAGE_PROVIDER deve ser template ou ollama")
+    if message_provider not in {"template", "ollama", "gemini"}:
+        raise ValueError("CRM_MESSAGE_PROVIDER deve ser template, ollama ou gemini")
     if message_provider == "ollama" and playbook is not None:
         from azul_crm.infrastructure.message_agent import BoundedMessageGenerator
 
         generator = BoundedMessageGenerator(generator)
+    if message_provider == "gemini" and playbook is not None:
+        from azul_crm.infrastructure.gemini import GeminiMessageGenerator
+
+        generator = GeminiMessageGenerator(generator)
     recommendations = RecommendationService(
         crm, index, EligibilityPolicy(policy.high_risk_threshold), generator, playbook
     )

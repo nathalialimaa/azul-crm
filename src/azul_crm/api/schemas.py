@@ -79,14 +79,16 @@ class RecommendationResponse(ApiModel):
     draft: str
     evidence: list[EvidenceResponse]
     status: Literal["DRAFT_REQUIRES_REVIEW"]
-    mode: Literal["demo_template", "playbook_template", "ollama_bounded_draft"]
+    mode: Literal["demo_template", "playbook_template", "ollama_bounded_draft", "gemini_grounded_draft"]
     offer: OfferResponse | None = None
     channel: str | None = None
     persona: str | None = None
     review_checklist: list[ChecklistItemResponse] = Field(default_factory=list)
+    draft_id: str | None = None
 
 
 class RecommendationRequest(ApiModel):
+    generate: bool = True
     customer_id: str = Field(min_length=1, max_length=80)
 
 

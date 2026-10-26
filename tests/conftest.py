@@ -34,3 +34,11 @@ def root(tmp_path):
 def client(root):
     with TestClient(create_app(build_container(Settings(root)))) as client:
         yield client
+
+
+@pytest.fixture(autouse=True)
+def isolate_external_llm(monkeypatch):
+    """A suíte nunca usa a chave local nem chama provedores externos implicitamente."""
+    monkeypatch.setenv("CRM_LLM_PROVIDER", "local")
+    monkeypatch.setenv("CRM_MESSAGE_PROVIDER", "template")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)

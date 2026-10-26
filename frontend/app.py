@@ -8,43 +8,22 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from gateway import Gateway
+from theme import apply_theme, masthead
 
 st.set_page_config(page_title="Azul | CRM Intelligence", page_icon="✈", layout="wide")
-st.markdown(
-    """<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-html,body,[class*="css"],.stApp {font-family:Inter,Arial,sans-serif;color:#0a244b}
-.stApp {background:#f3f8fd} header[data-testid="stHeader"]{background:transparent}
-.block-container{padding-top:2rem;padding-bottom:2rem;max-width:1680px}
-[data-testid="stSidebar"]{background:linear-gradient(165deg,#03254c,#031d3d);color:white;min-width:235px;max-width:235px}
-[data-testid="stSidebar"] *{color:#e1efff} [data-testid="stSidebar"] label{font-size:15px}
-[data-testid="stSidebar"] .stRadio>div{gap:18px}
-h1{font-size:2rem!important;letter-spacing:-.8px;color:#08234c} h2,h3{color:#08234c}
-.hero-sub{color:#527098;margin-top:-12px;font-size:16px;margin-bottom:22px}
-.badge{font-size:12px;background:#e7f0fa;padding:9px 14px;border-radius:20px;color:#456183;display:inline-block}
-.brand{font-size:48px;font-weight:800;letter-spacing:-2px;color:white;padding-top:8px}
-.brand-sub{color:#9fbbd6;font-size:14px;margin-bottom:45px}
-.kpi{background:white;border:1px solid #e0edf9;border-radius:13px;padding:23px 20px;min-height:142px;box-shadow:0 3px 14px #123e6505;margin-bottom:20px}
-.kpi .label{font-size:13px;font-weight:600}.kpi .value{font-size:30px;font-weight:800;margin:8px 0 3px}.kpi .sub{font-size:12px;color:#6982a3}
-.kpi .icon{float:left;width:45px;height:45px;background:#e7f5ff;color:#008ff2;border-radius:50%;text-align:center;line-height:45px;margin-right:14px;font-size:22px}
-[data-testid="stVerticalBlockBorderWrapper"]>div{border-color:#e0edf9!important;background:white;border-radius:12px}
-.stButton>button[kind="primary"]{background:#087bfa;border:0;color:#fff} .stButton>button{border-radius:7px}
-.stButton>button[kind="primary"]:disabled{background:#c9d6e6;cursor:not-allowed}
+
+apply_theme()
+# Controles críticos mantêm contraste mesmo antes do tema externo terminar de carregar.
+st.markdown("""<style>
+.stButton>button[kind="primary"]:disabled{background:#c9d6e6!important;cursor:not-allowed;transform:none}
 .stButton>button[kind="primary"]:disabled *{color:#5d7390!important}
-.stButton>button[kind="primary"]:not(:disabled) *{color:#fff!important}
-[data-testid="stSidebar"] .stButton>button *{color:#08234c!important}
+[data-testid="stSidebar"] .stButton>button *{color:#fff!important}
 [data-testid="stSidebar"] [data-testid="stSelectbox"] [role="group"],[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-baseweb="select"]>div{background:#0b3a6e!important;border-color:#2f6aa8!important}
-[data-testid="stSidebar"] [data-testid="stSelectbox"] input{color:#e1efff!important;-webkit-text-fill-color:#e1efff!important;opacity:1!important}
-.action{background:#eaf5ff;border-radius:10px;padding:16px;margin-bottom:14px;color:#0068df}
-.small{font-size:12px;color:#6380a4}.factors{background:#fff2f3;color:#bf3844;padding:12px;border-radius:9px;font-size:13px;margin:8px 0}
-[data-testid="stMetric"]{background:#f6faff;border:1px solid #e6eff8;border-radius:10px;padding:12px}
-</style>""",
-    unsafe_allow_html=True,
-)
+</style>""", unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown(
-        '<div class="brand">✈ azul</div><div class="brand-sub">CRM Intelligence</div>',
+        '<div class="brand"><span></span>&nbsp;azul</div><div class="brand-sub">CRM Intelligence · Flight Deck</div>',
         unsafe_allow_html=True,
     )
     page = st.radio(
@@ -62,10 +41,13 @@ with st.sidebar:
         label_visibility="collapsed",
     )
     st.markdown(
-        '<br><br><br><div class="small">HACKATHON · MVP PRIVADO<br>Inteligência que aproxima.</div>',
+        '<br><div class="small" style="color:#b0d0e7">Ambiente de demonstração privado<br>Relacionamentos que vão mais longe.</div>',
         unsafe_allow_html=True,
     )
     if st.button("Atualizar dados"):
+        for key in list(st.session_state):
+            if key.startswith("reviewed_draft_"):
+                del st.session_state[key]
         st.cache_resource.clear()
         st.rerun()
 
@@ -92,12 +74,14 @@ def ask_ui(api, cid):
             "Pergunte sobre a carteira ou metodologia",
             placeholder="Por que este cliente está em risco?",
         )
-        submit = st.form_submit_button("Consultar fontes", type="primary")
+        submit = st.form_submit_button("Perguntar ao copiloto", type="primary")
     if submit and question:
         with st.spinner("Consultando indicadores e evidências…"):
             result = api.ask(question, cid)
         st.write(result["answer"])
         st.caption("Modo: " + result["mode"])
+        if result.get("notice"):
+            st.warning(result["notice"])
         evidence_ui(result["evidence"])
 
 
@@ -106,17 +90,7 @@ try:
         api = gateway()
         meta = api.metadata()
         full = api.dashboard()
-    h1, h2 = st.columns([4, 1])
-    with h1:
-        st.title("Inteligência para cuidar de quem mais importa")
-        st.markdown(
-            '<div class="hero-sub">Priorize clientes, entenda os sinais e transforme dados em relacionamento.</div>',
-            unsafe_allow_html=True,
-        )
-    with h2:
-        st.markdown(
-            '<span class="badge">Demonstração · Dados sintéticos</span>', unsafe_allow_html=True
-        )
+    masthead(page, api.llm_status())
     if not full["rows"]:
         st.info("Nenhum cliente com viagens na janela. Execute o gerador e atualize os dados.")
         st.stop()
@@ -150,15 +124,14 @@ try:
         ("▥", "CLV 12 meses (margem)", money(k["clv_12m"]), "margem esperada, com desconto"),
         ("◉", "CLV em risco", money(k["clv_at_risk"]), "margem que se perde se saírem"),
     ]
-    for col, (icon, label, val, sub) in zip(st.columns(4), labels):
-        col.markdown(
-            f'<div class="kpi"><span class="icon">{icon}</span><div class="label">{label}</div><div class="value">{val}</div><div class="sub">{sub}</div></div>',
-            unsafe_allow_html=True,
-        )
+    metric_html = '<div class="kpi-grid">'
+    for i, (_, label, val, sub) in enumerate(labels):
+        metric_html += f'<div class="kpi" data-priority="{str(i == 1).lower()}"><div class="label">{escape(label)}</div><div class="value">{escape(val)}</div><div class="sub">{escape(sub)}</div></div>'
+    st.markdown(metric_html + '</div>', unsafe_allow_html=True)
     if page == "Visão geral":
         left, right = st.columns([1.38, 1])
-        with left, st.container(border=True):
-            st.subheader("Onde concentrar os esforços?")
+        with left, st.container(border=True, key="radar-panel"):
+            st.subheader("Radar de retenção")
             st.caption(
                 "Valor potencial (margem em 12 meses) × risco de evasão · divisória = corte do alto valor"
             )
@@ -172,7 +145,7 @@ try:
                 color="segment",
                 hover_name="customer_id",
                 hover_data=["clv_12m", "route"],
-                color_discrete_sequence=["#ff6670", "#00bc9c", "#13b9d4", "#078afa"],
+                color_discrete_sequence=["#bd425a", "#0076c8", "#00a6bf", "#417774"],
             )
             for x0, x1, y0, y1, color in [
                 (0, threshold, value_threshold, ymax, "#eaf5ff"),
@@ -229,7 +202,7 @@ try:
             fig.update_xaxes(range=[0, 1], tickformat=".0%", gridcolor="#edf2f7")
             fig.update_yaxes(range=[0, ymax], gridcolor="#edf2f7")
             st.plotly_chart(fig, width="stretch")
-        with right, st.container(border=True):
+        with right, st.container(border=True, key="action-panel"):
             st.subheader("Próxima melhor ação")
             st.markdown("**" + cid + " · " + focus["segment"] + "**")
             st.caption("Cliente sintético · " + focus["route"])
@@ -245,7 +218,7 @@ try:
                 st.markdown(
                     '<div class="factors">' + escape(driver) + "</div>", unsafe_allow_html=True
                 )
-            rec = api.recommend(cid)
+            rec = api.recommend(cid, generate=False)
             st.markdown(
                 '<div class="action"><b>'
                 + escape(rec["action"]["title"])
@@ -257,7 +230,13 @@ try:
             with st.expander("Ver evidências e regras"):
                 evidence_ui(rec["evidence"])
             if st.button("Gerar mensagem para revisão", type="primary", width="stretch"):
-                st.info(rec["draft"])
+                with st.spinner("Preparando uma mensagem personalizada…"):
+                    generated = api.recommend(cid)
+                st.session_state["reviewed_draft_" + cid] = generated
+            if "reviewed_draft_" + cid in st.session_state:
+                generated = st.session_state["reviewed_draft_" + cid]
+                st.info(generated["draft"])
+                st.caption("Geração: " + generated["mode"])
                 if rec.get("review_checklist"):
                     st.caption(
                         "Antes de qualquer contato, confirme o consentimento de comunicação "
@@ -265,7 +244,7 @@ try:
                         "A revisão completa fica em Ações de CRM."
                     )
         left, right = st.columns([1.6, 1])
-        with left, st.container(border=True):
+        with left, st.container(border=True, key="queue-panel"):
             st.subheader("Quem precisa de atenção agora?")
             st.caption("Ordenado por prioridade · seleção no menu lateral")
             table = df[["customer_id", "segment", "clv_12m", "churn_risk", "priority_score"]].head(
@@ -285,8 +264,8 @@ try:
                     "priority_score": "Prioridade",
                 },
             )
-        with right, st.container(border=True):
-            st.subheader("✧ Copiloto de CRM")
+        with right, st.container(border=True, key="copilot-panel"):
+            st.subheader("Copiloto de CRM")
             ask_ui(api, cid)
     elif page == "Clientes":
         st.subheader("Visão 360 · " + cid)
@@ -331,7 +310,7 @@ try:
                 x="segment",
                 y="clientes",
                 color="segment",
-                color_discrete_sequence=["#087bfa", "#00beac", "#ff7080", "#f4b849"],
+                color_discrete_sequence=["#0076c8", "#00a6bf", "#bd425a", "#417774"],
             ),
             width="stretch",
         )
@@ -460,7 +439,10 @@ try:
             st.caption(plan["disclaimer"])
         st.divider()
         st.subheader("Revisar antes de agir · " + cid)
-        rec = api.recommend(cid)
+        if st.button("Gerar nova mensagem com IA", type="primary"):
+            with st.spinner("Redigindo com base nos fatos e nas fontes…"):
+                st.session_state["reviewed_draft_" + cid] = api.recommend(cid)
+        rec = st.session_state.get("reviewed_draft_" + cid) or api.recommend(cid, generate=False)
         channels = {"app": "notificação no app", "email": "e-mail"}
         st.markdown(
             f"**Persona:** {rec.get('persona') or '—'} · "
@@ -488,10 +470,10 @@ try:
         note = st.text_area("Observação da revisão")
         a, b = st.columns(2)
         if a.button("Aprovar rascunho", type="primary", disabled=not ready):
-            api.decide(cid, "APPROVED", note, confirmed)
+            api.decide(cid, "APPROVED", note, confirmed, rec.get("draft_id"))
             st.success("Aprovação registrada. Nenhuma mensagem enviada.")
         if b.button("Rejeitar rascunho"):
-            api.decide(cid, "REJECTED", note, confirmed)
+            api.decide(cid, "REJECTED", note, confirmed, rec.get("draft_id"))
             st.success("Rejeição registrada.")
         st.subheader("Simular um cenário")
         cost = st.number_input("Custo por cliente (R$)", min_value=0.0, value=10.0)
@@ -517,9 +499,14 @@ try:
             st.caption(result["limitations"])
             st.download_button("Exportar análise de sentimento", json.dumps(result, ensure_ascii=False, indent=2), "sentimento.json", "application/json")
     elif page == "Assistente IA":
-        st.subheader("Respostas com evidências")
+        st.markdown('<div class="copilot-intro"><span class="copilot-orbit">✧</span><div><strong>Seu copiloto de relacionamento</strong><p>Explore oportunidades, entenda os fatores de risco e prepare a próxima conversa com seus clientes.</p></div></div>', unsafe_allow_html=True)
+        status = api.llm_status()
+        if status["provider"] == "gemini" and not status["configured"]:
+            st.warning("Configure GEMINI_API_KEY no .env local para ativar o Gemini.")
+        st.caption("Modelo ativo: " + (status.get("model") or "local") + " · Fontes e revisão humana")
+        st.subheader("Converse com a inteligência da carteira")
         st.caption(
-            "Indicadores são calculados por código. O corpus disponível contém metodologia e catálogo interno, sem regulamento oficial validado."
+            "O Gemini combina indicadores calculados e trechos recuperados. Confira as evidências antes de usar recomendações; benefícios dependem de validação."
         )
         ask_ui(api, cid)
     elif page == "Auditoria de viés":

@@ -1,3 +1,5 @@
+> Integração Gemini/Flight Deck: veja [GEMINI.md](../GEMINI.md), [DESIGN.md](../DESIGN.md) e o [README atualizado](../../README.md). Os estados e limites mais recentes estão nesses guias.
+
 > Pacote integrado em 26/10/2026. Estado atual, novas funcionalidades e evidências: [Consolidação](../CONSOLIDACAO.md). As referências a commits e resultados de 25/10 abaixo são históricas.
 
 # Roteiro de pitch — até 5 minutos

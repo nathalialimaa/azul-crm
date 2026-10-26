@@ -1,7 +1,11 @@
 """Execute da raiz, após gerar a Gold. Exporta contratos e exemplos da API real."""
 
 import json
+import os
 from pathlib import Path
+
+os.environ["CRM_LLM_PROVIDER"] = "local"
+os.environ["CRM_MESSAGE_PROVIDER"] = "template"
 
 from fastapi.testclient import TestClient
 

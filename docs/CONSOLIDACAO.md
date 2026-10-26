@@ -100,3 +100,10 @@ Branch de entrega: `integracao/consolidacao-crm-2026-10-26`. Privacidade do repo
 - O pipeline ANAC completo já havia passado e não foi repetido, pois seus dados e ingestores não mudaram.
 - Documentos originais não foram incluídos no repositório; apenas a análise e seus hashes.
 - Repositório privado confirmado antes do push. Branch: `integracao/consolidacao-crm-2026-10-26`.
+
+
+## Evolução Flight Deck e Gemini
+
+Branch `feat/gemini-experiencia-azul`: tema responsivo Azul Flight Deck, fonte local, README reorganizado, tarefas/depuração VS Code, Gemini para copiloto e mensagens originais com citações, preview sem geração remota, rascunhos identificados para revisão e contingência explícita. A chave permanece somente no `.env` local ignorado pelo Git.
+
+Regressão: 243 testes passaram. Após os últimos ajustes, 43 testes direcionados passaram, e uma conferência final de documentação/Gemini passou em 27 testes (conjuntos parcialmente sobrepostos; não somar as contagens). API e oito páginas verificadas. A API Google apresentou sobrecarga HTTP 503 em chamadas completas; esta dependência externa continua registrada, sem alegação de LLM sempre disponível. Guias atuais: `GEMINI.md`, `DESIGN.md` e README.

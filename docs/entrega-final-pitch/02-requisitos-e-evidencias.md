@@ -1,3 +1,5 @@
+> Integração Gemini/Flight Deck: veja [GEMINI.md](../GEMINI.md), [DESIGN.md](../DESIGN.md) e o [README atualizado](../../README.md). Os estados e limites mais recentes estão nesses guias.
+
 # Requisitos e evidências
 
 | Capacidade | Implementação | Evidência |

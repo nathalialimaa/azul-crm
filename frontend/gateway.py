@@ -8,7 +8,6 @@ import httpx
 
 from azul_crm.application.dashboard import overview, simulation, strategy
 from azul_crm.bootstrap import build_container
-from azul_crm.infrastructure.rag import DocumentIndex
 from azul_crm.infrastructure.settings import Settings
 from azul_crm.infrastructure.store import Store
 
@@ -67,11 +66,11 @@ class Gateway:
             "scores": asdict(self.c.crm.scores(cid)),
         }
 
-    def recommend(self, cid):
+    def recommend(self, cid, generate=True):
         return (
-            self.request("POST", "/agent/recommend", json={"customer_id": cid})
+            self.request("POST", "/agent/recommend", json={"customer_id": cid, "generate": generate})
             if self.http
-            else asdict(self.c.recommendations.recommend(cid))
+            else asdict(self.c.recommendations.recommend(cid, generate=generate))
         )
 
     def ask(self, question, cid=None):
@@ -79,14 +78,16 @@ class Gateway:
             return self.request(
                 "POST", "/agent/ask", json={"question": question, "customer_id": cid}
             )
-        if cid and any(w in question.lower() for w in ["risco", "prioriz", "valor", "fator"]):
-            s = self.c.crm.scores(cid)
-            return {
-                "answer": "\n".join(s.drivers) + "\nVersão: " + s.model_version,
-                "evidence": [],
-                "mode": "structured_customer_facts",
-            }
-        return DocumentIndex(self.settings.root).answer(question)
+        from azul_crm.application.assistant import answer_question
+
+        return answer_question(self.c, self.settings.root, question, cid)
+
+    def llm_status(self):
+        if self.http:
+            return self.request("GET", "/llm/status")
+        from azul_crm.infrastructure.gemini import provider_status
+
+        return provider_status()
 
     def models(self):
         if self.http:
@@ -139,7 +140,7 @@ class Gateway:
             (r for r in Store(self.settings.root).read("loyalty") if r["customer_id"] == cid), {}
         )
 
-    def decide(self, cid, status, note, confirmed=None):
+    def decide(self, cid, status, note, confirmed=None, draft_id=None):
         if status not in {"APPROVED", "REJECTED"}:
             raise ValueError("Status deve ser APPROVED ou REJECTED")
         confirmed = list(confirmed or [])
@@ -152,9 +153,10 @@ class Gateway:
                     "status": status,
                     "note": note,
                     "confirmed_checklist": confirmed,
+                    "draft_id": draft_id,
                 },
             )
-        rec = self.recommend(cid)
+        rec = asdict(self.c.recommendations.for_review(cid, draft_id))
         if status == "APPROVED" and rec["action"]["code"] == "NO_ACTION":
             raise ValueError("Sem evidências; aprovação bloqueada")
         if status == "APPROVED":

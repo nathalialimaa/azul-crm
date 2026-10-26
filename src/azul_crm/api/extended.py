@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from azul_crm.api.routes import get_container
 from azul_crm.application.dashboard import overview, simulation, strategy
-from azul_crm.infrastructure.rag import DocumentIndex
 from azul_crm.infrastructure.settings import Settings
 from azul_crm.infrastructure.store import Store
 
@@ -49,24 +48,17 @@ class Question(BaseModel):
 
 @router.post("/agent/ask")
 def ask(body: Question, c=Depends(get_container)):
-    if body.customer_id:
-        scores = c.crm.scores(body.customer_id)
-        if any(w in body.question.lower() for w in ["risco", "prioriz", "valor", "fator"]):
-            return {
-                "answer": "\n".join(scores.drivers) + "\nVersão: " + scores.model_version,
-                "evidence": [],
-                "mode": "structured_customer_facts",
-            }
+    from azul_crm.application.assistant import answer_question
+
     try:
-        return DocumentIndex(Settings.load().root).answer(body.question)
+        return answer_question(c, Settings.load().root, body.question, body.customer_id)
     except (ValueError, httpx.HTTPError, KeyError) as exc:
-        raise HTTPException(
-            503,
-            "Assistente indisponível ou resposta sem referências válidas. Confira índice/provedor.",
-        ) from exc
+        raise HTTPException(503, "Assistente indisponível. Confira índice e provedor.") from exc
+
 
 
 class Decision(BaseModel):
+    draft_id: str | None = Field(None, max_length=80)
     customer_id: str
     status: str = Field(pattern="^(APPROVED|REJECTED)$")
     note: str = Field("", max_length=1000)
@@ -75,7 +67,10 @@ class Decision(BaseModel):
 
 @router.post("/decisions")
 def decide(body: Decision, c=Depends(get_container)):
-    rec = c.recommendations.recommend(body.customer_id)
+    try:
+        rec = c.recommendations.for_review(body.customer_id, body.draft_id)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
     if body.status == "APPROVED" and rec.action.code == "NO_ACTION":
         raise HTTPException(409, "Sem evidência: inclua e revise as fontes antes de aprovar.")
     if body.status == "APPROVED":
@@ -180,3 +175,10 @@ def explanation(customer_id: str, c=Depends(get_container)):
     from azul_crm.application.explanations import explain_customer
 
     return explain_customer(c, Settings.load().root, customer_id)
+
+
+@router.get("/llm/status")
+def llm_status():
+    from azul_crm.infrastructure.gemini import provider_status
+
+    return provider_status()

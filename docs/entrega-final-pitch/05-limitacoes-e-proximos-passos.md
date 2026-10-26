@@ -1,3 +1,5 @@
+> Integração Gemini/Flight Deck: veja [GEMINI.md](../GEMINI.md), [DESIGN.md](../DESIGN.md) e o [README atualizado](../../README.md). Os estados e limites mais recentes estão nesses guias.
+
 # Limitações e próximos passos
 
 - Clientes, fidelidade e desfechos são sintéticos. Dados ANAC agregados não identificam clientes reais.

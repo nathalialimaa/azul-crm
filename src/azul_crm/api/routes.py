@@ -74,4 +74,4 @@ def segments(c: Container = Depends(get_container)):
 
 @router.post("/agent/recommend", response_model=RecommendationResponse)
 def recommend(body: RecommendationRequest, c: Container = Depends(get_container)):
-    return c.recommendations.recommend(body.customer_id)
+    return c.recommendations.recommend(body.customer_id, generate=body.generate)

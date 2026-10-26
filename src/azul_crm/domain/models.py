@@ -133,3 +133,4 @@ class Recommendation:
     channel: str | None = None
     persona: str | None = None
     review_checklist: tuple[ChecklistItem, ...] = ()
+    draft_id: str | None = None

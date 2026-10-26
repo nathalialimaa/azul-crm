@@ -1,3 +1,5 @@
+> Integração Gemini/Flight Deck: veja [GEMINI.md](../GEMINI.md), [DESIGN.md](../DESIGN.md) e o [README atualizado](../../README.md). Os estados e limites mais recentes estão nesses guias.
+
 # Azul CRM — Entrega final e pitch
 
 Versão integrada em 26/10/2026: código corrigido e dados públicos do chore, base funcional develop e organização da entrega do Luan.

@@ -732,6 +732,22 @@
           }
         }
       }
+    },
+    "/api/v1/llm/status": {
+      "get": {
+        "summary": "Llm Status",
+        "operationId": "llm_status_api_v1_llm_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -852,6 +868,18 @@
       },
       "Decision": {
         "properties": {
+          "draft_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Id"
+          },
           "customer_id": {
             "type": "string",
             "title": "Customer Id"
@@ -1026,6 +1054,11 @@
       },
       "RecommendationRequest": {
         "properties": {
+          "generate": {
+            "type": "boolean",
+            "title": "Generate",
+            "default": true
+          },
           "customer_id": {
             "type": "string",
             "maxLength": 80,
@@ -1070,7 +1103,8 @@
             "enum": [
               "demo_template",
               "playbook_template",
-              "ollama_bounded_draft"
+              "ollama_bounded_draft",
+              "gemini_grounded_draft"
             ],
             "title": "Mode"
           },
@@ -1112,6 +1146,17 @@
             },
             "type": "array",
             "title": "Review Checklist"
+          },
+          "draft_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Id"
           }
         },
         "additionalProperties": false,

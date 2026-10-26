@@ -40,6 +40,8 @@ def main():
     os.environ["CRM_PROJECT_ROOT"] = str(ROOT)
     os.environ["CRM_STORAGE"] = "sqlite"
     os.environ["CRM_UI_MODE"] = "local"
+    os.environ["CRM_LLM_PROVIDER"] = "local"
+    os.environ["CRM_MESSAGE_PROVIDER"] = "template"
     api_port, ui_port = free_port(), free_port()
     processes = []
     flags = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}

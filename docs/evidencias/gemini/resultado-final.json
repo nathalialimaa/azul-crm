@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-26",
+  "branch": "feat/gemini-experiencia-azul",
+  "regression": {
+    "passed": 243,
+    "warnings": 1,
+    "seconds": 542.87
+  },
+  "post_change_targeted": {
+    "passed": 43,
+    "warnings": 1,
+    "seconds": 69.09
+  },
+  "final_docs_and_gemini": {
+    "passed": 27,
+    "warnings": 1,
+    "seconds": 16.17
+  },
+  "http_and_streamlit": "passed_8_pages",
+  "secret_scan": "key_not_found_in_publishable_files",
+  "vscode": "project_window_and_official_python_extensions_confirmed",
+  "gemini": {
+    "configured_model": "gemini-3.8-flash",
+    "catalog_authentication": "passed",
+    "structured_connection_generation": "passed",
+    "assistant_grounded_generation_observed_with_3_5": "passed",
+    "message_generation_observed_with_3_5": "passed",
+    "current_full_flow": "blocked_by_provider_http_503_high_demand",
+    "fallback": "explicit_local_mode_not_misrepresented_as_llm"
+  },
+  "design": {
+    "real_browser_width": 1395,
+    "horizontal_overflow": false,
+    "local_font_loaded": true,
+    "taste_lint_failures": 0,
+    "taste_lint_warnings": 2,
+    "mobile_emulation": "not_run"
+  }
+}

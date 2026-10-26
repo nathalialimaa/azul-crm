@@ -1,228 +1,180 @@
-> **Versão consolidada em 26/10/2026:** [comparação, execução, novas funcionalidades e pendências](docs/CONSOLIDACAO.md). [Pacote de pitch](docs/entrega-final-pitch/README.md).
+# Azul CRM · Flight Deck
 
-> **Entrega revisada em 25/10/2026:** comece por [LEIA_PRIMEIRO.md](LEIA_PRIMEIRO.md).
-> Mudanças, resultados e limites: [docs/REVISAO_FINAL.md](docs/REVISAO_FINAL.md).
+Uma plataforma de inteligência de relacionamento para identificar clientes de alto valor, entender sinais de evasão e preparar a próxima ação de retenção. **FastAPI + Streamlit + Gemini**, com dados públicos da ANAC e clientes inteiramente sintéticos.
 
-# Azul CRM — CRM de Alto Valor (Hacka Business 2026)
+> **Para apresentar:** abra o projeto no VS Code e use **Executar tarefa → Azul CRM: executar**. Acesse `http://127.0.0.1:8501`. O guia organizado da entrega está em [docs/entrega-final-pitch](docs/entrega-final-pitch/README.md).
 
-Painel de inteligência de CRM que encontra clientes de alto valor, mostra quem corre risco de sair e sugere a próxima ação, sempre com revisão humana. **FastAPI + Streamlit**, dados em SQLite (ou Snowflake) e um lake em Parquet com dicionário de dados.
+## O que a plataforma entrega
 
-**Os clientes são sintéticos.** Tarifas, demanda por rota e atrasos podem ser calibrados com dados públicos da ANAC (veja "Calibração com dados da ANAC"). Nenhum dado real da empresa foi usado.
+| Pergunta de negócio | Como o produto responde |
+|---|---|
+| Quem priorizar? | CLV de 12 meses, valor em risco, quatro personas e fila de retenção |
+| Por que esse cliente? | Histórico, fatores de valor/risco e valores de Shapley exatos |
+| Qual ação considerar? | Playbook por persona, contexto da jornada, fontes públicas e revisão humana |
+| Como conversar com os dados? | Copiloto Gemini com indicadores calculados e evidências recuperadas |
+| Como personalizar o contato? | Mensagem original gerada pelo Gemini, somente quando solicitada |
+| Onde a jornada gera atrito? | Sentimento lexical, sete assuntos, intensidade e etapas da jornada |
+| Qual impacto avaliar? | Simulador com custo, retenção assumida e equilíbrio, sem promessa causal |
 
-**Leia primeiro:** esta entrega roda localmente, mas não está homologada no Snowflake, por padrão o rascunho usa template; a composição limitada por Ollama é opcional e ainda não homologada com serviço real e o regulamento público do Azul Fidelidade está na base apenas para consulta (o assistente busca por semelhança de palavras e não valida a vigência nem benefícios específicos). O repositório e o protótipo devem permanecer privados conforme o enunciado. Índice dos documentos e premissas: `docs/INDICE.md`. Pendências: `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`.
+**O projeto é uma demonstração privada.** Clientes, fidelidade, resgates e desfechos são sintéticos. CLV depende de hipóteses de margem e desconto. Risco heurístico não deve ser apresentado como probabilidade calibrada de clientes reais. Ofertas permanecem hipóteses, e nenhuma mensagem é enviada.
 
-## Em três comandos (Windows / PowerShell)
+## Começar no Windows
 
-```powershell
-py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
-.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address 127.0.0.1
-```
+Requisitos: Python **3.11 a 3.13**; para a configuração validada nesta máquina, Python **3.12**. Não é necessário instalar Node, Ollama ou Snowflake para o fluxo local com Gemini.
 
-Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q`. Resultados atuais em `docs/CONSOLIDACAO.md`.
-
-## O que a base de demonstração mostra
-
-Valores de referência com a seed 42. Podem variar levemente com a versão das bibliotecas.
-
-| Resultado | Valor |
-| --- | --- |
-| Personas | 4 grupos: Baixo Volume Ativo (119), Alto Valor Esfriando (102), Fiéis de Alto Valor (98) e Baixo Volume Ativo com Atrasos Frequentes (81) |
-| Alto valor | 80 clientes, os 20% de maior valor potencial (corte de R$ 3.252 de margem por ano). Concentram 41,5% do valor, e 46 estão em risco |
-| CLV de 12 meses | R$ 370.979 esperados e R$ 341.667 em risco, com margem de 15% e desconto de 10% ao ano, que são **hipóteses** |
-| Churn | A regra heurística é mantida: o modelo logístico não passa no teste estatístico (t = −0,40; mínimo de 1,65) |
-| Auditoria de viés | 0 alertas. Aeroporto e região aparecem como "confundido" porque o gerador sem calibração define o comportamento pela posição do cliente; com rotas reais isso deixa de acontecer |
-
-Com a calibração da ANAC os números mudam (por exemplo, 173, 103, 98 e 26 clientes nas personas, e 37 clientes de alto valor em risco). Veja `docs/CALIBRACAO_PUBLICA.md`.
-
-## Calibração com dados da ANAC
-
-Os arquivos públicos usados na reprodução estão em `data/inputs/ANAC` (cerca de 40 MB descompactados). Execute `python scripts/preparar_anac.py` para usar esse snapshot. Fontes oficiais:
-
-- **Tarifas aéreas domésticas** (mensal): DataSAS da ANAC, `https://sistemas.anac.gov.br/sas/downloads/`, tema "Tarifas Transporte Aéreo Passageiros Domésticos".
-- **VRA, Voo Regular Ativo** (mensal): `https://sistemas.anac.gov.br/dadosabertos/`, pasta "Voos e operações aéreas / Voo Regular Ativo (VRA)".
-- **Aeroportos:** o comando `airports` baixa a lista do OurAirports.
+Abra o terminal na pasta onde está `pyproject.toml`:
 
 ```powershell
-$dados = "C:\caminho\da\pasta"   # TROCAR pelo caminho real dos arquivos baixados
-.\.venv\Scripts\python.exe -m azul_crm.cli airports
-.\.venv\Scripts\python.exe -m azul_crm.cli fares --file "$dados\ARQUIVO-DE-TARIFAS.zip" --period 2026-09
-.\.venv\Scripts\python.exe -m azul_crm.cli vra --file "$dados\VRA_20268.csv" --period 2026-08
-.\.venv\Scripts\python.exe -m azul_crm.cli demo --public --customers 400 --seed 42
-```
-
-Depois rode, na ordem: `train`, `personas`, `sync-scores`, `bias-audit`, `clv-report` e `export-lake`. O passo `fares` é o mais pesado (de 1 a 3 minutos e uns 2 GB de memória).
-
-
-## Demonstração rápida no Windows / PowerShell
-
-1. Instale Python **3.11 a 3.13** (incluindo o Python Launcher). Clone ou extraia o repositório.
-2. Abra o PowerShell na pasta `azul-crm`, onde está `pyproject.toml`.
-3. Execute, sem precisar ativar o ambiente virtual:
-
-```powershell
-py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
+python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 Copy-Item .env.example .env
-.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
 ```
 
-Abra `http://localhost:8501`. **É só um terminal.** O Streamlit usa os mesmos serviços de negócio da API diretamente. Se a base SQLite estiver ausente, a entrada `streamlit_app.py` gera 400 clientes com seed 42. O app gera a base de demonstração sozinho na primeira execução. Não é necessário instalar Node, React ou Django.
+Se o `.env` já existe, mantenha seu arquivo e ajuste somente as variáveis necessárias. Não substitua uma configuração que já contém sua chave.
 
-Se preferir, execute `powershell -ExecutionPolicy Bypass -File .\scripts\start_demo.ps1`. Essa opção aplica a política somente a esse processo, instala dependências e força o modo SQLite local. Não use esse script para demonstrar Snowflake.
+### Ativar o Gemini
 
-Se o comando `py -3.12` falhar, confirme a instalação com `py --list`. Se a porta estiver ocupada, acrescente `--server.port 8502` ao comando Streamlit. Não copie ambientes virtuais de outras máquinas.
+Crie uma chave no [Google AI Studio](https://aistudio.google.com/app/apikey). No **.env local**, configure:
 
-## O que demonstrar em cinco minutos
+```dotenv
+CRM_STORAGE=sqlite
+CRM_UI_MODE=local
+RAG_PROVIDER=local
+CRM_LLM_PROVIDER=gemini
+CRM_MESSAGE_PROVIDER=gemini
+GEMINI_MODEL=gemini-3.8-flash
+GEMINI_API_KEY=SUA_CHAVE_LOCAL
+```
 
-1. **Visão geral:** clientes de alto valor (top 20% por CLV), risco, CLV de 12 meses e fila de prioridade.
-2. Escolha um cliente no menu lateral. A matriz destaca o cliente selecionado.
-3. Confira fatores e clique em **Gerar mensagem para revisão**. Abra as evidências.
-4. Em **Clientes**, veja viagens e fidelidade sintética, inclusive resgates e pagamentos restritos simulados.
-5. Em **Ações de CRM**, marque o checklist de revisão (consentimento de comunicação, revisão humana e oferta fora da mensagem) e aprove ou rejeite o rascunho. A aprovação só é registrada com o checklist confirmado, e nenhuma mensagem é enviada. Compare uma hipótese de custo e retenção no simulador.
-6. Em **Assistente IA**, consulte a metodologia; uma pergunta sem correspondência deve produzir abstenção.
-7. Em **Dados e modelos**, mostre método ativo, métricas e limitações. Exporte o recorte no rodapé.
+A chave fica no servidor, nunca no navegador ou no GitHub. O arquivo `.env` já é ignorado pelo Git. O exemplo acima é um placeholder, não uma credencial.
 
-Também vale mostrar **Segmentos** (as personas e a definição de alto valor, com a tabela de sensibilidade) e **Auditoria de viés** (o alerta exige significância estatística).
+O modelo `gemini-3.8-flash` respondeu na conta usada na validação. A API informou que `gemini-2.5-flash` não está disponível para novos usuários; por isso ele não é usado nesta entrega. Disponibilidade, cotas e cobrança dependem da sua conta Google. O modelo pode ser alterado em `GEMINI_MODEL`.
 
-A aparência segue a hierarquia e a paleta da imagem fornecida. A matriz usa o valor potencial de 12 meses (margem, em reais) no eixo vertical e o risco de evasão no horizontal; a divisória marca o corte do alto valor (top 20%). Margem e desconto são hipóteses, com tabela de sensibilidade (`docs/CLV.md`). O resultado não é uma cópia pixel a pixel da imagem.
+**Após mudar o .env, reinicie o processo Streamlit.** Recarregar apenas o navegador pode manter a configuração antiga no servidor.
 
-## Usar FastAPI em processo separado
+### Preparar os dados e abrir
 
-Terminal 1, na mesma pasta:
+Para usar os arquivos públicos já empacotados:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/preparar_anac.py
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+O preparo ANAC recria a carteira sintética e limpa decisões anteriores **dessa cópia**. Feche a aplicação antes de executá-lo. Ele ingere os dados, treina/compara churn, cria personas, valida a base e exporta o lake. Não precisa baixar os arquivos novamente.
+
+Para uma primeira demonstração leve sem calibração ANAC, omita o preparo: o app gera sua base sintética automaticamente quando a base ainda não existe. Na inicialização normal, ele preserva a carteira e repara artefatos incompatíveis.
+
+### Abrir no VS Code
+
+A pasta `.vscode` contém:
+
+- Interpretador `.venv/Scripts/python.exe` configurado.
+- Tarefa **Azul CRM: executar** para iniciar o app.
+- Tarefa **Azul CRM: testes** para executar a suíte.
+- Configuração de depuração **Azul CRM · Apresentação** para usar com F5, com a extensão Python/Debugger. Ela usa a porta 8502 para não conflitar com a demonstração que já roda em 8501.
+
+Se a porta 8501 já estiver ocupada pelo app em execução, use a instância existente ou encerre-a antes de iniciar outra.
+
+## Como demonstrar em cinco minutos
+
+1. **Visão geral:** apresente o radar de retenção, clientes de alto valor e CLV em risco. Os filtros alteram o recorte, sem recalcular modelos indevidamente.
+2. **Clientes:** abra uma pessoa sintética e mostre viagens, fidelidade e explicação exata de Shapley.
+3. **Segmentos:** explique as quatro personas e as premissas de alto valor.
+4. **Assistente IA:** pergunte “Quais são as principais oportunidades de retenção desta carteira?” e confira a resposta do Gemini com suas fontes.
+5. **Ações de CRM:** gere uma mensagem original, confira os fatos/fontes e complete o checklist antes de aprovar. O registro mantém o mesmo rascunho gerado; não chama o modelo novamente na aprovação.
+6. **Sentimento:** execute o CSV de exemplo e mostre temas e hipóteses de atrito.
+7. **Simulador e Dados e modelos:** mostre custos hipotéticos, arquitetura e limitações.
+
+O tema **Azul Flight Deck** usa tipografia Manrope local, azul-marinho e ciano, hierarquia de indicadores, estados de foco/hover e composição responsiva. Movimentos respeitam `prefers-reduced-motion`. A identidade é uma interpretação do protótipo, não uma alegação de produto oficial homologado.
+
+## Como o Gemini funciona
+
+```text
+Indicadores calculados + ação elegível + trechos recuperados
+                            ↓
+                  Gemini com saída JSON
+                            ↓
+            Validação de estrutura e citações
+                            ↓
+             Resposta ou rascunho revisável
+```
+
+O Gemini explica e redige. CLV, churn, prioridade e elegibilidade continuam calculados pelo código. A busca local TF-IDF não depende de embeddings pagos. São enviados somente o contexto sintético necessário e trechos do corpus; chave, configuração de credenciais e os documentos confidenciais originais do desafio não entram nos prompts.
+
+As mensagens não podem mudar a ação selecionada, incluir números ou prometer benefícios, pontos, descontos ou compensações. A aplicação valida esses limites e os IDs das citações. Isso reduz riscos, mas não substitui avaliação humana da fidelidade semântica.
+
+Em falha de rede, indisponibilidade ou limite da API, o painel informa **structured_fallback** ou **Modo de contingência**. Esse resultado é explicitamente local; não é apresentado como resposta do Gemini. Erros temporários 5xx têm tentativas limitadas. Não há troca automática para outro provedor.
+
+Para usar somente recursos locais, configure `CRM_LLM_PROVIDER=local` e `CRM_MESSAGE_PROVIDER=template`. O adaptador Ollama anterior continua opcional. Detalhes: [docs/GEMINI.md](docs/GEMINI.md).
+
+## Organização do projeto
+
+```text
+frontend/                Painel Streamlit, gateway, tema e fontes locais
+src/azul_crm/
+  domain/                Contratos, scores, CLV e políticas de decisão
+  application/           Serviços, indicadores, copiloto e explicações
+  infrastructure/        SQLite/Snowflake, RAG e cliente Gemini
+  pipeline/              ANAC, geração sintética, treino e auditoria
+config/                  Premissas, janelas e playbook
+ data/inputs/ANAC/        Arquivos públicos para reprodução offline
+ data/knowledge/          Corpus público e metodologia versionados
+scripts/                 Preparo, exportação e verificações reproduzíveis
+tests/                   Regressão, API, UI e validação de segurança
+docs/                    Requisitos, arquitetura, entrega e evidências
+```
+
+A aplicação consome contratos canônicos, permitindo futura substituição dos dados sintéticos por fontes reais. O lake usa Bronze/Silver/Gold, Parquet, dicionário e DDL Snowflake. A homologação com conta Snowflake real continua externa.
+
+## ANAC e reprodução
+
+Fontes: [tarifas ANAC](https://sistemas.anac.gov.br/sas/downloads/) e [dados abertos/VRA](https://sistemas.anac.gov.br/dadosabertos/). Os arquivos empacotados estão em `data/inputs/ANAC`; checksums são verificados antes do preparo.
+
+Ingestão individual, caso queira reproduzir cada etapa:
+
+```powershell
+.\.venv\Scripts\python.exe -m azul_crm.cli fares --file data/inputs/ANAC/anac_tarifa_setembro2026.zip --period 2026-09
+.\.venv\Scripts\python.exe -m azul_crm.cli vra --file data/inputs/ANAC/VRA-agosto_2026.csv --period 2026-08
+```
+
+## API separada, quando necessária
+
+O painel padrão funciona em um processo, usando os serviços diretamente. Para demonstrar HTTP:
 
 ```powershell
 .\.venv\Scripts\python.exe -m uvicorn azul_crm.api.main:app --host 127.0.0.1 --port 8000
 ```
 
-Terminal 2:
+Em outro terminal, defina `CRM_UI_MODE=http`, `CRM_API_URL=http://127.0.0.1:8000` e execute o Streamlit. Documentação: `http://127.0.0.1:8000/docs`. Mantenha a API em localhost: ela não tem autenticação produtiva.
+
+## Testes e evidências
 
 ```powershell
-$env:CRM_UI_MODE="http"
-$env:CRM_API_URL="http://127.0.0.1:8000"
-.\.venv\Scripts\python.exe -m streamlit run frontend/app.py
-```
-
-Documentação interativa: `http://127.0.0.1:8000/docs`. Saúde: `http://127.0.0.1:8000/health`.
-
-Para voltar a um terminal: feche os processos, remova a variável com `Remove-Item Env:CRM_UI_MODE -ErrorAction SilentlyContinue` e use `streamlit_app.py`.
-
-A API não implementa autenticação de produção. Mantenha-a vinculada a `127.0.0.1`; a hospedagem recomendada usa o modo local de serviços e o controle de acesso do Streamlit privado. Não exponha a API diretamente à internet.
-
-## Reproduzir dados, treinamento e validação
-
-```powershell
-# Substitui o snapshot sintético atual, incluindo decisões de demonstração.
-.\.venv\Scripts\python.exe -m azul_crm.cli demo --customers 400 --seed 42
-.\.venv\Scripts\python.exe -m azul_crm.cli validate
-.\.venv\Scripts\python.exe -m azul_crm.cli train
-.\.venv\Scripts\python.exe -m azul_crm.cli personas
-.\.venv\Scripts\python.exe -m azul_crm.cli bias-audit
-.\.venv\Scripts\python.exe -m azul_crm.cli clv-report
-.\.venv\Scripts\python.exe -m azul_crm.cli export-lake
-.\.venv\Scripts\python.exe -m azul_crm.cli index
-.\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
 .\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m ruff check src frontend tests
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe scripts/verificar_integracao.py
+.\.venv\Scripts\python.exe scripts/verificar_gemini.py
 ```
 
-Após mudar a Gold/modelo, reinicie a API e clique **Atualizar dados** no Streamlit. O snapshot evita consultas repetidas ao warehouse; não há atualização automática em tempo real.
+A suíte usa mocks e isola provedores externos: não consome a chave nem faz chamadas Gemini por acidente. O último comando é uma verificação **real e explícita**, dependente da sua conta e cota, com evidência sanitizada em `docs/evidencias/gemini/`.
 
-`train` usa 60% treino, 20% validação e 20% teste, com estratificação e seed. A escolha entre a logística e a regra usa **validação cruzada** (5×3, em treino + validação, sem o teste): a logística só entra se o ganho de AUC for distinguível de ruído (teste t pareado com correção de Nadeau e Bengio, t > 1,65) e o Brier for menor; veja `docs/MODELO_CHURN.md`. Na base de demonstração, a logística **não é promovida**. Métricas reais da execução estão em `artifacts/metrics.json`; elas medem apenas dados simulados.
+## O que falta homologar
 
-O baseline de valor e os segmentos continuam sendo regras. Os drivers da logística são aditivos em log-odds; a visão Clientes oferece também decomposição exata de Shapley dos scores ativos, com referência única explícita (veja `docs/EXPLICABILIDADE.md`). O CLV de 12 meses é calculado com premissas explícitas e configuráveis (margem e desconto, que são hipóteses), não treinado com dados reais; veja `docs/CLV.md`.
+- Qualidade semântica/groundedness em avaliação humana sistemática; IDs válidos não garantem que toda afirmação seja correta.
+- Vigência e critérios específicos dos benefícios oficiais.
+- Sentimento com corpus público real rotulado; o classificador atual é lexical.
+- Snowflake/MLflow em ambiente real, se escolhidos para a continuidade.
+- Hospedagem privada, acesso dos avaliadores, vídeo e submissão pela equipe.
 
-O catálogo de ações por persona está em `config/playbook.toml`; veja `docs/PLAYBOOK.md`.
+O regulamento exige repositório privado. Não publique os documentos originais do desafio ou credenciais. A [matriz de requisitos](docs/VALIDACAO.md) distingue implementação local, diferenciais e dependências externas.
 
-Para publicar o protótipo (Docker, senha e Streamlit Cloud), veja `docs/DEPLOY.md`.
+## Documentação organizada
 
-Data lake em Parquet, dicionário de dados e DDL do Snowflake (`azul-crm export-lake`): `docs/DATA_LAKE.md`.
-
-CLV de 12 meses e definição de alto valor (`azul-crm clv-report`): `docs/CLV.md`.
-
-## ANAC e aeroportos
-
-Importe a referência pequena já verificada, ou baixe a dimensão completa:
-
-```powershell
-.\.venv\Scripts\python.exe -m azul_crm.cli airports --file data/fixtures/airports_reference.csv
-# Alternativa: download real OurAirports, limite 50 MiB
-.\.venv\Scripts\python.exe -m azul_crm.cli airports
-```
-
-Tarifas, com arquivo oficial obtido no portal:
-
-```powershell
-.\.venv\Scripts\python.exe -m azul_crm.cli fares --file "C:\dados\202606.CSV" --period 2026-06
-```
-
-Download automático a partir de um link oficial:
-
-```powershell
-# Substitua o endereço pelo link HTTPS do arquivo, não pela página HTML.
-.\.venv\Scripts\python.exe -m azul_crm.cli fares --url "COLE_A_URL_HTTPS_OFICIAL" --period 2026-06 --max-mb 50
-# Tenta descobrir um link mensal único publicado pelo portal:
-.\.venv\Scripts\python.exe -m azul_crm.cli fares --period 2026-06
-```
-
-A descoberta não inventa caminhos e pode falhar se o portal exigir interação, estiver indisponível ou apresentar múltiplos arquivos. Foi observado HTTP 503 no ambiente desta entrega. Use `--file` nesses casos.
-
-VRA, com as colunas publicadas pela ANAC:
-
-```powershell
-.\.venv\Scripts\python.exe -m azul_crm.cli vra --file "C:\dados\VRA_202606.csv" --period 2026-06
-# Também aceita --url HTTPS de domínio ANAC.
-```
-
-O parser VRA lê o arquivo oficial mensal (CSV do portal de dados abertos da ANAC, "Voo Regular Ativo"): pula a linha de aviso do topo, trata `null` e `N/A` como ausência, lê horários em **UTC** e calcula atraso e cancelamento. Linhas sem data ou fora do período são **rejeitadas e contadas** (`rejected_reasons`); se mais de 5% forem rejeitadas, a carga é recusada. Schemas divergentes falham explicitamente. Foi validado com o arquivo real de agosto de 2026 (88 mil linhas). Veja `docs/CALIBRACAO_PUBLICA.md`.
-
-Para gerar uma carteira com médias tarifárias da Silver pública:
-
-```powershell
-# Ingerir antes: airports, fares (tarifas) e vra (atrasos)
-.\.venv\Scripts\python.exe -m azul_crm.cli demo --public --customers 400 --seed 42
-.\.venv\Scripts\python.exe -m azul_crm.cli train
-.\.venv\Scripts\python.exe -m azul_crm.cli sync-scores
-```
-
-Essa calibração usa médias de tarifas AZU ponderadas por assentos, por rota, e distribui os clientes pelas rotas na proporção dos assentos comercializados (sorteio com semente fixa). Se o VRA tiver sido ingerido, os **atrasos** também são sorteados da distribuição real da Azul (doméstico, por aeroporto de origem quando há voos suficientes); sem ele, vale o padrão antigo. Não calibra frequência individual de viagens, resgate nem fidelidade. O que foi calibrado fica registrado no manifesto (`calibration_scope` e `delay_calibration`).
-
-Os CSVs de tarifas não identificam clientes nem comprovam fidelidade. `period` representa mês de venda. Tarifas restritas e milhas são simulações separadas, sem alegação de cobertura pública.
-
-## Snowflake, RAG, MLflow e hospedagem
-
-Siga `docs/DEPENDENCIAS.md`: contas, permissões, variáveis, comandos e verificações. Em resumo:
-
-- Snowflake é o destino principal planejado/configurável. `CRM_STORAGE=snowflake` escolhe o adaptador; não há fallback silencioso para SQLite se a conexão falhar.
-- A demonstração entregue usa `CRM_STORAGE=sqlite` explicitamente.
-- `RAG_PROVIDER=local` usa TF-IDF e resposta extrativa, sem LLM.
-- `RAG_PROVIDER=ollama` usa embeddings e geração locais. É preciso instalar os modelos e construir o índice. Integração implementada, não executada com modelos reais nesta entrega.
-- O corpus contém a metodologia e o catálogo internos do MVP e o **regulamento público do Azul Fidelidade** (versão "novo-2024", copiada manualmente em 23/10/2026; último aditamento registrado em 28/02/2024). A importação **não certifica a vigência**, e o regulamento não fixa valores de bônus nem de upgrade. Veja `docs/BASE_DE_CONHECIMENTO.md`.
-- MLflow registra métricas e o artefato JSON se habilitado; não fornece infraestrutura gratuita.
-- Hospedagem externa, autenticação dos avaliadores e submissão não foram realizadas.
-
-## Estrutura
-
-```text
-src/azul_crm/domain/           entidades, portas, pontuações e elegibilidade originais
-src/azul_crm/application/      casos de uso, consulta do dashboard e simulação
-src/azul_crm/infrastructure/   SQLite/Snowflake, configuração, índice e validação
-src/azul_crm/pipeline/         geração, ingestão, normalização e treinamento
-src/azul_crm/api/              contratos v1 preservados e endpoints adicionais
-frontend/                     interface Streamlit e gateway local/HTTP
-sql/                          estruturas, roles e consultas Snowflake
-scripts/                      execução Windows e ingestão agendável
-artifacts/                    modelo JSON, métricas e índice
- data/                        fixtures, snapshots, Bronze/Silver/Gold e corpus
- docs/                        diagnóstico, arquitetura, dependências e validação
-```
-
-Os documentos anteriores foram preservados em `docs/legacy`; descrevem o estado anterior e não prevalecem sobre esta documentação. Os comandos antigos `python -m azul_crm.pipeline.cli demo/validate` continuam destinados à exportação CSV v1; para atualizar a aplicação v2, use `python -m azul_crm.cli ...`.
-
-## Limites que permanecem
-
-**Feito:** coleta real das tarifas (setembro de 2026) e do VRA (agosto de 2026), com calibração de tarifa média, demanda por rota e atrasos; regulamento público do Azul Fidelidade na base do assistente; CLV de 12 meses com premissas explícitas; personas; auditoria de viés com taxa de erro medida; lake em Parquet com dicionário de dados.
-
-**Pendente ou sem homologação:** Snowflake, Ollama e MLflow reais; vigência e condições específicas dos benefícios; agente LLM completo; avaliação de sentimento com corpus público rotulado e hospedagem privada do protótipo. Sentimento lexical com temas/jornada e decomposição exata de Shapley já estão implementados; consulte `docs/VALIDACAO.md` e `docs/EXPLICABILIDADE.md`.
-
-Clientes, fidelidade, resgates, comportamento e desfechos são sintéticos, e a margem e o desconto do CLV são hipóteses. Não alegue que todos os requisitos analíticos do hackathon estão concluídos: a entrega fornece um fluxo local executável, com evidências e lacunas explícitas.
+- [Índice completo](docs/INDICE.md)
+- [Pacote de entrega e pitch](docs/entrega-final-pitch/README.md)
+- [Consolidação das três versões](docs/CONSOLIDACAO.md)
+- [Gemini e configuração](docs/GEMINI.md)
+- [Design e responsividade](docs/DESIGN.md)
+- [Explicabilidade](docs/EXPLICABILIDADE.md)
+- [Arquitetura](docs/ARQUITETURA.md) · [Lake](docs/DATA_LAKE.md) · [Deploy](docs/DEPLOY.md)

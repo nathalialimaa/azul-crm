@@ -45,3 +45,7 @@ data/inputs/ANAC/*
 !data/inputs/ANAC/airports.csv
 !data/inputs/ANAC/airports.source.json
 !data/inputs/ANAC/LEIA-ME-DADOS-ANAC.md
+
+# Processos locais e logs de execução
+.runtime/
+.taste-skill/

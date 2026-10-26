@@ -14,7 +14,7 @@ A matriz anterior citava páginas 5–9 inexistentes no PDF recebido. Esta revis
 | Priorização separando valor e risco (proposta 11 e 15) | Matriz, fila, valores em risco e filtros no painel/API | Implementado e testado |
 | Próxima ação elegível e revisão humana (proposta 12–13 e 19.1) | Motor de regras por persona, NO_ACTION quando falta evidência, consentimento/checklist e decisões registradas sem envio | Implementado; ofertas comerciais permanecem hipóteses, sem concessão automática |
 | RAG sobre regras públicas de fidelidade (proposta 13 e 19.1) | Regulamento público versionado no corpus, recuperação com citações, abstenção; agora inclui contexto público de comunicação nas recomendações | Implementado em recuperação lexical; contexto não certifica benefício/vigência |
-| Agente baseado em LLM (PDF p. 2, caminhos possíveis; proposta 13) | Adaptador Ollama para perguntas com fontes e composição limitada de abertura/encerramento das mensagens, saída validada e fallback | Parcial: não escolhe livremente a ação nem redige benefícios; inferência real/avaliação humana de groundedness pendentes |
+| Agente baseado em LLM (PDF p. 2, caminhos possíveis; proposta 13) | Gemini para perguntas com fatos/fontes e mensagens originais, saída JSON validada, IDs únicos de rascunho e contingência identificada | Integração implementada; geração real observada. API apresentou HTTP 503 por demanda; avaliação humana sistemática de groundedness e disponibilidade externa permanecem pendentes |
 | Sentimento, assunto, intensidade, causa de atrito e etapa da jornada (proposta 10.4; diferencial em 19.2) | Serviço/API/CLI/painel com 7 temas, etapas, intensidade lexical e hipóteses de atrito; test_sentiment.py | Baseline implementado e testado; sem coleta automática/corpus real rotulado. Não associa opiniões a clientes |
 | Explicabilidade (PDF p. 2 e 4; proposta 10.5 e 19.1) | Drivers e decomposição exata de Shapley, API/visão 360, referência explícita, versão/data; test_explanations.py | Implementado: 16 coalizões por saída e referência única. Não é SHAP condicional ou evidência causal |
 | Cenários de custo/retorno sem alegação causal (proposta 14 e 19.2) | Simulador, retenção assumida, equilíbrio e comparação por persona | Implementado e testado; não estima uplift real |
@@ -28,7 +28,7 @@ A proposta 10.1 e 19.1 aceita **Customer Value Score ou CLV baseline**. Gradient
 
 ## Lacunas remanescentes, sem falsas promessas
 
-1. Executar Ollama/modelos reais e avaliar geração/groundedness com revisores. A ação é selecionada pelo motor de regras; o adaptador acrescentado é limitado e não equivale a um agente autônomo completo.
+1. Avaliar sistematicamente a qualidade/groundedness do Gemini com revisores e monitorar cota/disponibilidade. A ação continua selecionada pelo motor de regras; o modelo explica e redige, sem conceder benefícios ou executar campanhas.
 2. Revisar vigência, autorização e condições específicas de benefícios antes de tornar uma oferta elegível. Consulta textual ao regulamento não é certificação automática.
 3. Avaliar sentimento em avaliações públicas autorizadas e rotuladas; calibrar intensidade e temas. As “causas de atrito” são hipóteses de associação temática.
 4. Avaliar a sensibilidade das atribuições de Shapley a outras referências representativas. O explicador entregue é exato com referência única; não modela dependência/correlação das variáveis.
@@ -43,3 +43,8 @@ A consolidação anterior passou em 213 testes completos. As mudanças desta lei
 ## Extensões do desenho completo da proposta
 
 A proposta detalha um desenho maior do que o núcleo de 19.1. Campos como data de reserva, classe tarifária, tempo de conta, ruptura de conexão, experiência/reclamação por viagem e aceitação/conversão/valor incremental de campanhas ainda não fazem parte dos contratos canônicos atuais. Também não há calibração pública por opinião atribuída a cada cliente, feature de resposta a campanha ou otimização de orçamento. O sistema registra revisão de decisões, sem simular sucesso de campanha como resultado medido. Essas extensões não são apresentadas como funcionalidades prontas.
+
+
+## Evolução Gemini e Flight Deck
+
+A branch `feat/gemini-experiencia-azul` acrescenta Gemini REST, mensagens originais, preservação de revisão por IDs de rascunho, tentativas limitadas e interface responsiva Flight Deck. Veja [GEMINI.md](GEMINI.md) e [DESIGN.md](DESIGN.md). O modelo antigo 2.5 foi recusado para novos usuários; o principal está configurado em `GEMINI_MODEL`. Resposta de contingência não é apresentada como geração real.
