@@ -1,3 +1,5 @@
+> **Versão consolidada em 26/10/2026:** [comparação, execução, novas funcionalidades e pendências](docs/CONSOLIDACAO.md). [Pacote de pitch](docs/entrega-final-pitch/README.md).
+
 > **Entrega revisada em 25/10/2026:** comece por [LEIA_PRIMEIRO.md](LEIA_PRIMEIRO.md).
 > Mudanças, resultados e limites: [docs/REVISAO_FINAL.md](docs/REVISAO_FINAL.md).
 
@@ -7,7 +9,7 @@ Painel de inteligência de CRM que encontra clientes de alto valor, mostra quem 
 
 **Os clientes são sintéticos.** Tarifas, demanda por rota e atrasos podem ser calibrados com dados públicos da ANAC (veja "Calibração com dados da ANAC"). Nenhum dado real da empresa foi usado.
 
-**Leia primeiro:** esta entrega roda localmente, mas não está homologada no Snowflake, o assistente não usa LLM (o rascunho da mensagem vem de template) e o regulamento público do Azul Fidelidade está na base apenas para consulta (o assistente busca por semelhança de palavras e não valida a vigência nem benefícios específicos). O repositório e o protótipo devem permanecer privados conforme o enunciado. Índice dos documentos e premissas: `docs/INDICE.md`. Pendências: `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`.
+**Leia primeiro:** esta entrega roda localmente, mas não está homologada no Snowflake, por padrão o rascunho usa template; a composição limitada por Ollama é opcional e ainda não homologada com serviço real e o regulamento público do Azul Fidelidade está na base apenas para consulta (o assistente busca por semelhança de palavras e não valida a vigência nem benefícios específicos). O repositório e o protótipo devem permanecer privados conforme o enunciado. Índice dos documentos e premissas: `docs/INDICE.md`. Pendências: `docs/DEPENDENCIAS.md` e `docs/VALIDACAO.md`.
 
 ## Em três comandos (Windows / PowerShell)
 
@@ -17,7 +19,7 @@ py -3.12 -m venv .venv          # ou py -3.11 / py -3.13
 .\.venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address 127.0.0.1
 ```
 
-Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q` (180 testes).
+Na primeira execução o app gera sozinho a base de demonstração (400 clientes sintéticos, seed 42), treina o churn e as personas e roda a auditoria. Leva alguns segundos. Abra `http://127.0.0.1:8501`. Para rodar os testes: `.\.venv\Scripts\python.exe -m pytest -q`. Resultados atuais em `docs/CONSOLIDACAO.md`.
 
 ## O que a base de demonstração mostra
 
@@ -35,7 +37,7 @@ Com a calibração da ANAC os números mudam (por exemplo, 173, 103, 98 e 26 cli
 
 ## Calibração com dados da ANAC
 
-Os arquivos públicos **não estão no repositório** (uns 40 MB). Fontes oficiais:
+Os arquivos públicos usados na reprodução estão em `data/inputs/ANAC` (cerca de 40 MB descompactados). Execute `python scripts/preparar_anac.py` para usar esse snapshot. Fontes oficiais:
 
 - **Tarifas aéreas domésticas** (mensal): DataSAS da ANAC, `https://sistemas.anac.gov.br/sas/downloads/`, tema "Tarifas Transporte Aéreo Passageiros Domésticos".
 - **VRA, Voo Regular Ativo** (mensal): `https://sistemas.anac.gov.br/dadosabertos/`, pasta "Voos e operações aéreas / Voo Regular Ativo (VRA)".

@@ -55,6 +55,7 @@ with st.sidebar:
             "Segmentos",
             "Ações de CRM",
             "Assistente IA",
+            "Sentimento",
             "Auditoria de viés",
             "Dados e modelos",
         ],
@@ -494,6 +495,19 @@ try:
         c.metric("Saldo hipotético", money(result["net_scenario"]))
         st.caption(result["note"])
         st.json(result)
+    elif page == "Sentimento":
+        st.subheader("Sentimento de avaliações")
+        st.caption("Análise lexical explicável. Avaliações públicas e sintéticas são identificadas separadamente; os resultados não alteram o risco dos clientes.")
+        sample = (Path(__file__).resolve().parents[1] / "data/fixtures/reviews.csv").read_bytes()
+        st.download_button("Baixar CSV de exemplo sintético", sample, "reviews.csv", "text/csv")
+        upload = st.file_uploader("CSV UTF-8: review_id, text, source_url, is_synthetic", type=["csv"])
+        if st.button("Analisar avaliações"):
+            content = upload.getvalue() if upload else sample
+            result = api.sentiment(content)
+            st.json({"total": result["total"], "sintéticas": result["synthetic"], "contagens": result["counts"]})
+            st.dataframe(pd.DataFrame(result["reviews"]), hide_index=True)
+            st.caption(result["limitations"])
+            st.download_button("Exportar análise de sentimento", json.dumps(result, ensure_ascii=False, indent=2), "sentimento.json", "application/json")
     elif page == "Assistente IA":
         st.subheader("Respostas com evidências")
         st.caption(

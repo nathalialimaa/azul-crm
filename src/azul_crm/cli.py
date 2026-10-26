@@ -30,6 +30,7 @@ def main():
             "sync-scores",
             "vra",
             "document",
+            "sentiment",
         ],
     )
     parser.add_argument("--customers", type=int, default=400)
@@ -50,7 +51,18 @@ def main():
     args = parser.parse_args()
     settings = Settings.load()
     store = Store(settings.root)
-    if args.command == "document":
+    if args.command == "sentiment":
+        from azul_crm.application.sentiment import analyze_csv
+
+        if not args.file:
+            parser.error("sentiment exige --file CSV")
+        if args.file.stat().st_size > 2 * 1024 * 1024:
+            parser.error("CSV excede 2 MiB")
+        result = analyze_csv(args.file.read_bytes())
+        output = args.out or settings.root / "artifacts/sentiment-report.json"
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    elif args.command == "document":
         from azul_crm.pipeline.documents import import_document
 
         if not args.file:

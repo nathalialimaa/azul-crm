@@ -7,6 +7,8 @@ enunciado pede para documentar. Comece pelo `README.md`.
 
 | Documento | O que responde |
 | --- | --- |
+| `CONSOLIDACAO.md` | Comparação dos três pacotes, execução integrada, funcionalidades e pendências atuais |
+| `entrega-final-pitch/README.md` | Pacote organizado do pitch e guia de apresentação |
 | `ARQUITETURA.md` | Como o código está organizado em camadas, e os contratos da API |
 | `CLV.md` | Como definimos CLV de 12 meses e alto valor, com margem, desconto e sensibilidade |
 | `PERSONAS.md` | Como as personas são formadas, nomeadas e por que aeroporto, canal e tier ficam de fora |

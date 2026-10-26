@@ -1,0 +1,375 @@
+ETAPA: airports --file C:\Users\GPADS\Documents\ChatGPT\Azul vias �reas\azul-crm-integrado\data\inputs\ANAC\airports.csv
+{
+  "airports": 86281,
+  "sha256": "fe7f0d9dc2646e41b0cc520f1733d99b9c76a6b26a3e6a55f66fa89e62083ad5"
+}
+ETAPA: fares --file C:\Users\GPADS\Documents\ChatGPT\Azul vias �reas\azul-crm-integrado\data\inputs\ANAC\anac_tarifa_setembro2026.zip --period 2026-09
+{
+  "sha256": "458f3b2e3d330c10517b69edc237b2a0351e0d879c01e006f6414cf361b1a1e4",
+  "period": "2026-09",
+  "source_url": "official_local_file",
+  "rows": 892505,
+  "silver_rows": 892505,
+  "unmatched": 45,
+  "ingested_at": "2026-10-26T17:47:20.635867+00:00",
+  "dataset": "fares"
+}
+ETAPA: vra --file C:\Users\GPADS\Documents\ChatGPT\Azul vias �reas\azul-crm-integrado\data\inputs\ANAC\VRA-agosto_2026.csv --period 2026-08
+{
+  "dataset": "vra",
+  "sha256": "2414e55a3baf16600462119192af3dcdc2775420942f997bc1b897d75a78392b",
+  "period": "2026-08",
+  "rows": 88040,
+  "silver_rows": 87996,
+  "unmatched": 101,
+  "rejected_rows": 24,
+  "rejected_reasons": {
+    "fora_do_periodo": 24
+  },
+  "source_url": "official_local_file",
+  "ingested_at": "2026-10-26T17:51:56.510772+00:00"
+}
+ETAPA: demo --public --customers 400 --seed 42
+{
+  "schema_version": "2.0",
+  "mode": "synthetic_public_fares",
+  "seed": 42,
+  "observation_start": "2025-10-01",
+  "observation_end": "2026-09-30",
+  "customer_count": 400,
+  "trip_count": 6046,
+  "calibrated_with_public_data": true,
+  "notes": "Clientes, fidelidade, resgates e desfechos simulados; atrasos sorteados da distribui��o real do VRA (ANAC). Sem clientes reais.",
+  "calibration_scope": "route_mean_fares_and_route_demand_and_delays",
+  "delay_calibration": {
+    "source": "VRA (ANAC)",
+    "airline": "AZU",
+    "line_type": "N",
+    "periods": [
+      "2026-08"
+    ],
+    "flights": 22969,
+    "cancellation_rate": 0.013,
+    "share_delay_ge_15": 0.1215,
+    "share_delay_ge_60": 0.0294,
+    "airports_with_own_distribution": 23
+  },
+  "churn_label_status": "synthetic_generated",
+  "storage": "sqlite"
+}
+ETAPA: train --seed 42
+{
+  "synthetic_only": true,
+  "seed": 42,
+  "features": [
+    "spend",
+    "frequency",
+    "recency_days",
+    "incident_rate"
+  ],
+  "split": {
+    "train": 240,
+    "validation": 80,
+    "test": 80
+  },
+  "validation_model": {
+    "roc_auc": 0.716,
+    "pr_auc": 0.584121014004288,
+    "brier": 0.20557196279495882,
+    "precision": 0.5454545454545454,
+    "recall": 0.4,
+    "confusion_matrix": [
+      [
+        40,
+        10
+      ],
+      [
+        18,
+        12
+      ]
+    ]
+  },
+  "validation_baseline": {
+    "roc_auc": 0.6966666666666667,
+    "pr_auc": 0.566168678962549,
+    "brier": 0.2162704246626034,
+    "precision": 0.5333333333333333,
+    "recall": 0.5333333333333333,
+    "confusion_matrix": [
+      [
+        36,
+        14
+      ],
+      [
+        14,
+        16
+      ]
+    ]
+  },
+  "test_model": {
+    "roc_auc": 0.562,
+    "pr_auc": 0.4565375685488059,
+    "brier": 0.24878230821152006,
+    "precision": 0.36363636363636365,
+    "recall": 0.26666666666666666,
+    "confusion_matrix": [
+      [
+        36,
+        14
+      ],
+      [
+        22,
+        8
+      ]
+    ]
+  },
+  "test_baseline": {
+    "roc_auc": 0.6163333333333333,
+    "pr_auc": 0.5000843126761936,
+    "brier": 0.24905919409924962,
+    "precision": 0.4482758620689655,
+    "recall": 0.43333333333333335,
+    "confusion_matrix": [
+      [
+        34,
+        16
+      ],
+      [
+        17,
+        13
+      ]
+    ]
+  },
+  "selected": "heuristic",
+  "cross_validation": {
+    "splits": 5,
+    "repeats": 3,
+    "customers": 320,
+    "min_t_statistic": 1.65,
+    "model": {
+      "roc_auc_mean": 0.6593850889595853,
+      "roc_auc_std": 0.05890406561316265,
+      "brier_mean": 0.21655973178676174
+    },
+    "baseline": {
+      "roc_auc_mean": 0.6648883586661953,
+      "roc_auc_std": 0.06845726106190152,
+      "brier_mean": 0.22394602615992729
+    },
+    "auc_gain": {
+      "mean": -0.005503269706610125,
+      "std_error": 0.02398941421859493,
+      "t_statistic": -0.2294040886727602
+    }
+  },
+  "validation_only_would_select": true,
+  "selection_rule": "valida��o cruzada 5x3 em treino+valida��o: ganho de AUC com t > 1.65 (teste pareado corrigido) E Brier menor. O teste n�o participa da escolha.",
+  "limitation": "Desfechos simulados. N�o comprova previs�o de churn real.",
+  "leakage_warning": false
+}
+ETAPA: personas --seed 42
+{
+  "method": "kmeans_personas_v1",
+  "k": 4,
+  "quality": {
+    "customers": 400,
+    "silhouette": 0.4142,
+    "smallest_group_share": 0.065,
+    "silhouette_by_k": {
+      "3": 0.391,
+      "4": 0.4142,
+      "5": 0.3827
+    },
+    "bootstrap_ari_mean": 0.9934,
+    "bootstrap_ari_min": 0.9809
+  },
+  "personas": [
+    {
+      "cluster": 0,
+      "name": "Baixo Volume Ativo",
+      "description": "Gastam e voam abaixo da m�dia da base, voaram recentemente. Em m�dia: R$ 3.352 gastos, 5 viagens, 60 dias desde a �ltima viagem.",
+      "traits": {
+        "high_value": false,
+        "cooling": false,
+        "delays": false
+      },
+      "size": 173,
+      "share": 0.4325,
+      "profile": {
+        "spend": 3351.75,
+        "frequency": 5.05,
+        "recency_days": 60.1,
+        "incident_rate": 0.0
+      }
+    },
+    {
+      "cluster": 1,
+      "name": "Alto Valor Esfriando",
+      "description": "Gastam e voam acima da m�dia da base, est�o h� bastante tempo sem voar. Em m�dia: R$ 15.983 gastos, 25 viagens, 158 dias desde a �ltima viagem.",
+      "traits": {
+        "high_value": true,
+        "cooling": true,
+        "delays": false
+      },
+      "size": 103,
+      "share": 0.2575,
+      "profile": {
+        "spend": 15982.77,
+        "frequency": 24.69,
+        "recency_days": 157.9,
+        "incident_rate": 0.0254
+      }
+    },
+    {
+      "cluster": 2,
+      "name": "Baixo Volume Ativo com Atrasos Acima da M�dia",
+      "description": "Gastam e voam abaixo da m�dia da base, voaram recentemente, e 24% das viagens tiveram atraso de 60 min ou mais. Em m�dia: R$ 3.306 gastos, 5 viagens, 59 dias desde a �ltima viagem.",
+      "traits": {
+        "high_value": false,
+        "cooling": false,
+        "delays": true
+      },
+      "size": 26,
+      "share": 0.065,
+      "profile": {
+        "spend": 3305.95,
+        "frequency": 5.12,
+        "recency_days": 59.0,
+        "incident_rate": 0.2412
+      }
+    },
+    {
+      "cluster": 3,
+      "name": "Fi�is de Alto Valor",
+      "description": "Gastam e voam acima da m�dia da base, voaram recentemente. Em m�dia: R$ 16.967 gastos, 25 viagens, 14 dias desde a �ltima viagem.",
+      "traits": {
+        "high_value": true,
+        "cooling": false,
+        "delays": false
+      },
+      "size": 98,
+      "share": 0.245,
+      "profile": {
+        "spend": 16967.13,
+        "frequency": 25.48,
+        "recency_days": 13.9,
+        "incident_rate": 0.026
+      }
+    }
+  ]
+}
+ETAPA: sync-scores
+{
+  "scores": 400
+}
+ETAPA: bias-audit
+{
+  "method": "bias_audit_v1",
+  "settings": {
+    "favorable_outcome": "estar entre os 20% mais priorit�rios",
+    "selected_customers": 80,
+    "customers": 400,
+    "min_group": 30,
+    "min_within_persona": 20,
+    "four_fifths_rule": 0.8,
+    "calibration_gap_threshold": 0.1
+  },
+  "summary": {
+    "alerts": 0,
+    "attention": 2,
+    "confounded": 0,
+    "ok": 2,
+    "insufficient": 0
+  },
+  "segmenter": "kmeans_personas_v1",
+  "verdicts": {
+    "home_airport": "ok",
+    "region": "atencao",
+    "preferred_channel": "ok",
+    "tier": "atencao"
+  }
+}
+ETAPA: clv-report
+{
+  "method": "clv_margin_discounted_v1",
+  "assumptions": {
+    "margin": 0.15,
+    "discount_rate": 0.1,
+    "top_share": 0.2,
+    "horizon_months": 12,
+    "status": "hip�teses de demonstra��o; n�o s�o dados da Azul"
+  },
+  "summary": {
+    "customers": 400,
+    "high_value_customers": 80,
+    "cutoff_potential_12m": 2418.8,
+    "top_value_share": 0.4547,
+    "total_potential_12m": 568864.5,
+    "total_clv_12m": 357776.59,
+    "total_clv_at_risk": 211087.83,
+    "risk_threshold": 0.6,
+    "high_value_at_risk_customers": 37,
+    "high_value_at_risk_clv": 77377.62
+  },
+  "concentration": [
+    {
+      "top_share": 0.1,
+      "customers": 40,
+      "value_share": 0.2657
+    },
+    {
+      "top_share": 0.2,
+      "customers": 80,
+      "value_share": 0.4547
+    },
+    {
+      "top_share": 0.3,
+      "customers": 120,
+      "value_share": 0.6108
+    }
+  ]
+}
+ETAPA: validate
+{
+  "status": "valid",
+  "backend": "sqlite",
+  "customers": 400,
+  "trips": 6046,
+  "synthetic": true,
+  "calibration": "route_mean_fares_and_route_demand_and_delays"
+}
+ETAPA: index
+{
+  "fingerprint": "eae40e70f008fc82375ae48893a6cecfa5afeabf33c04da5bab0b354fba5a28a",
+  "chunks": 50,
+  "provider": "local",
+  "embedding_model": "tfidf"
+}
+ETAPA: export-lake
+{
+  "out": "C:\\Users\\GPADS\\Documents\\ChatGPT\\Azul vias �reas\\azul-crm-integrado\\data\\lake",
+  "tables_exported": 17,
+  "tables_without_data": [
+    "gold.decisions"
+  ],
+  "rows": {
+    "bronze.sources": 2,
+    "bronze.raw_rows": 980545,
+    "silver.airports": 86281,
+    "silver.fares": 892505,
+    "silver.operations": 87996,
+    "gold.customers": 400,
+    "gold.trips": 6046,
+    "gold.features": 400,
+    "gold.loyalty": 400,
+    "gold.loyalty_transactions": 6046,
+    "gold.outcomes": 400,
+    "gold.scores": 400,
+    "gold.personas": 4,
+    "gold.bias_audit_groups": 13,
+    "gold.customer_value": 400,
+    "gold.clv_assumptions": 1,
+    "gold.manifest": 1
+  }
+}
+{"status": "ok", "next": "python -m streamlit run streamlit_app.py"}

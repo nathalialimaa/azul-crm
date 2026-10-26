@@ -114,7 +114,7 @@ class RecommendationService:
             action,
             self.generator.draft(customer, scores, action, all_evidence, context),
             all_evidence,
-            mode="playbook_template",
+            mode=getattr(self.generator, "mode", "playbook_template"),
             offer=offer,
             channel=customer.preferred_channel,
             persona=scores.segment,

@@ -1,3 +1,5 @@
+> Versão consolidada em 26/10/2026: veja [docs/CONSOLIDACAO.md](docs/CONSOLIDACAO.md) e o [pacote de pitch](docs/entrega-final-pitch/README.md). Resultados atuais: 213 testes passaram; API, oito páginas e pipeline ANAC verificados. O conteúdo abaixo registra a revisão anterior.
+
 # Azul CRM — ajustes finais de 25/10/2026
 
 Projeto privado. Estrutura Python, FastAPI, Streamlit, SQLite e contratos existentes preservados.

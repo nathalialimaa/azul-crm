@@ -152,3 +152,24 @@ def models():
         if path.exists()
         else {"selected": "heuristic", "trained": False}
     )
+
+
+class ReviewInput(BaseModel):
+    review_id: str = Field(min_length=1, max_length=100)
+    text: str = Field(min_length=1, max_length=4000)
+    source_url: str = Field("", max_length=2000)
+    is_synthetic: bool = Field(strict=True)
+
+
+class SentimentRequest(BaseModel):
+    reviews: list[ReviewInput] = Field(min_length=1, max_length=1000)
+
+
+@router.post("/sentiment/analyze")
+def sentiment(body: SentimentRequest):
+    from azul_crm.application.sentiment import analyze_reviews
+
+    try:
+        return analyze_reviews([r.model_dump() for r in body.reviews])
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc

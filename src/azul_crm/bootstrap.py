@@ -1,6 +1,7 @@
 """Composition root: único lugar que escolhe adaptadores concretos."""
 
 import json
+import os
 from dataclasses import asdict, dataclass
 from datetime import date
 
@@ -125,6 +126,13 @@ def build_stored_container(settings, store, manifest):
 
         playbook = load_playbook(playbook_path)
         generator = PlaybookMessageGenerator(playbook)
+    message_provider = os.getenv("CRM_MESSAGE_PROVIDER", "template")
+    if message_provider not in {"template", "ollama"}:
+        raise ValueError("CRM_MESSAGE_PROVIDER deve ser template ou ollama")
+    if message_provider == "ollama" and playbook is not None:
+        from azul_crm.infrastructure.message_agent import BoundedMessageGenerator
+
+        generator = BoundedMessageGenerator(generator)
     recommendations = RecommendationService(
         crm, index, EligibilityPolicy(policy.high_risk_threshold), generator, playbook
     )
@@ -135,6 +143,7 @@ def build_stored_container(settings, store, manifest):
         if isinstance(churn, LogisticPredictor)
         else "heuristic_not_calibrated",
         "agent_mode": index.mode,
+        "message_provider": message_provider,
         "segmenter": segmenter_method,
         "clv_policy": asdict(settings.clv_policy()),
         "playbook": playbook.version if playbook else "none",

@@ -1,0 +1,25 @@
+{
+  "uvicorn_health": 200,
+  "streamlit_health": 200,
+  "customers": 400,
+  "recommendation_mode": "playbook_template",
+  "assistant_evidence": 1,
+  "sentiment_http_gateway": {
+    "positivo": 1,
+    "negativo": 2,
+    "misto": 1,
+    "inconclusivo": 1
+  },
+  "streamlit_pages": [
+    "Visão geral",
+    "Clientes",
+    "Segmentos",
+    "Ações de CRM",
+    "Assistente IA",
+    "Sentimento",
+    "Auditoria de viés",
+    "Dados e modelos"
+  ],
+  "sentiment_ui": "ok",
+  "status": "ok"
+}

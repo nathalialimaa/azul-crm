@@ -25,6 +25,20 @@ class Gateway:
         r.raise_for_status()
         return r.json()
 
+    def sentiment(self, content):
+        from azul_crm.application.sentiment import analyze_csv
+
+        result = analyze_csv(content)
+        if self.http:
+            import csv
+            import io
+
+            reviews = list(csv.DictReader(io.StringIO(content.decode("utf-8-sig"))))
+            for review in reviews:
+                review["is_synthetic"] = review["is_synthetic"].strip().lower() == "true"
+            return self.request("POST", "/sentiment/analyze", json={"reviews": reviews})
+        return result
+
     def metadata(self):
         return self.request("GET", "/metadata") if self.http else self.c.metadata
 

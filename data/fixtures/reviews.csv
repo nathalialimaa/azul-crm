@@ -1,0 +1,6 @@
+review_id,text,source_url,is_synthetic
+DEMO-1,Atendimento excelente e voo pontual.,,true
+DEMO-2,Voo cancelado e bagagem extraviada.,,true
+DEMO-3,O atendimento foi bom mas houve atraso.,,true
+DEMO-4,Não foi bom.,,true
+DEMO-5,Voo de Recife para Campinas.,,true

@@ -1,0 +1,72 @@
+{
+  "base_comparison": "azul-crm-develop",
+  "packages": {
+    "azul-crm-chore-dados-publicos-anac": {
+      "files": 153,
+      "added": [
+        "LEIA_PRIMEIRO.md",
+        "data/inputs/ANAC/LEIA-ME-DADOS-ANAC.md",
+        "data/inputs/ANAC/VRA-agosto_2026.csv",
+        "data/inputs/ANAC/airports.csv",
+        "data/inputs/ANAC/airports.source.json",
+        "data/inputs/ANAC/anac_tarifa_setembro2026.zip",
+        "docs/BASE_REGULATORIA_OFERTAS.md",
+        "docs/REVISAO_FINAL.md",
+        "docs/evidencias/bias_report.json",
+        "docs/evidencias/clv_report.json",
+        "docs/evidencias/fares.log",
+        "docs/evidencias/knowledge-check.log",
+        "docs/evidencias/metrics.json",
+        "docs/evidencias/ollama.json",
+        "docs/evidencias/pipeline-final.log",
+        "docs/evidencias/pytest-final.log",
+        "docs/evidencias/ruff-final.log",
+        "docs/evidencias/ui-api-smoke.log",
+        "docs/evidencias/versoes-validacao.json",
+        "docs/evidencias/vra.log",
+        "scripts/preparar_anac.py",
+        "scripts/verificar_ollama.py"
+      ],
+      "missing": [],
+      "changed": [
+        ".dockerignore",
+        ".gitignore",
+        "README.md",
+        "config/playbook.toml",
+        "docs/BASE_DE_CONHECIMENTO.md",
+        "docs/DEPLOY.md",
+        "docs/INDICE.md",
+        "docs/VALIDACAO.md",
+        "frontend/gateway.py",
+        "src/azul_crm/bootstrap.py",
+        "src/azul_crm/pipeline/demo.py",
+        "src/azul_crm/pipeline/public_data.py",
+        "tests/test_consent_checklist.py",
+        "tests/test_deploy.py",
+        "tests/test_vra_delays.py"
+      ]
+    },
+    "azul-crm-develop": {
+      "files": 131,
+      "added": [],
+      "missing": [],
+      "changed": []
+    },
+    "azul-crm-docs-entrega-final-pitch": {
+      "files": 140,
+      "added": [
+        "docs/entrega-final-pitch/00-progresso.md",
+        "docs/entrega-final-pitch/01-arquitetura-e-fluxos.md",
+        "docs/entrega-final-pitch/02-requisitos-e-evidencias.md",
+        "docs/entrega-final-pitch/03-guia-para-iniciante.md",
+        "docs/entrega-final-pitch/04-testes-e-validacao.md",
+        "docs/entrega-final-pitch/05-limitacoes-e-proximos-passos.md",
+        "docs/entrega-final-pitch/06-roteiro-pitch.md",
+        "docs/entrega-final-pitch/README.md",
+        "docs/superpowers/plans/2026-10-25-entrega-final-pitch.md"
+      ],
+      "missing": [],
+      "changed": []
+    }
+  }
+}

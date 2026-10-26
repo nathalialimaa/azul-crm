@@ -1,0 +1,12 @@
+{
+  "pytest": {
+    "passed": 213,
+    "warnings": 1,
+    "seconds": 368.43
+  },
+  "ruff": "passed",
+  "anac_pipeline": "passed",
+  "http_and_streamlit": "passed",
+  "original_requirements_review": "awaiting_user_documents",
+  "github_push": "pending_original_requirements_review"
+}

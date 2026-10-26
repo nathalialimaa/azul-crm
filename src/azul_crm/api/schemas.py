@@ -79,7 +79,7 @@ class RecommendationResponse(ApiModel):
     draft: str
     evidence: list[EvidenceResponse]
     status: Literal["DRAFT_REQUIRES_REVIEW"]
-    mode: Literal["demo_template", "playbook_template"]
+    mode: Literal["demo_template", "playbook_template", "ollama_bounded_draft"]
     offer: OfferResponse | None = None
     channel: str | None = None
     persona: str | None = None

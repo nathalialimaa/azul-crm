@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\GPADS\Documents\ChatGPT\Azul vias �reas\azul-crm-integrado\scripts\verificar_integracao.py", line 138, in <module>
+    main()
+  File "C:\Users\GPADS\Documents\ChatGPT\Azul vias �reas\azul-crm-integrado\scripts\verificar_integracao.py", line 104, in main
+    from frontend.gateway import Gateway
+ModuleNotFoundError: No module named 'frontend'
