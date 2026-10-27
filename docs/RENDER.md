@@ -8,7 +8,7 @@ guarda a configuração reproduzível do deploy.
 
 - Interface responsiva e API em `web/`.
 - Snapshot versionado com 400 clientes exclusivamente sintéticos.
-- Login privado obrigatório em ambiente hospedado.
+- Acesso público no Render, adequado à demonstração do hackathon com dados sintéticos.
 - Gemini opcional: sem chave, a aplicação usa a contingência estruturada e a identifica como tal.
 
 O deploy **não** homologa dados reais da Azul, Snowflake, Ollama, corpus oficial, envio de campanhas
@@ -26,9 +26,8 @@ criar o serviço. Não publique diretamente de `main` enquanto este deploy estiv
 3. Conecte o repositório do Azul CRM e selecione a branch `deploy/render-web`.
 4. O Render encontrará `render.yaml`. Revise o plano **Free** e o nome
    `azul-crm-intelligence`.
-5. No campo protegido `CRM_APP_PASSWORD`, crie a senha privada de acesso diretamente no Render.
-   Não coloque essa senha no GitHub, no código ou em mensagens.
-6. Confirme a criação. `CRM_SESSION_SECRET` será gerado automaticamente pelo Render.
+5. Confirme a criação. `CRM_SESSION_SECRET` será gerado automaticamente pelo Render. Ele protege a
+   sessão técnica, mas não pede senha ao visitante.
 
 O Blueprint instala `web/requirements.txt`, inicia o Uvicorn em `0.0.0.0:$PORT` e verifica
 `/api/health`.
@@ -55,7 +54,7 @@ As duas variáveis devem ser configuradas juntas. Não as registre no repositór
 ## 5. Validar o resultado
 
 1. Abra `https://SEU-SERVICO.onrender.com/api/health` e confirme `status: ok` e `snapshot: true`.
-2. Abra a URL principal, entre com a senha cadastrada e confira Visão geral e Clientes.
+2. Abra a URL principal e confirme que o painel entra automaticamente, sem pedir senha.
 3. Teste em uma janela estreita ou celular.
 4. Gere uma pergunta no Assistente IA. Confira se o modo exibido é `gemini_grounded` ou
    `structured_fallback`; não trate a contingência como resposta do Gemini.
@@ -69,7 +68,7 @@ acorda. Isso é comportamento da hospedagem, não falha do CRM.
 - **Build falhou:** confirme que o Root Directory mostrado pelo Blueprint é `web` e que o comando é
   `pip install -r requirements.txt`.
 - **Serviço não responde:** confirme o Start Command e procure no log a porta fornecida por `PORT`.
-- **HTTP 503 ao entrar:** `CRM_APP_PASSWORD` ou `CRM_SESSION_SECRET` não foi configurado corretamente.
+- **HTTP 503 ao entrar:** confirme se `CRM_SESSION_SECRET` foi gerado corretamente pelo Blueprint.
 - **Estado sumiu após deploy:** configure o par Upstash; o SQLite local não é persistente no plano
   gratuito.
 - **Gemini em contingência:** confira a chave, o modelo e a cota no provedor; não repita chamadas em

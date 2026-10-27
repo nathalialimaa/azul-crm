@@ -12,8 +12,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
-      - key: CRM_APP_PASSWORD
-        sync: false
       - key: CRM_SESSION_SECRET
         generateValue: true
       - key: GEMINI_MODEL
