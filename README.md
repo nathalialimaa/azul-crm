@@ -2,6 +2,14 @@
 
 Uma plataforma de inteligência de relacionamento para identificar clientes de alto valor, entender sinais de evasão e preparar a próxima ação de retenção. **Web responsiva + FastAPI + Gemini**, com ambiente analítico Streamlit preservado, com dados públicos da ANAC e clientes inteiramente sintéticos.
 
+### 🌐 Acesse a plataforma
+
+**🚀 Aplicação online (Render):** [Azul CRM Intelligence](https://azul-crm-intelligence.onrender.com)
+
+Explore o dashboard interativo de inteligência de CRM, com análise de clientes sintéticos, segmentação, previsão de risco de evasão e recomendações de retenção apoiadas por inteligência artificial.
+
+> **Nota:** A aplicação está hospedada no Render. O primeiro acesso pode levar alguns segundos devido à inicialização do serviço.
+
 > **Abrir a interface principal:** no VS Code, use **Executar tarefa → Azul CRM: web** ou execute `python -m uvicorn web.api.index:app --host 127.0.0.1 --port 8503`. Acesse [localhost:8503](http://127.0.0.1:8503). O snapshot sintético já está incluído; não é necessário reprocessar a ANAC para abrir a aplicação.
 >
 > **Publicar:** siga [o passo a passo da Vercel](docs/VERCEL.md). A pasta raiz do deploy é **web**, com API Python leve, frontend estático e persistência Redis. O ambiente analítico completo continua em [localhost:8501](http://127.0.0.1:8501).
