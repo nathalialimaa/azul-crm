@@ -1,8 +1,8 @@
 # Azul CRM Intelligence · Web
 
-Interface responsiva e API leve para Vercel. Usa a projeção sintética em `data/snapshot.json`, derivada do motor analítico do repositório.
+Interface responsiva e API leve para Render ou Vercel. Usa a projeção sintética em `data/snapshot.json`, derivada do motor analítico do repositório.
 
-**Documentação principal:** [README do projeto](../README.md). **Publicação:** [passo a passo Vercel](../docs/VERCEL.md).
+**Documentação principal:** [README do projeto](../README.md). **Publicação recomendada:** [passo a passo Render](../docs/RENDER.md). Alternativa: [Vercel](../docs/VERCEL.md).
 
 Na raiz do repositório:
 

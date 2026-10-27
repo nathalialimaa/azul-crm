@@ -20,7 +20,9 @@ from crm_runtime.storage import Storage
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.delenv("RENDER", raising=False)
     monkeypatch.delenv("CRM_APP_PASSWORD", raising=False)
+    monkeypatch.delenv("CRM_SESSION_SECRET", raising=False)
     monkeypatch.delenv("UPSTASH_REDIS_REST_URL", raising=False)
     monkeypatch.setenv("CRM_WEB_STATE", str(tmp_path / "state.db"))
     monkeypatch.setenv("GEMINI_MAX_ATTEMPTS", "1")
@@ -36,8 +38,9 @@ def test_private_data_requires_session(client):
     assert client.get("/api/decisions").status_code == 401
 
 
-def test_hosted_fails_closed_without_password(client, monkeypatch):
-    monkeypatch.setenv("VERCEL", "1")
+@pytest.mark.parametrize("platform", ["VERCEL", "RENDER"])
+def test_hosted_fails_closed_without_password(client, monkeypatch, platform):
+    monkeypatch.setenv(platform, "1")
     assert client.get("/api/bootstrap").status_code == 503
     assert client.post("/api/session", json={}).status_code == 503
 
@@ -53,6 +56,15 @@ def test_password_login_and_secure_cookie(client, monkeypatch):
     assert client.get("/api/bootstrap").status_code == 200
     client.delete("/api/session")
     assert client.get("/api/bootstrap").status_code == 401
+
+
+def test_render_login_uses_secure_cookie(client, monkeypatch):
+    monkeypatch.setenv("RENDER", "1")
+    monkeypatch.setenv("CRM_APP_PASSWORD", "unit-private-password")
+    monkeypatch.setenv("CRM_SESSION_SECRET", "s" * 32)
+    response = client.post("/api/session", json={"password": "unit-private-password"})
+    assert response.status_code == 200
+    assert "Secure" in response.headers["set-cookie"]
 
 
 def test_cross_origin_and_invalid_content_type_rejected(client):

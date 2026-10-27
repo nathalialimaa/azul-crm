@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: azul-crm-intelligence
+    runtime: python
+    plan: free
+    branch: deploy/render-web
+    rootDir: web
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn api.index:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: CRM_APP_PASSWORD
+        sync: false
+      - key: CRM_SESSION_SECRET
+        generateValue: true
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: GEMINI_DAILY_LIMIT
+        value: "5"

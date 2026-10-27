@@ -4,7 +4,7 @@ Uma plataforma de inteligência de relacionamento para identificar clientes de a
 
 > **Abrir a interface principal:** no VS Code, use **Executar tarefa → Azul CRM: web** ou execute `python -m uvicorn web.api.index:app --host 127.0.0.1 --port 8503`. Acesse [localhost:8503](http://127.0.0.1:8503). O snapshot sintético já está incluído; não é necessário reprocessar a ANAC para abrir a aplicação.
 >
-> **Publicar:** siga [o passo a passo da Vercel](docs/VERCEL.md). A pasta raiz do deploy é **web**, com API Python leve, frontend estático e persistência Redis. O ambiente analítico completo continua em [localhost:8501](http://127.0.0.1:8501).
+> **Publicar:** siga [o passo a passo do Render](docs/RENDER.md). O `render.yaml` prepara a pasta **web**, com API Python leve e frontend estático. A persistência externa é opcional e recomendada; sem ela, o SQLite do plano gratuito é efêmero. A [Vercel](docs/VERCEL.md) permanece documentada como alternativa. O ambiente analítico completo continua em [localhost:8501](http://127.0.0.1:8501).
 
 ![Visão geral da aplicação](docs/evidencias/design/vercel-desktop.png)
 

@@ -22,6 +22,8 @@ enunciado pede para documentar. Comece pelo `README.md`.
 | `CALIBRACAO_PUBLICA.md` | Dados da ANAC: fontes, comandos, números e limites |
 | `DATA_LAKE.md` | Camadas bronze, silver e gold em Parquet, dicionário de dados e DDL do Snowflake |
 | `DEPLOY.md` | Docker, senha opcional e opções de hospedagem |
+| `RENDER.md` | Passo a passo do deploy web no Render, segurança, persistência e validação |
+| `VERCEL.md` | Alternativa de publicação da interface web na Vercel |
 | `DEPENDENCIAS.md` | O que falta ativar: Snowflake, Ollama, MLflow |
 | `VALIDACAO.md` | Matriz do que foi verificado e do que não foi |
 | `DIAGNOSTICO_E_INTEGRACAO.md` | Diagnóstico e histórico da integração da versão 2 |
@@ -58,5 +60,3 @@ Apenas dados públicos da ANAC, e só quando ingeridos: tarifas aéreas domésti
 - [`REVISAO_FINAL.md`](REVISAO_FINAL.md)
 - [`BASE_REGULATORIA_OFERTAS.md`](BASE_REGULATORIA_OFERTAS.md)
 - [Roteiro de execução](../LEIA_PRIMEIRO.md)
-
-| `VERCEL.md` | Interface web, variáveis privadas, Redis e publicação na Vercel |

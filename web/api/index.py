@@ -25,7 +25,14 @@ from pydantic import BaseModel, Field
 
 WEB = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(WEB))
-if not os.getenv("VERCEL"):
+
+
+def hosted():
+    """Indica execução em uma plataforma pública suportada."""
+    return bool(os.getenv("VERCEL") or os.getenv("RENDER"))
+
+
+if not hosted():
     load_dotenv(WEB.parent / ".env", override=False)
 from crm_runtime.gemini import GeminiClient, GeminiUnavailable, schema_for, validate_grounding
 from crm_runtime.sentiment import analyze_reviews
@@ -42,7 +49,7 @@ def snapshot():
 
 def secret():
     value = os.getenv("CRM_SESSION_SECRET", "")
-    if os.getenv("VERCEL") and len(value) < 32:
+    if hosted() and len(value) < 32:
         raise HTTPException(503, "Configure CRM_SESSION_SECRET com pelo menos 32 caracteres.")
     return value or _local_secret
 
@@ -61,7 +68,7 @@ def check_cookie(request):
 
 
 def authorized(request: Request):
-    if os.getenv("VERCEL") and not os.getenv("CRM_APP_PASSWORD"):
+    if hosted() and not os.getenv("CRM_APP_PASSWORD"):
         raise HTTPException(503, "Configure a senha de acesso antes de disponibilizar a aplicação.")
     sid = check_cookie(request)
     if not sid:
@@ -110,8 +117,8 @@ class Login(BaseModel):
 @app.post("/api/session")
 def login(body: Login, response: Response):
     password = os.getenv("CRM_APP_PASSWORD", "")
-    if os.getenv("VERCEL") and not password:
-        raise HTTPException(503, "Configure CRM_APP_PASSWORD na Vercel.")
+    if hosted() and not password:
+        raise HTTPException(503, "Configure CRM_APP_PASSWORD na plataforma de hospedagem.")
     if password:
         bucket = "login:" + str(int(time.time() // 900))
         if Storage().reserve(bucket, 30, 0) < 0:
@@ -127,7 +134,7 @@ def login(body: Login, response: Response):
         "azul_session",
         token,
         httponly=True,
-        secure=bool(os.getenv("VERCEL")),
+        secure=hosted(),
         samesite="strict",
         max_age=8 * 3600,
     )
