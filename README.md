@@ -4,7 +4,7 @@ Uma plataforma de inteligência de relacionamento para identificar clientes de a
 
 ### 🌐 Acesse a plataforma
 
-**🚀 Aplicação online (Render):** [Azul CRM Intelligence](https://azul-crm-intelligence.onrender.com)
+**🚀 Aplicação online (Render):** [CRM Intelligence](https://azul-crm-intelligence.onrender.com)
 
 Explore o dashboard interativo de inteligência de CRM, com análise de clientes sintéticos, segmentação, previsão de risco de evasão e recomendações de retenção apoiadas por inteligência artificial.
 
