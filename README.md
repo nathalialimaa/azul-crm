@@ -1,4 +1,4 @@
-# Azul CRM Intelligence
+# CRM Intelligence
 
 Uma plataforma de inteligência de relacionamento para identificar clientes de alto valor, entender sinais de evasão e preparar a próxima ação de retenção. **Web responsiva + FastAPI + Gemini**, com ambiente analítico Streamlit preservado, com dados públicos da ANAC e clientes inteiramente sintéticos.
 
